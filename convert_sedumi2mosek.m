@@ -30,6 +30,16 @@ else
     K.l = 0;
 end
 
+% Get the number of socp variables
+n_pos = 0;
+if isfield(K, 'q') && ~isempty(K.q) && (K.q(1) > 0)
+    n_sec = K.l;
+else
+    n_sec = [];
+end
+n_socp = length(n_sec);
+
+
 % Get the orders of SDP variables
 if isfield(K, 's') && ~isempty(K.s) && (K.s(1) > 0)
     nj = K.s;
@@ -58,15 +68,19 @@ val = c(I)';
 if ~isempty(I)
 I(count + 1) = Ainds(end) + 1;
 k = 1;
+if length(Ainds) > k
 while I(1) > Ainds(k + 1)
     k = k + 1;
+end
 end
 start = 1;
 stop = 1;
 for vv = 2:count
     j = k;
+    if length(Ainds) > j
     while I(vv) > Ainds(j + 1)
         j = j + 1;
+    end
     end
     if j > k
         [row, col] = ind2sub([nj(k), nj(k)], I(start:stop) - Ainds(k));
