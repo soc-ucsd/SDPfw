@@ -3,15 +3,17 @@ clc;clear
 
 folder = 'SeDuMiData\';
 
-fileName{1} = 'sedumiPOPbt_10';
-fileName{2} = 'sedumiPOPbt_15';
-fileName{3} = 'sedumiPOPbt_20';
-fileName{4} = 'sedumiPOPbt_30';
-fileName{5} = 'sedumiPOPbt_40';
+fileName{1} = 'SedumiDataEx10';
+fileName{2} = 'SedumiDataEx15';
+fileName{3} = 'SedumiDataEx20';
+fileName{4} = 'SedumiDataEx25';
+fileName{5} = 'SedumiDataEx30';
+fileName{6} = 'SedumiDataEx35';
+fileName{7} = 'SedumiDataEx40';
 
-Partition = [2,4,6,8,10,20,30,40,50];
+Partition = [2,4,6,8,10,20,30,40,50,75,100];
 
-for Index = 1:5
+for Index = 1:length(fileName)
     file = fileName{Index};
     load([folder, file '.mat']);
 
