@@ -12,8 +12,19 @@ function [Anew, bnew, cnew, Knew] = FactorWidth(A,b,c,K,opts)
 
 % input check;
     if nargin == 5 && isfield(opts,'NoP')
-        alpha = ones(opts.NoP,1)*floor(K.s/opts.NoP);
-        alpha(end) = K.s - sum(alpha(1:opts.NoP-1));
+        
+        SizeU = ceil(K.s/opts.NoP);
+        SizeL = floor(K.s/opts.NoP);
+        if SizeU == SizeL
+            alpha = ones(opts.NoP,1)*SizeU;
+        else
+            x = (K.s - SizeL*opts.NoP)./(SizeU-SizeL);
+            alpha = [ones(x,1)*SizeU;ones(opts.NoP-x,1)*SizeL];
+        end
+        
+        
+     %   alpha = ones(opts.NoP,1)*floor(K.s/opts.NoP);
+     %   alpha(end) = K.s - sum(alpha(1:opts.NoP-1));
     end
     if size(A,1) ~= length(b) 
         A = A';
