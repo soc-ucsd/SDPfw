@@ -7,8 +7,8 @@ clc;clear
 %                       Conic program with banded SDP
 % ---------------------------------------------------------------------------- %
 % Parameters
-m   = 20;                      % # constraints
-K.s = [3000];                    % PSD cones
+m   = 2;                      % # constraints
+K.s = [100];                    % PSD cones
 bandWidth = [K.s-1];              % bandWidth for SDP cones
 
 
@@ -19,7 +19,7 @@ tsetup = tic;
 tsetup = toc(tsetup);
 
 
-opts.NoP = 10;%K.s;  %% number of partition
+opts.NoP = 13;%K.s;  %% number of partition
 opts.socp = 1;
 
 tic

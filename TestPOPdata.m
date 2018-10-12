@@ -39,6 +39,6 @@ for Index = 1:length(fileName)
             Cost(k)  = NaN;
         end
 
-        save([folder, 'Result_' file],'Time','Cost','Tcon')
+        save([folder, 'NewResult_' file],'Time','Cost','Tcon')
     end
 end
