@@ -9,6 +9,10 @@ function [Anew, bnew, cnew, Knew, Ech] = factorwidth(A,b,c,K,opts)
 % Only replacing K.s with a block factor-width-two cone
 % Reformulating it into a standard SDP in the SeDuMi form
 
+% How to recover the original variable x
+%    after geting a solution from SeDuMi, (x,y) for the new data Anew, bnew, cnew, Knew 
+%    then, the original solution will be, (accumarray(Ech,x),y)
+
 %% Input check
     if size(A,1) ~= length(b) 
         A = A';
