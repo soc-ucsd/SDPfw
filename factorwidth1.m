@@ -1,13 +1,13 @@
-function [Anew, bnew, cnew, Knew, Ech] = factorwidth(A,b,c,K,opts)
-%  Reformulating a primal semidefinte program with a block factorwidth 2
-%  cone
+function [Anew, bnew, cnew, Knew, Ech] = factorwidth1(A,b,c,K,opts)
+%  Reformulating a primal SDP with a block factorwidth two cone
 %
 %       min_{x} c^Tx
 %               Ax = b
 %                x \in K
-
-% assuming K.s only, and there is only one PSD cone
-% can have K.f, K.l, K.q
+%
+% K can have K.f, K.l, K.q, K.s
+% Only replacing K.s with a block factor-width-two cone
+% Reformulating it into a standard SDP in the SeDuMi form
 
 %% Input check
     if size(A,1) ~= length(b) 
@@ -27,9 +27,7 @@ function [Anew, bnew, cnew, Knew, Ech] = factorwidth(A,b,c,K,opts)
     Anonpsd = A(:,1:K.f+K.l+K.q);
     cnonpsd = c(1:K.f+K.l+K.q);
     
-   % Apsd = cell(length(K.s),1);
-   % cpsd = cell(length(K.s),1);
-   %%
+    %%
     Knew.f = K.f;
     Knew.l = K.l;
     Knew.q = K.q;
@@ -41,10 +39,10 @@ function [Anew, bnew, cnew, Knew, Ech] = factorwidth(A,b,c,K,opts)
     Ech  = Ech(:);
        
   Count = K.f+K.l+K.q;  
-  for PSDind = 1:length(K.s)   
+  for PSDind = 1:length(K.s)   % multiple PSD cone
       
-       Apsd   = A(:,Count + 1:Count + K.s(PSDind)^2);   % PSD data 
-       cpsd   = c(Count + 1:Count + K.s(PSDind)^2);
+       Apsd = A(:,Count + 1:Count + K.s(PSDind)^2);   % PSD data 
+       cpsd = c(Count + 1:Count + K.s(PSDind)^2);
    
       if K.s(PSDind) <= opts.nop   % the size of PSD cone must be bigger than the number of partiiton
             nop = K.s(PSDind);
@@ -76,23 +74,14 @@ function [Anew, bnew, cnew, Knew, Ech] = factorwidth(A,b,c,K,opts)
                 cnew = [cnew;ck{k}];
                 Ech  = [Ech;Index + Count];
             end
-%       else
-%           Anew = [Anew,Apsd];
-%           cnew = [cnew;cpsd];
-%           Knew.s = [Knew.s;K.s(PSDind)];
-%           Index = Count+1:Count + K.s(PSDind)^2;
-%           Ech  = [Ech;Index(:)];
-%       end
       Count  = Count + K.s(PSDind)^2;
   end 
   
-  
-    Anew = [Anonpsd,Anew];
-    cnew = [cnonpsd;cnew];
-    
+  Anew = [Anonpsd,Anew];
+  cnew = [cnonpsd;cnew];
     
     %% Formulate an SOCP if all PSD cones are 2 by 2
-    if isfield(opts,'socp')&&(opts.socp == 1) && (length(find(Knew.s == 2)) == length(Knew.s))
+    if isfield(opts,'socp') && (opts.socp == 1) && (length(find(Knew.s == 2)) == length(Knew.s))
         % to do
     end
     
