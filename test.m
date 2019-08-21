@@ -1,4 +1,4 @@
-%%  test the usage of factorwitdth.m
+%%  test the usage of factorwitdth.m using Mosek
 
 clc;clear
 Partition = [2,5,10,20,50,100];         % partition of blocks
