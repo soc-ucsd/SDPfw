@@ -1,4 +1,4 @@
-function [Anew, bnew, cnew, Knew, Ech] = factorwidth1(A,b,c,K,opts)
+function [Anew, bnew, cnew, Knew, Ech] = factorwidth(A,b,c,K,opts)
 %  Reformulating a primal SDP with a block factorwidth two cone
 %
 %       min_{x} c^Tx
