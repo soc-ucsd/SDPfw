@@ -1,7 +1,7 @@
 # Block factor-width-two cone program
 Reformulation of SDPs using block factor-width two matrices
 
-The function factorwidth.m approximates an SDP in the standard primal vectorized form
+The function factorwidth.m approximates an SDP in the standard primal vectorized form using block factor-width-two matrices
 
 		minimize 	c'x					
     subject to	Ax = b,					
@@ -14,7 +14,7 @@ where the conic constraint `x \in K` is cartesian products of the following cone
 * Second-order cone
 * Positive semidefinite cone
 
-with a block factor-width-two cone. Only the PSD cones are approximated.
+Only the PSD cones are approximated.
 
 ## Related publications
 Details can be found in the following papers:
