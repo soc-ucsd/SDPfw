@@ -5,13 +5,24 @@ function [Anew, bnew, cnew, Knew, Ech] = factorwidth(A,b,c,K,opts)
 %               Ax = b
 %                x \in K
 %
-% K can have K.f, K.l, K.q, K.s
-% Only replacing K.s with a block factor-width-two cone
-% Reformulating it into a standard SDP in the SeDuMi form
+% K can have K.f, K.l, K.q, K.s; 
+%       Only replacing K.s with a block factor-width-two cone
+%       and reformulating it into a standard SDP in the SeDuMi form
+% Input data
+%       A, b, c, K are SDP data in seudmi form
+%       opts.bfw     1 or 0,  block factor-width-two decomposition
+%       opts.nop     integer, number of blocks in the partion alpha
+%       opts.socp    1 or 0,  reformualte 2 by 2 PSD cone with a second-order cone
+% Output data 
+%       Anew, bnew, cnew, Knew, new SDP data in sedumi form
+%       Ech         an index vector that maps back to the original solution
+%                   x = accumarray(Ech,x);
 
 % How to recover the original variable x
-%    after geting a solution from SeDuMi, (x,y) for the new data Anew, bnew, cnew, Knew 
-%    then, the original solution will be, (accumarray(Ech,x),y)
+%       after geting a solution from SeDuMi, [x;y],  for the new data Anew, bnew, cnew, Knew 
+%       then, the original solution will be [accumarray(Ech,x);y]
+
+% Author: Yang Zheng
 
 %% Input check
     if size(A,1) ~= length(b) 
@@ -49,7 +60,7 @@ function [Anew, bnew, cnew, Knew, Ech] = factorwidth(A,b,c,K,opts)
        cpsd = c(Count + 1:Count + K.s(PSDind)^2);
    
       if K.s(PSDind) <= opts.nop   % the size of PSD cone must be bigger than the number of partiiton
-            nop = K.s(PSDind);
+          nop = K.s(PSDind);
       else
           nop = opts.nop;
       end
