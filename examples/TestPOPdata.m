@@ -24,7 +24,7 @@ for Index = 1:length(fileName)
     for k = 1:length(Partition)
         opts.NoP = Partition(k);
         Ts = tic;
-        [Anew, bnew, cnew, Knew] = FactorWidth(A',b,c,K,opts);
+        [Anew, bnew, cnew, Knew] = factorwidth(A',b,c,K,opts);
         Tcon(k) = toc(Ts);
 
         prob1          = convert_sedumi2mosek(Anew', bnew, cnew,Knew); 

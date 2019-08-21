@@ -1,4 +1,4 @@
-function [Anew, bnew, cnew, Knew] = FactorWidth(A,b,c,K,opts)
+function [Anew, bnew, cnew, Knew, Ech] = factorwidth(A,b,c,K,opts)
 %  Reformulating a primal semidefinte program with a block factorwidth 2
 %  cone
 %
@@ -9,23 +9,7 @@ function [Anew, bnew, cnew, Knew] = FactorWidth(A,b,c,K,opts)
 % assuming K.s only, and there is only one PSD cone
 % can have K.f, K.l, K.q
 
-
-% input check;
-    if nargin == 5 && isfield(opts,'NoP')
-        
-        SizeU = ceil(K.s/opts.NoP);
-        SizeL = floor(K.s/opts.NoP);
-        if SizeU == SizeL
-            alpha = ones(opts.NoP,1)*SizeU;
-        else
-            x = (K.s - SizeL*opts.NoP)./(SizeU-SizeL);
-            alpha = [ones(x,1)*SizeU;ones(opts.NoP-x,1)*SizeL];
-        end
-        
-        
-     %   alpha = ones(opts.NoP,1)*floor(K.s/opts.NoP);
-     %   alpha(end) = K.s - sum(alpha(1:opts.NoP-1));
-    end
+%% Input check
     if size(A,1) ~= length(b) 
         A = A';
     end
@@ -41,62 +25,75 @@ function [Anew, bnew, cnew, Knew] = FactorWidth(A,b,c,K,opts)
 
     %% Non PSD part
     Anonpsd = A(:,1:K.f+K.l+K.q);
-    Apsd    = A(:,K.f+K.l+K.q+1:end);
-    
     cnonpsd = c(1:K.f+K.l+K.q);
-    cpsd    = c(K.f+K.l+K.q+1:end);
-    %%
-
-    [clique] = ConeSplit(alpha);    %% maximal cliques
-
-    Knew.s = clique.NoElem;
+    
+   % Apsd = cell(length(K.s),1);
+   % cpsd = cell(length(K.s),1);
+   %%
     Knew.f = K.f;
     Knew.l = K.l;
     Knew.q = K.q;
-    bnew = b;
-    Ak   = cell(clique.NoC,1);
-    ck   = cell(clique.NoC,1);
+    bnew   = b;
+    Knew.s = [];
     Anew = [];
     cnew = [];
-    for k = 1:clique.NoC   
-        Tn  = cumsum([1;clique.NoElem]);
-        ind = Tn(k):Tn(k+1)-1;
+    Ech  = 1:K.f+K.l+K.q;      % Indexing to extract local submatrices & split cone
+    Ech  = Ech(:);
+       
+  Count = K.f+K.l+K.q;  
+  for PSDind = 1:length(K.s)   
+      
+       Apsd   = A(:,Count + 1:Count + K.s(PSDind)^2);   % PSD data 
+       cpsd   = c(Count + 1:Count + K.s(PSDind)^2);
+   
+      if K.s(PSDind) <= opts.nop   % the size of PSD cone must be bigger than the number of partiiton
+            nop = K.s(PSDind);
+      else
+          nop = opts.nop;
+      end
+            SizeU = ceil(K.s(PSDind)/nop);
+            SizeL = floor(K.s(PSDind)/nop);
+            if SizeU == SizeL
+                alpha = ones(nop,1)*SizeU;
+            else
+                x = (K.s(PSDind) - SizeL*nop)./(SizeU-SizeL);
+                alpha = [ones(x,1)*SizeU;ones(nop-x,1)*SizeL];
+            end
+            [clique] = ConeSplit(alpha);    %% maximal cliques
+            Knew.s   = [Knew.s;clique.NoElem];
+            Ak       = cell(clique.NoC,1);
+            ck       = cell(clique.NoC,1);
+            for k = 1:clique.NoC   
+                Tn  = cumsum([1;clique.NoElem]);
+                ind = Tn(k):Tn(k+1)-1;
 
-        Position = zeros(sum(alpha));
-        Position(clique.Elem(ind),clique.Elem(ind)) = 1;
-        Index  = find(Position == 1);
-        Ak{k}  = Apsd(:,Index);
-        ck{k}  = cpsd(Index);
-        Anew = [Anew,Ak{k}];
-        cnew = [cnew;ck{k}];
-    end
-    
+                Position = zeros(sum(alpha));
+                Position(clique.Elem(ind),clique.Elem(ind)) = 1;
+                Index  = find(Position == 1);
+                Ak{k}  = Apsd(:,Index);
+                ck{k}  = cpsd(Index);
+                Anew = [Anew,Ak{k}];
+                cnew = [cnew;ck{k}];
+                Ech  = [Ech;Index + Count];
+            end
+%       else
+%           Anew = [Anew,Apsd];
+%           cnew = [cnew;cpsd];
+%           Knew.s = [Knew.s;K.s(PSDind)];
+%           Index = Count+1:Count + K.s(PSDind)^2;
+%           Ech  = [Ech;Index(:)];
+%       end
+      Count  = Count + K.s(PSDind)^2;
+  end 
+  
+  
     Anew = [Anonpsd,Anew];
     cnew = [cnonpsd;cnew];
     
     
     %% Formulate an SOCP if all PSD cones are 2 by 2
     if isfield(opts,'socp')&&(opts.socp == 1) && (length(find(Knew.s == 2)) == length(Knew.s))
-        [data,Knew] = sedumi2scs(Anew',bnew,cnew,Knew);
-        
-        Asocp = data.A';
-        bsocp = -data.c;
-        csocp = data.b;
-        
-        H = [1 0 1;0 2 0; 1 0 -1]^(-1);
-        for k = 1:clique.NoC
-            ind           = 3*(k-1)+1:3*k;    % the socp cone size is 3
-            Asocp(:,ind)  = Asocp(:,ind)*H;
-            csocp(ind)    = H'*csocp(ind);
-        end
-               
-        Knew.q = ones(1,length(Knew.s))*3;
-        Knew.s = 0;
-        Anew = Asocp;
-        bnew = bsocp;
-        cnew = csocp;
-        
-        %% add nonnegative constraints
+        % to do
     end
     
 end
