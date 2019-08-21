@@ -7,7 +7,7 @@ Num   = [10,15,20,30,40,50];                % number of variables
 Lower = zeros(length(Num),4);  % SOS, CSOS, SDSOS, DSOS
 Time  = zeros(length(Num),4);
 
-for ind = 6:length(Num)
+for ind = 1:length(Num)
 
 %% Method 1: solution via Yalmip - orginal SOS
     N = Num(ind);
@@ -26,8 +26,8 @@ for ind = 6:length(Num)
     gamma = sdpvar(1);
     
     F = sos(f-gamma*(x'*x));
-    %opts = sdpsettings('solver','mosek');
-    opts = sdpsettings('solver','sedumi');
+    opts = sdpsettings('solver','mosek');
+    %opts = sdpsettings('solver','sedumi');
     opts.sos.newton = 0;
     opts.sos.congruence = 0;
     opts.sos.csp = 0; 
