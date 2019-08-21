@@ -1,4 +1,4 @@
-function [Anew, bnew, cnew, Knew, Ech] = factorwidth(A,b,c,K,opts)
+function [Anew, bnew, cnew, Knew, info] = factorwidth(A,b,c,K,opts)
 %  Reformulating a primal SDP with a block factorwidth two cone
 %
 %       min_{x} c^Tx
@@ -15,8 +15,10 @@ function [Anew, bnew, cnew, Knew, Ech] = factorwidth(A,b,c,K,opts)
 %       opts.socp    1 or 0,  reformualte 2 by 2 PSD cone with a second-order cone
 % Output data 
 %       Anew, bnew, cnew, Knew, new SDP data in sedumi form
-%       Ech         an index vector that maps back to the original solution
+%       info.Ech    an index vector that maps back to the original solution
+%                   when opts.socp = 0;
 %                   x = accumarray(Ech,x);
+%       info.indsocp 
 
 % How to recover the original variable x
 %       after geting a solution from SeDuMi, [x;y],  for the new data Anew, bnew, cnew, Knew 
@@ -94,10 +96,13 @@ function [Anew, bnew, cnew, Knew, Ech] = factorwidth(A,b,c,K,opts)
   
   Anew = [Anonpsd,Anew];
   cnew = [cnonpsd;cnew];
-    
+  info.Ech = Ech;
     %% Formulate an SOCP if all PSD cones are 2 by 2
     if isfield(opts,'socp') && (opts.socp == 1) && (length(find(Knew.s == 2)) == length(Knew.s))
-        % to do
+        tic
+        [Anew,bnew,cnew,Knew,indsocp] = psd2socp(Anew,bnew,cnew,Knew);
+        info.socptime = toc;
+        info.indsocp  = indsocp;
     end
     
 end

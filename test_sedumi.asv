@@ -1,7 +1,6 @@
 %%  test the usage of factorwitdth.m using sedumi
 
-%clc;
-clear; close all;
+clc;clear
 % Partition = [2:2:10];         % partition of blocks
 
 Partition = [2,100];
@@ -23,7 +22,7 @@ for k = 1:length(Partition)
     
     % reformulating the SDP
     Ts = tic;
-    [Anew, bnew, cnew, Knew, infofw] = factorwidth(A,b,c,K,opts);
+    [Anew, bnew, cnew, Knew, Ech] = factorwidth(A,b,c,K,opts);
     Tcon(k) = toc(Ts);
     
     % solve the new SDP using sedumi
@@ -33,8 +32,8 @@ for k = 1:length(Partition)
     Cost(k)    = cnew'*xn;
 
     % variables corresponds to the original SDP data, A, b, c, K
-    %y(:,k) = yn;
-    %x(:,k) = accumarray(infofw.Ech,xn);
+    y(:,k) = yn;
+    x(:,k) = accumarray(Ech,xn);
 end
 
 figure

@@ -1,0 +1,35 @@
+clear
+% test psd to socp
+
+Num = 10;
+A = 
+for i = 1:Num
+
+    temp = rand(2);
+    At = temp + temp';
+
+    A = A(:)';
+
+end
+X = eye(2);
+
+b = A'*X(:);
+
+Z = eye(2);
+
+y = rand(1);
+
+c = y*A + Z(:);
+
+K.s = 2;
+
+[x,y,info] = sedumi(A',b,c,K);
+
+[An,bn,cn,Kn,indsocp] = psd2socp(A,b,c,K);
+[xn,yn,info] = sedumi(An,bn,cn,Kn);
+
+y - yn
+cn'*xn - c'*x
+
+indsocp*xn - x
+

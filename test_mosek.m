@@ -1,9 +1,9 @@
 %%  test the usage of factorwitdth.m using Mosek
 
-clc;clear
-Partition = [2,5,10,20,50,100];         % partition of blocks
+clear;close all
+Partition = [2,100];%[2,5,10,20,50,100];         % partition of blocks
 
-file = 'SedumiDataEx15';
+file = 'SedumiDataEx10';
 load(['SeDuMiData\', file '.mat']);
 
 Tcon = zeros(length(Partition),1);
@@ -13,10 +13,11 @@ Cost = zeros(length(Partition),1);
 for k = 1:length(Partition)
     opts.bfw = 1;
     opts.nop = Partition(k);
+    opts.socp = 1;
     
     % reformulating the SDP
     Ts = tic;
-    [Anew, bnew, cnew, Knew, Ech] = factorwidth(A',b,c,K,opts);
+    [Anew, bnew, cnew, Knew, infofw] = factorwidth(A',b,c,K,opts);
     Tcon(k) = toc(Ts);
     
     % solve the new SDP using Mosek
