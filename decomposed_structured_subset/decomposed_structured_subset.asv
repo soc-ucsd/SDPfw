@@ -1,0 +1,33 @@
+%testing to make sure that the decomposed structured subset scheme works
+
+
+m = 40;
+nBlk = 5;
+BlkSize = 8;
+ArrowHead = 4;
+r = 6;
+
+[At,b,C,K, X0] = blockArrowRank(m,nBlk,BlkSize,ArrowHead, r);
+
+
+SP = spones(spones(C) + sparse(sum(spones(At),2)));  % vector of 1s and 0s
+mask = reshape(SP, K.s, K.s);
+%spy(mask)
+
+[x, y, info] = sedumi(At, b, C, K);
+
+
+%now try the chordal decomposition
+[cliques,Ech,Jch,usedvars,s] = chordalDecomposition(At,C,K);
+
+
+% Set new At, c, K.s (remove unused variables)
+% At_cl  = At(usedvars,:);
+% C_cl   = C(usedvars);
+% K_cl = K;
+% K_cl.s = s;
+
+[x_cl, y_cl, info_cl] = sedumi(At_cl, b, C_cl, K_cl);
+
+cost_orig = C'*x;
+cost_cl = C_cl'*x_cl;
