@@ -9,7 +9,7 @@ model.c  = c;
 model.K  = K;
 model.pars = pars;
 
-%important constraints, i'm not sure about 8
+%original constraints
 %cons = [1, 3,  5, 6, 7, 8, 9, 11, 12, 15];
 
 %cliques = {[1,2,5] ,[1,2,3], [2,3,4] , [3,4,6]};
@@ -22,10 +22,10 @@ model.pars = pars;
 %cliques = {[1, 3], [2, 3], [ 3 , 6], [4, 6] , [5, 6] };
 %cliques_11 = {[1 , 3, 5], [3, 5, 6], [2, 3, 6] , [2, 6, 4]};
 %Ats = At(K.f+1:end, :);
-%cons = [1:13 15];
+cons = [1:13 15];
 %cons = 1:15;
 %cons = [1:13, 15];
-cons = [1:12 15]
+%cons = [1:12 15]
 
 K.l = 0;
 K.q = [];
