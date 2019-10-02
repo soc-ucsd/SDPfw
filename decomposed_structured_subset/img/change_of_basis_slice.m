@@ -11,15 +11,24 @@ D = [1 0 0;
      0 1 0;
      0 0 1;
      0 0 0;
+     0 0 0;
      0 0 0];
 
 %Diagonally Dominant 
  
-DD_aug = [1  1 0  0;
+DD_aug_C = [1  1 0  0;
       1  1 1  1;
       0  0 1  1;
       1 -1 0  0;
-      0  0 1 -1]/2;
+      0  0 1 -1; 
+      0  0 0  0]/2;
+  
+DD_aug = [1  1 0  0 1  1;
+          1  1 1  1 0  0 ;
+          0  0 1  1 1  1;
+          1 -1 0  0 0  0;
+          0  0 1 -1 0  0;  
+          0  0 0  0 1 -1]/2;  
 
 DD = [D DD_aug];  
   
@@ -28,9 +37,11 @@ CDD_aug = [1   1  1  1;
            1   1  1  1;
            1   1  1  1;
            1   1 -1 -1;
-           1  -1  1 -1]/2;
+           1  -1  1 -1;
+           0   0  0  0]/2;
  
 CDD = [DD CDD_aug];   
+
 
 %PSD
 R = 1;
@@ -43,14 +54,14 @@ Yr = cos(phi)'*sin(theta);
 Y = reshape(Yr, [], 1);
 Z = repmat(sin(phi)', N, 1);
 
-PSD = [X.*X, Y.*Y,  Z.*Z,  X.*Y,  Y.*Z]';
+PSD = [X.*X, Y.*Y,  Z.*Z,  X.*Y,  Y.*Z, X.*Z]';
 
 %Find affine subspace through I
-I = [1; 1; 1; 0; 0];
+I = [1; 1; 1; 0; 0; 0];
 
-A = randn(5, 2);
+A = [randn(5, 2); [0 0]];
 
-A0 = abs(randn(5, 1));
+A0 = [abs(randn(5, 1)); 0]; 
 b0 = A0'*I;
 
 %constraints and cost
@@ -63,7 +74,6 @@ c = A*[ -1.5; 2.5];
 %p: weights on extreme rays
 c_dd = c'*DD;
 At_dd = A0'*DD;
-%b_dd = [b0; zeros(size(K, 2),1)];
 c_cdd = c'*CDD;
 At_cdd = A0'*CDD;
 
@@ -81,102 +91,162 @@ X_psd = reshape(x_psd, 3, 3);
 xv_psd = m2v(X_psd);
 cost_psd = c_psd'*x_psd;
 
-%DD optimization
-n_dd = size(DD, 2);
-K_dd.l = n_dd;
+%Set up variables for change of basis
+cost_dd = [];
+cost_cdd = [];
+DD_atom = {};
+CDD_atom = {};
+DD_L = {};
+CDD_L1 = {};
+CDD_L2 = {};
+x_dd_opt = {};
+x_cdd_opt = {};
+ec = {};
+k_max = 10;
+DD_new = DD;
+CDD_new = CDD;
+L_prev = eye(3);
+L1_prev = eye(2);
+L2_prev = eye(2);
 
-[p_dd, y_dd, ~] = sedumi(At_dd, b0, c_dd, K_dd);
- 
-x_dd = DD*p_dd;
-X_dd = v2m(x_dd)
-%L_dd = chol(X_dd);
-cost_dd = c'*x_dd;
+%basis changes
+for k = 1:k_max
+    
+    %DD optimization
+    n_dd = size(DD_new, 2);                                   
+    K_dd.l = n_dd;
 
-%CDD optimization
-n_cdd = size(CDD, 2);
-K_cdd.l = n_cdd;
-[p_cdd, y_cdd, ~] = sedumi(At_cdd, b0, c_cdd, K_cdd);
- 
-x_cdd = CDD*p_cdd;
-X_cdd = v2m(x_cdd)
-%L_dd = chol(X_dd);
-cost_cdd = c'*x_cdd;
+    c_dd = c'*DD_new;
+    At_dd = A0'*DD_new;
 
+    
+    [p_dd, y_dd, ~] = sedumi(At_dd, b0, c_dd, K_dd);
+
+    x_dd = DD_new*p_dd;
+    X_dd = v2m(x_dd);
+    cost_dd{k} = c'*x_dd;
+    DD_atom{k} = DD_new;
+    x_dd_opt{k} = x_dd;
+    
+    %new iteration of DD
+    L = basis_shift(X_dd);
+    L_prev = L_prev * L;
+    DD_L{k} = L_prev;
+    DD_new = dd_shuffle(DD, L_prev);
+
+
+    %CDD optimization
+    ec{k} = eig_cdd(CDD_new);
+    n_cdd = size(CDD_new, 2);
+    K_cdd.l = n_cdd;
+    c_cdd = c'*CDD_new;
+    At_cdd = A0'*CDD_new;
+    [p_cdd, y_cdd, ~] = sedumi(At_cdd, b0, c_cdd, K_cdd);
+
+    x_cdd = CDD_new*p_cdd;
+    X_cdd = v2m(x_cdd);    
+    
+    cost_cdd{k} = c'*x_cdd;
+    CDD_atom{k} = CDD_new;
+    x_cdd_opt{k} = x_cdd;
+    
+    %new iteration of CDD
+    X1 = X_cdd([1,2], [1,2]);
+    X2 = X_cdd([2,3], [2,3]);
+
+    L1 = basis_shift(X1);
+    L2 = basis_shift(X2);
+    
+    
+    %L1_prev = L1_prev * L1;
+    %CDD_L1{k} = L1_prev;
+    CDD_L1{k} = L1;
+    %L2_prev = L2_prev * L2;
+    %CDD_L2{k} = L2_prev;
+    CDD_L2{k} = L2;
+    CDD_new = cdd_shuffle(L1, L2);
+      
+end
 
 %intersection of points in cone with affine subspace
-D_proj0    = D.*b0./(A0'*D);
-DD_proj0   = DD.*b0./(A0'*DD);
-CDD_proj0  = CDD.*b0./(A0'*CDD);
+
+DD_proj = {};
+CDD_proj = {};
+DD_opt = {};
+CDD_opt = {};
+
+kDD = {};
+kCDD = {};
+
+opt_DD = {};
+opt_CDD = {};
+
+for k = 1:k_max
+    DDi = DD_atom{k};
+    CDDi = CDD_atom{k};
+    DD_proj0   = DDi.*b0./(A0'*DDi);
+    CDD_proj0  = CDDi.*b0./(A0'*CDDi);
+    DD_proj{k}  = A\DD_proj0;
+    CDD_proj{k} = A\CDD_proj0;
+
+    kDD{k} =  convhull(DD_proj{k}(1, :),    DD_proj{k}(2, :));
+    kCDD{k}  = convhull(CDD_proj{k}(1, :),  CDD_proj{k}(2, :));
+
+    
+    opt_DD{k} = A\x_dd_opt{k};
+    opt_CDD{k} = A\x_cdd_opt{k};
+end
 PSD_proj0  = PSD.*b0./(A0'*PSD);
 
 
 %project onto subspace
-DD_proj  = A\DD_proj0;
-CDD_proj = A\CDD_proj0;
 PSD_proj = A\PSD_proj0;
 I_proj = A\I;
-
-
-opt_DD  = A\x_dd;
-opt_CDD = A\x_cdd;
+ 
 opt_PSD = A\xv_psd;
 
-% D_proj = A\D;
-% DD_proj  = A\DD;
-% CDD_proj = A\CDD;
-% PSD_proj = A\PSD;
-% SDD_proj = A\SDD;
-% CSDD_proj = A\CSDD;
 
 %convex hulls
-kDD =  convhull(DD_proj(1, :),    DD_proj(2, :));
-kCDD  = convhull(CDD_proj(1, :),  CDD_proj(2, :));
 kPSD  = convhull(PSD_proj(1, :),  PSD_proj(2, :));
 
 %plot
 C = linspecer(5);
-figure(1)
-clf
-hold on
 
-%extreme rays
-plot(DD_proj(1, kDD), DD_proj(2, kDD),'color', C(1, :), 'linewidth', 2)
-plot(CDD_proj(1, kCDD), CDD_proj(2, kCDD),'color', C(2, :),'linewidth', 2)
-plot(PSD_proj(1, kPSD), PSD_proj(2, kPSD),'k', 'linewidth', 2)
-text(I_proj(1), I_proj(2), 'I', 'interpreter', 'latex', 'Fontsize', 20)
+for k = 1:k_max
+    figure(1)
+    clf
+    hold on
 
-%optimal points
-plot(opt_DD(1), opt_DD(2), '*', 'color', C(1, :), 'MarkerSize', 20, 'linewidth', 2)
-plot(opt_CDD(1), opt_CDD(2), '*', 'color', C(2, :), 'MarkerSize', 20,'linewidth', 2)
-plot(opt_PSD(1), opt_PSD(2), '*k', 'MarkerSize', 20, 'linewidth', 2)
+    %extreme rays
+    plot(PSD_proj(1, kPSD), PSD_proj(2, kPSD),'k', 'linewidth', 2)
+    plot(DD_proj{k}(1, kDD{k}), DD_proj{k}(2, kDD{k}),'color', C(1, :), 'linewidth', 2)
+    plot(CDD_proj{k}(1, kCDD{k}), CDD_proj{k}(2, kCDD{k}),'color', C(2, :),'linewidth', 2)
+    text(I_proj(1), I_proj(2), 'I', 'interpreter', 'latex', 'Fontsize', 20)
+
+    %optimal points
+    plot(opt_DD{k}(1), opt_DD{k}(2), '*', 'color', C(1, :), 'MarkerSize', 20, 'linewidth', 2)
+    plot(opt_CDD{k}(1), opt_CDD{k}(2), '*', 'color', C(2, :), 'MarkerSize', 20,'linewidth', 2)
+
+    plot(opt_PSD(1), opt_PSD(2), '*k', 'MarkerSize', 20, 'linewidth', 2)
 
 
-%plot(2*PSD_proj(1, kPSD), 2*PSD_proj(2, kPSD),':k')
 
-%scatter(DD_proj(1, :),DD_proj(2, :), 'b')
-%scatter(CDD_proj(1, :),CDD_proj(2, :), 'r')
-legend({'DD', 'DD(E, ?)', 'S_+'}, 'location', 'northwest', 'fontsize', 15)
-%title('Random affine cut of structured subsets', 'Fontsize', 16)
-hold off
-axis square
-axis off
+    legend({'DD', 'DD(E, ?)', 'S_+'}, 'location', 'northwest', 'fontsize', 15)
+    %legend({'DD', 'DD(E, ?)', 'DD_L', ' DD_L (E, ?)', 'S_+'}, 'location', 'northwest', 'fontsize', 15)
+    %title('Random affine cut of structured subsets', 'Fontsize', 16)
+    hold off
 
-function m = v2m(v)
-    m = zeros(3);
-    m(1, 1) = v(1);
-    m(2, 2) = v(2);
-    m(3, 3) = v(3);
-    m(1, 2) = v(4);
-    m(2, 1) = v(4);
-    m(2, 3) = v(5);
-    m(3, 2) = v(5);    
+    xlim([min(PSD_proj(1, kPSD)),max(PSD_proj(1, kPSD))] + [-0.3 , 0.3])
+    ylim([min(PSD_proj(2, kPSD)),max(PSD_proj(2, kPSD))]  + [-0.1, 0.1])
+
+    axis square
+    axis off
+
+    keyboard;
+
 end
 
-function v = m2v(m)
-    v = zeros(5, 1);
-    v(1) = m(1, 1); 
-    v(2) = m(2, 2);
-    v(3) = m(3 ,3);
-    v(4) = m(1, 2); 
-    v(5) = m(2, 3);    
-end
+
+
+
+
