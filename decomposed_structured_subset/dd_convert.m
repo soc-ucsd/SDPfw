@@ -57,13 +57,13 @@ function [Anew, bnew, cnew, Knew, info] = dd_convert(A,b,c,K)
     for PSDind = 1:length(K.s)   % multiple PSD cone
       
         Apsd = A(:,Count + 1:Count + K.s(PSDind)^2);   % PSD data 
-        cpsd = c(Count + 1:Count + K.s(PSDind)^2);
+        cpsd = c(Count + 1:Count + K.s(PSDind)^2, :);
          
         Ksi = K.s(PSDind);
         
         rays = dd_extreme_rays(Ksi);
         A_dd = [A_dd Apsd*rays];
-        c_dd = [c_dd (cpsd'*rays)'];
+        c_dd = [c_dd; rays*cpsd];
         
         info.ind{PSDind} = Count_dd + (1:Ksi^2);
         info.rays{PSDind} = rays;

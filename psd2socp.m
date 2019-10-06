@@ -27,7 +27,7 @@ cnonpsd = c(1:K.f+K.l+K.q);
 
 % psd data
 Apsd = A(:,K.f+K.l+K.q+1:end);   % PSD data 
-cpsd = c(K.f+K.l+K.q+1:end);     
+cpsd = c(K.f+K.l+K.q+1:end, :);     
    
 
 %% 2-2 psd to socp

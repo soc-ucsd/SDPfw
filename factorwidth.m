@@ -42,7 +42,7 @@ function [Anew, bnew, cnew, Knew, info] = factorwidth(A,b,c,K,opts)
 
     %% Non PSD part
     Anonpsd = A(:,1:K.f+K.l+K.q);
-    cnonpsd = c(1:K.f+K.l+K.q);
+    cnonpsd = c(1:K.f+K.l+K.q, :);
     
     %%
     Knew.f = K.f;
@@ -59,7 +59,7 @@ function [Anew, bnew, cnew, Knew, info] = factorwidth(A,b,c,K,opts)
   for PSDind = 1:length(K.s)   % multiple PSD cone
       
        Apsd = A(:,Count + 1:Count + K.s(PSDind)^2);   % PSD data 
-       cpsd = c(Count + 1:Count + K.s(PSDind)^2);
+       cpsd = c(Count + 1:Count + K.s(PSDind)^2, :);
    
       if K.s(PSDind) <= opts.nop   % the size of PSD cone must be bigger than the number of partiiton
           nop = K.s(PSDind);
@@ -86,7 +86,7 @@ function [Anew, bnew, cnew, Knew, info] = factorwidth(A,b,c,K,opts)
                 Position(clique.Elem(ind),clique.Elem(ind)) = 1;
                 Index  = find(Position == 1);
                 Ak{k}  = Apsd(:,Index);
-                ck{k}  = cpsd(Index);
+                ck{k}  = cpsd(Index,:);
                 Anew = [Anew,Ak{k}];
                 cnew = [cnew;ck{k}];
                 Ech  = [Ech;Index + Count];

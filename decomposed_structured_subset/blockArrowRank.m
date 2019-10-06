@@ -1,4 +1,4 @@
-function [At,b,c,K, X_star] = blockArrowRank(m,nBlk,BlkSize,ArrowHead, r)
+function [At,b,c,K, X_star] = blockArrowRank(m,nBlk,BlkSize,ArrowHead, r, num_c)
 % Is a modification of blockArrowMultCones
 % Setup problem for block-arrow sdp with multiple cones. Inputs:
 % m        : number of equality constraints
@@ -6,13 +6,14 @@ function [At,b,c,K, X_star] = blockArrowRank(m,nBlk,BlkSize,ArrowHead, r)
 % BlkSize  : size of each diagonal block (vector of length nCones)
 % ArrowHead: size of head of arrow pattern (vector of length nCones)
 % r        : rank of optimal X
+% num_c    : number of cost functions desired
 
 nCones = 1;
 
 % cone
 K.f = 0;
 K.l = 0;
-K.q = 0;
+K.q = [];
 K.s = zeros(1,nCones);
 
 % Sparsity pattern of each cone
@@ -40,7 +41,7 @@ At = sparse(n^2, m);
 for i = 1:m
 %     Ai = [];
     %for k = 1:nCones
-        M = 100*sprandsym(Spa{k});  % random symmetric data with given sparsity pattern
+        M = 10*sprandsym(Spa{k});  % random symmetric data with given sparsity pattern
 %         Ai = [Ai; M(:)];        % concatenate
 %     end
     At(:, i) = M(:);
@@ -69,13 +70,27 @@ X_star = X_star_mat(:);
 b = At'*X_star;
 
 % stictly feasible dual point
-y = rand(m,1);
+
 S = cell(nCones,1);
 for k = 1:nCones
     Temp = 10*sprandsym(Spa{k});
     Temp = Temp + (-min(eig(full(Temp)))+1)*speye(size(Spa{k}));
     S{k} = Temp(:);
 end
-c = vertcat(S{:}) + At*y;
+
+S_cat = vertcat(S{:});
+c = sparse(size(S_cat, 1), num_c);
+
+y = rand(m,1);
+
+if (nargin >= 6) && num_c > 1
+    for i = 1:num_c
+        y = rand(m,1);
+        c(:, i) = S_cat + At*y;
+    end
+else
+    y = rand(m,1);
+    c = S_cat + At*y;
+end
 
 end
