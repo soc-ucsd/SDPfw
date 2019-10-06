@@ -111,6 +111,9 @@ function out = draw_feasibility(model, th)
         c = c1*cos(theta) + c2*sin(theta);
         %c(2) = sin(theta);
         
+        
+        %there's a bug here, the chordal decomposition did not add new
+        %equality constraints. How to add these in?
         [x,y,info] = sedumi(model.At, model.b, c, model.K, model.pars);
         K = model.K;
         out.a(i) = c1'*x;
