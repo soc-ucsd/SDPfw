@@ -27,30 +27,45 @@ cliques = {};
 cl_ind = 0;
 idx = [];
 
-for i = 1:nBlk
-    %cli = cl{1 ,1}.Elem (cl_ind + (1:cl{1,1}.NoElem(i)));
-    %cl_ind = cl_ind + cl{1,1}.NoElem(i);
-    cli =  [BlkSize*(i-1)+(1:BlkSize), ((-ArrowHead + 1):0) + model.K.s];
-    cliques{i} = cli;
-    idxi = reshape(cli +  model.K.s*(cli-1)', [],1 );
-    idx = [idx; idxi];
-    if i ==1
-        idx0 = idxi;
-    end
-end
+% for i = 1:nBlk
+%     %cli = cl{1 ,1}.Elem (cl_ind + (1:cl{1,1}.NoElem(i)));
+%     %cl_ind = cl_ind + cl{1,1}.NoElem(i);
+%     cli =  [BlkSize*(i-1)+(1:BlkSize), ((-ArrowHead + 1):0) + model.K.s];
+%     cliques{i} = cli;
+%     idxi = reshape(cli +  model.K.s*(cli-1)', [],1 );
+%     idx = [idx; idxi];
+%     if i ==1
+%         idx0 = idxi;
+%     end
+% end
+% 
+model_grone.K.f = model.K.f;
+model_grone.K.l = 0;
+model_grone.K.q = [];
+model_grone.K.s = cellfun(@length, cliques);
+model_grone.pars = pars;
+numvar = sum(model_grone.K.s .^2);
+model_grone.At = model.At(idx, :);
+model_grone.b = model.b;
+model_grone.c = model.c(idx, :);
 
-model_agler.K.f = model.K.f;
-model_agler.K.l = 0;
-model_agler.K.q = [];
-model_agler.K.s = cellfun(@length, cliques);
-model_agler.pars = pars;
-numvar = sum(model_agler.K.s .^2);
+% %now try the chordal decomposition
+% parCoLO.domain    = 1;  % dConvCliqueTree  ---> equalities 
+% parCoLO.range     = 2;   % rConvMatDecomp   ---> equalities 
+% parCoLO.EQorLMI   = 1; % CoLOtoEQform     ---> equality standard form
+% parCoLO.SDPsolver = []; % CoLOtoEQform     ---> equality standard form       
+% parCoLO.quiet     = 1; % Some peace and quiet     
+% J.f = length(b);
+% [~,~,~,cliqueDomain,cliqueRange,LOP] = sparseCoLO(model.At',model.b,model.c,model.K,J,parCoLO); 
+% 
+% model_grone = LOP;
 
-model_agler.At = model.At(idx, :);
-model_agler.b = model.b;
-model_agler.c = model.c(idx, :);
+%[x_cl, ~, ~] = sedumi(LOP.A', LOP.b, LOP.c, LOP.K);
+
+
+
 % for i = 1:num_c
-%     model_agler.c(:, i)  = model.c(idx, i);
+%     model_grone.c(:, i)  = model.c(idx, i);
 % end
 
 
@@ -60,7 +75,7 @@ cone = 'dd';
 model_dd.pars = pars;
 
 [model_cdd.At,model_cdd.b,model_cdd.c,model_cdd.K, ~] = ...
-    decomposed_subset(model_agler.At, model_agler.b, model_agler.c, model_agler.K, cone);
+    decomposed_subset(model_grone.At, model_grone.b, model_grone.c, model_grone.K, cone);
 model_cdd.pars = pars;
 
 cone = 'sdd';
@@ -69,7 +84,7 @@ cone = 'sdd';
 model_sdd.pars = pars;
 
 [model_csdd.At,model_csdd.b,model_csdd.c,model_csdd.K, ~] = ...
-    decomposed_subset(model_agler.At, model_agler.b, model_agler.c, model_agler.K, cone);
+    decomposed_subset(model_grone.At, model_grone.b, model_grone.c, model_grone.K, cone);
 model_csdd.pars = pars;
 
 N = 30;
@@ -104,13 +119,9 @@ function out = draw_feasibility(model, th)
     c2 = model.c(:, 2);
     
     for i = 1:N
-        theta = th(i);
+        theta = th(i);                
         
-        
-        
-        c = c1*cos(theta) + c2*sin(theta);
-        %c(2) = sin(theta);
-        
+        c = c1*cos(theta) + c2*sin(theta);                
         
         %there's a bug here, the chordal decomposition did not add new
         %equality constraints. How to add these in?
