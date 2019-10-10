@@ -12,6 +12,7 @@ function [Anew, bnew, cnew, Knew, info] = factorwidth(A,b,c,K,opts)
 %       A, b, c, K are SDP data in seudmi form
 %       opts.bfw     1 or 0,  block factor-width-two decomposition
 %       opts.nop     integer, number of blocks in the partion alpha
+%       opts.size    alternative to nop, number of entries in each block
 %       opts.socp    1 or 0,  reformualte 2 by 2 PSD cone with a second-order cone
 % Output data 
 %       Anew, bnew, cnew, Knew, new SDP data in sedumi form
@@ -54,9 +55,15 @@ function [Anew, bnew, cnew, Knew, info] = factorwidth(A,b,c,K,opts)
     cnew = [];
     Ech  = 1:K.f+K.l+K.q;      % Indexing to extract local submatrices & split cone
     Ech  = Ech(:);
-       
+
+    
+    
   Count = K.f+K.l+K.q;  
   for PSDind = 1:length(K.s)   % multiple PSD cone
+      
+       if isfield(opts, 'block')
+            opts.nop = ceil (K.s(PSDind)/opts.block);
+       end
       
        Apsd = A(:,Count + 1:Count + K.s(PSDind)^2);   % PSD data 
        cpsd = c(Count + 1:Count + K.s(PSDind)^2, :);

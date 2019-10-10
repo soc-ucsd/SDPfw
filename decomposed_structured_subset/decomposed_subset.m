@@ -52,7 +52,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
     info = cell(numPSD, 1);
     
     %set up cones array
-    if ischar(cones)
+    if ~iscell(cones)
         cone_str = cones;
         cones = cell(numPSD, 1);
         for i = 1:numPSD
@@ -65,6 +65,10 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
         
         
         cone_curr = cones{i};
+        
+        if strcmp('sdd', cone_curr) 
+            cone_curr = 1;
+        end
         
         Ksi = K.s(i);
         A_curr = A(:, Count + (1:Ksi^2));
@@ -85,28 +89,33 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
             cnew_lin = [cnew_lin; c_dd_curr];
             
             Knew.l = Knew.l + K_dd_curr.l;            
-        elseif strcmp('sdd', cone_curr)            
+        elseif isnumeric(cone_curr)  && (cone_curr > 0)           
             %SDD
             %SDD
-            Partition = Inf;
+            %Partition = Inf;
             opts.bfw  = 1;
-            opts.nop  = Partition;
+            %opts.nop  = Partition;
             opts.socp = 1;   % second-order cones constraints
+            opts.block = cone_curr;
 
             
             K_temp.s = Ksi;
             %TODO: add indexing/recovery for sdd_info
-            [A_sdd_curr, ~, c_sdd_curr, K_sdd_curr, info_curr] = ...
+            [A_curr, ~, c_curr, K_curr, info_curr] = ...
                 factorwidth(A_curr, b, c_curr, K_temp, opts);
             
             info_curr.Ech = info_curr.Ech + Count;
             info_curr.Ech = info_curr.Ech + Count;
             
-            Anew_quad = [Anew_quad A_sdd_curr];
-            cnew_quad = [cnew_quad; c_sdd_curr];
-            K_sdd_curr.q(K_sdd_curr.q == 0) = [];
-            Knew.q = [Knew.q K_sdd_curr.q];
+            Anew_quad = [Anew_quad A_curr];
+            cnew_quad = [cnew_quad; c_curr];
             
+            if cone_curr == 1
+                K_curr.q(K_curr.q == 0) = [];
+                Knew.q = [Knew.q K_curr.q];
+            else
+                Knew.s = [Knew.s K_curr.s'];
+            end
         else
             %PSD
             Anew_psd = [Anew_psd A_curr];

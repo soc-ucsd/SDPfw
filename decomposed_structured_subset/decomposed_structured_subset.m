@@ -28,60 +28,43 @@ J.f = length(model.b);
 
 [~,~,~,cliqueDomain,cliqueRange,LOP] = sparseCoLO(model.At',model.b,model.c,model.K,J,parCoLO); 
 
-[x_psd, ~, ~] = sedumi(model.At, model.b, model.c, model.K);
-[x_cpsd_G, ~, ~] = sedumi(LOP.A', LOP.b, LOP.c, LOP.K);
-[x_cpsd, ~, ~] = sedumi(model_split.At, model_split.b, model_split.c, model_split.K);
+mask_CoLO = sparse(size( mask, 1), size( mask, 2));
+for i = 1:cliqueDomain{1,1}.NoC
+    cli = cliqueDomain{1,1}.Set{i};
+    mask_CoLO(cli, cli) = 1;
+end
+% 
+% figure(1)
+% hold on
+% spy(mask_CoLO , 'm');
+% spy(mask);
+% hold off
+% title('Block Arrow Sparsity + Fill-in', 'fontsize', 14)
+% 
 
 
-%% Block Factor Width optimization
+LOP.At = LOP.A';
 
-%Partition = 2;
-Partition = Inf;
-opts.bfw  = 1;
-opts.nop  = Partition;
-opts.socp = 1;   % second-order cone constraints
 
-%SDD
-[A_sdd, b_sdd, c_sdd, K_sdd, ~] = decomposed_subset(model.At',model.b,model.c,model.K,'sdd');
+%cone_list = {'sdd', 5, 10, 'psd'};
+cone_list = {'dd', 'sdd', 2, 5, 10, 'psd'};
+model_list = {model, LOP, model_split};
 
-[x_sdd, ~, ~] = sedumi(A_sdd, b_sdd, c_sdd, K_sdd);
+Cost_Matrix = zeros(length(cone_list), length(model_list));
+Info_Matrix = cell(length(cone_list), length(model_list));
 
-%SDD_clique
-[A_csdd_G, b_csdd_G, c_csdd_G, K_csdd_G, ~] = decomposed_subset(LOP.A,LOP.b,LOP.c,LOP.K,'sdd');
-[x_csdd_G, ~, ~] = sedumi(A_csdd_G, b_csdd_G, c_csdd_G, K_csdd_G);
+for i = 1:length(cone_list) 
+    for j = 1:length(model_list)        
+        [cost, info] = run_model(model_list{j}, cone_list{i});
+        Cost_Matrix(i, j) = cost;
+        Info_Matrix{i, j} = info;
+    end 
+end
 
-[A_csdd, b_csdd, c_csdd, K_csdd, ~] = decomposed_subset(model_split.At,model_split.b,model_split.c,model_split.K,'sdd');
-[x_csdd, ~, ~] = sedumi(A_csdd, b_csdd, c_csdd, K_csdd);
+save('block_arrow.mat', 'model_list', 'cone_list', 'cliqueDomain', 'Cost_Matrix', 'Info_Matrix')
 
-%DD
-[A_dd, b_dd, c_dd, K_dd, ~] = decomposed_subset(model.At',model.b,model.c,model.K,'dd');
-
-[x_dd, ~, ~] = sedumi(A_dd, b_dd, c_dd, K_dd);
-
-%SDD_clique
-[A_cdd_G, b_cdd_G, c_cdd_G, K_cdd_G, ~] = decomposed_subset(LOP.A,LOP.b,LOP.c,LOP.K,'dd');
-[x_cdd_G, ~, ~] = sedumi(A_cdd_G, b_cdd_G, c_cdd_G, K_cdd_G);
-
-[A_cdd, b_cdd, c_cdd, K_cdd, ~] = decomposed_subset(model_split.At,model_split.b,model_split.c,model_split.K,'dd');
-[x_cdd, ~, ~] = sedumi(A_cdd, b_cdd, c_cdd, K_cdd);
-
-%variable extraction is going to be more difficult
-
-cost_sdd  = c_sdd'*x_sdd;
-cost_csdd = c_csdd'*x_csdd;
-cost_csdd_G = c_csdd_G'*x_csdd_G;
-
-cost_dd  = c_dd'*x_dd;
-cost_cdd = c_cdd'*x_cdd;
-cost_cdd_G = c_cdd_G'*x_cdd_G;
-
-cost_psd  = model.c'*x_psd;
-cost_cpsd = model_split.c'*x_cpsd;
-cost_cpsd_G = LOP.c'*x_cpsd_G;
-
-Cost_Matrix = [cost_dd      cost_cdd_G cost_cdd;
-               cost_sdd     cost_csdd_G cost_csdd;
-               cost_psd     cost_cpsd_G cost_cpsd];
-%dcost_sdd = cost_sdd_cl - cost_sdd_orig;
-
-save('block_arrow.mat', 'model', 'model_split', 'LOP', 'cliqueDomain', 'Cost_Matrix')
+function  [cost, info] = run_model(model, cone)
+    [A, b, c, K, ~] = decomposed_subset(model.At,model.b,model.c,model.K, cone);
+    [x, ~, info] = sedumi(A, b, c, K);
+    cost = c'*x;
+end
