@@ -37,7 +37,6 @@ end
 % Data
 %At = [];
 At = sparse(n^2, m);
-%At = zeros(
 for i = 1:m
 %     Ai = [];
     %for k = 1:nCones
