@@ -133,6 +133,8 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
     cnew = [c_free_lin; cnew_lin; c_quad; cnew_quad; cnew_psd];
     bnew = b;
     
+    Knew.q(Knew.q == 0) = [];
+    
     info = [];
 end
 

@@ -34,13 +34,13 @@ for i = 1:cliqueDomain{1,1}.NoC
     mask_CoLO(cli, cli) = 1;
 end
 % 
-% figure(1)
-% hold on
-% spy(mask_CoLO , 'm');
-% spy(mask);
-% hold off
-% title('Block Arrow Sparsity + Fill-in', 'fontsize', 14)
-% 
+figure(1)
+hold on
+spy(mask_CoLO , 'm');
+spy(mask);
+hold off
+title('Block Arrow Sparsity + Fill-in', 'fontsize', 14)
+
 
 
 LOP.At = LOP.A';
