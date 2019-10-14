@@ -52,7 +52,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
     
     %offsets in the new x on where the cones are.
     Count_dd = K.f + K.l;
-    %Count_non_dd = K.f + K.l + sum(K.q);
+    Count_non_dd = K.f + K.l + sum(K.q);
     
     info_dd = {};
     info_non_dd = {};
@@ -70,7 +70,6 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
         
         
         cone_curr = cones{i};
-        info_curr = struct;
         
         if strcmp('sdd', cone_curr) 
             cone_curr = 1;
@@ -145,7 +144,6 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
             is_dd = 0;
             
         end
-        info_curr.ind_orig = Count + (1:Ksi^2);
         
         if is_dd
             info_dd{end+1} = info_curr;
@@ -165,10 +163,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
     %info = [];
     
     info.dd = info_dd;
-    info.count_dd = K.f+K.l;
     info.non_dd = info_non_dd;
-    info.count_non_dd = Count_dd + sum(K.q);
-    info.prev_var = length(c);
     
 end
 

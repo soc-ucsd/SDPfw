@@ -62,7 +62,7 @@ function [Anew, bnew, cnew, Knew, info] = factorwidth(A,b,c,K,opts)
   for PSDind = 1:length(K.s)   % multiple PSD cone
       
        if isfield(opts, 'block')
-            opts.nop = ceil (K.s(PSDind)/opts.block);
+            opts.nop = max(floor(K.s(PSDind)/opts.block), 1);
        end
       
        Apsd = A(:,Count + 1:Count + K.s(PSDind)^2);   % PSD data 

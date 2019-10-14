@@ -44,6 +44,15 @@ model_agler.At = At(idx, cons );
 model_agler.b = b(cons);
 model_agler.c  = c(idx);
 
+%Initial feasible point
+model_feas_0 = model_agler;
+model_feas_0.At = [model_feas_0.At, [eye(2); zeros(size(model_feas_0.At,1)-2, 2)]];
+model_feas_0.b = [model_feas_0.b; 0; 0];
+
+[x0, y0, info0] = sedumi(model_feas_0.At, model_feas_0.b, model_feas_0.c, model_feas_0.K, model.pars);
+
+model_change = basis_change(x0, model_feas_0);
+
 
 %Now do the decompositions
 
@@ -63,7 +72,7 @@ OUT_0 = draw_feasibility(model, 0, th);
 for i = 1:LC
     for j = 1:LC
         cone_curr = {cones{i}, cones{j}};
-        OUT{i, j} = draw_feasibility(model_agler, cone_curr, th);
+        OUT{i, j} = draw_feasibility(model_change, cone_curr, th);
     end
 end
 
@@ -81,7 +90,11 @@ for i = 1:LC
         OUT_curr = OUT{i, j};
         plot(OUT_curr.a(OUT_curr.conv), OUT_curr.b(OUT_curr.conv), 'color', C(1, :), 'linewidth', 2)
         
-        title(strcat('$K_1=', upper(cones{i}), ',$  $K_2=', upper(cones{j}), '$'), 'Interpreter', 'latex', 'FontSize', 18)
+        plot(0, 0, 'xk', 'markersize', 12)
+        
+        model_out = basis_change(OOUT_CURR.x, model);
+        
+        title(strcat('$K_4=', upper(cones{i}), ',$  $K_5=', upper(cones{j}), '$'), 'Interpreter', 'latex', 'FontSize', 18)
         xlabel('a')
         ylabel('b')
         hold off
@@ -96,13 +109,10 @@ function out = draw_feasibility(model, cone, th)
     out.b  = zeros(N, 1);
     out.Q  = cell(N, 1);
     
-    if iscell(cone)
-        [model_new.At, model_new.b, model_new.c, model_new.K, ~] = ...
+    [model_new.At, model_new.b, model_new.c, model_new.K, model_new.info] = ...
         decomposed_subset(model.At',model.b,model.c,model.K,cone);
         model_new.pars = model.pars;
-    else
-        model_new = model;
-    end
+
     
     c = model_new.c;
     
@@ -117,7 +127,60 @@ function out = draw_feasibility(model, cone, th)
         out.a(i) = x(1);
         out.b(i) = x(2);
         out.Q{i} = x(K.f+1:end);
+        out.x = decomposed_recover(x, model_new.info);
     end
     
     out.conv = convhull(out.a, out.b);
+end
+
+function model_out = basis_change(x, model)
+    K = model.K;
+    
+    basis = cell(length(K.s), 1);
+    
+    Count = K.f + K.l + sum(K.q);
+    
+    %delta = 1e-5;
+    
+    %NO_C = (nargin < 3) 
+    
+    model_out = model;
+    
+    for i = 1:length(K.s)
+        Ksi = K.s(i);
+        ind = Count + (1:Ksi^2);
+        
+        %Find new basis
+        X = reshape(x(ind), Ksi, Ksi);        
+                
+        L = chol(X);
+        basis{i} = L;
+        
+        %perform basis change
+        C = reshape(model.c(ind), Ksi, Ksi);
+        C_new = L'*C*L;
+        model_out.c(ind) = reshape(C_new, [], 1);
+        
+        At_curr = model.At(ind, :);
+        for j = 1:size(model.At, 2)
+            At_j = At_curr(:, j);
+            At_j_mat = reshape(At_j, Ksi, Ksi);
+            
+            At_j_mat_new = L'*At_j_mat*L;
+            At_curr(:, j) = reshape(At_j_mat_new, [], 1);
+        end
+        
+        model_out.At(ind, :) = At_curr;
+        
+        Count = Count + Ksi^2;
+    end
+    
+    
+    if isfield(model, 'basis')
+        for i = 1:length(model.basis)
+            basis{i} = model.basis{i}*basis{i};
+        end
+    else
+        model_out.basis = basis;
+    end
 end
