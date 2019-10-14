@@ -2,14 +2,14 @@ PROCESS_DATA = 1;
 RUN_DATA = 1;
 
 
-
 if PROCESS_DATA
     load('polynomial_big_clique.mat')
     model_csp.pars.fid = 0;
     
     %cones = {'dd', 'sdd', 2, ceil(maxKs/8), ceil(maxKs/4), 'psd'}; 
     %cones = {'dd', 'sdd', 2, 10, 19, 'psd'};
-    cones = {'dd', 'sdd', 2, 3, 5, 10, 19, 38, 'psd'};
+    %cones = {'dd', 'sdd', 2, 3, 5, 10, 15, 30, 'psd'};
+    cones = {'dd', 'sdd', 2, 3, 5, 11, 21, 40, 77, 'psd'};
     %cones = {'dd', 5, 19};
     
     %cones = {'dd', 'sdd', 2, 3, 5,  10, 19, 'psd'}; 
@@ -75,7 +75,7 @@ end
 output_table = latex(vpa(sym([cost_list time_list]),2));
 
 
-save('big_clique_results_fR2_72', 'time_list', 'cost_list', 'info_list', 'output_table')
+save('big_clique_results_fR2_120.mat', 'time_list', 'cost_list', 'info_list', 'output_table')
 %save('big_clique_results_32.mat_0', 'time_list', 'cost_list', 'info_list')
 
 

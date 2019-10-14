@@ -1,9 +1,10 @@
 lower = sdpvar(1,1);
 rng( 40, 'twister');
 %N = 64;
-N = 72;
+%N = 72;
+N = 120;
 %N = 32;
-b = N/4;
+b = N/6;
 x = sdpvar(N, 1);
 
 %f_R  = sum(100*(x(2:end ) - x(1:end-1) .^2).^2 +  (1 -x(1:end-1 )).^2);
@@ -40,5 +41,6 @@ opts_csp.sos.csp = 1;
 
 %[x_csp, y_csp, info_csp] = sedumi(model_csp.A', model_csp.b, model_csp.C, model_csp.K);
 %cost_csp = model_csp.C'*x_csp;
+Ks = model_csp.K.s';
 mKs = max(model_csp.K.s);
 save('polynomial_big_clique.mat', 'N', 'b', 'model_csp')
