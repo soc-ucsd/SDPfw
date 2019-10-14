@@ -9,7 +9,9 @@ if PROCESS_DATA
     %cones = {'dd', 'sdd', 2, ceil(maxKs/8), ceil(maxKs/4), 'psd'}; 
     %cones = {'dd', 'sdd', 2, 10, 19, 'psd'};
     %cones = {'dd', 'sdd', 2, 3, 5, 10, 15, 30, 'psd'};
-    cones = {'dd', 'sdd', 2, 3, 5, 11, 21, 40, 77, 'psd'};
+    %cones = {'dd', 'sdd', 2, 3, 5, 11, 21, 40, 77, 'psd'};
+    %cones = {4, 7, 9};
+    cones = {6};
     %cones = {'dd', 5, 19};
     
     %cones = {'dd', 'sdd', 2, 3, 5,  10, 19, 'psd'}; 
@@ -65,17 +67,19 @@ end
 if RUN_DATA
     i = 4;
     for i = 1:lc
-        {i, 'same'}  
+        {cones{i}, 'same'}  
         [time_list(i, 1), cost_list(i, 1), info_list{i, 1}, x1] = run_model(model_list{i, 1});
         
-        {i, 'diff'}          
+        {cones{i}, 'diff'}          
         [time_list(i, 2), cost_list(i, 2), info_list{i, 2}, x2] = run_model(model_list{i, 2});
     end
 end
 output_table = latex(vpa(sym([cost_list time_list]),2));
 
 
-save('big_clique_results_fR2_120.mat', 'time_list', 'cost_list', 'info_list', 'output_table')
+save('big_clique_results_fR2_120_aug6.mat', 'time_list', 'cost_list', 'info_list', 'output_table')
+
+%save('big_clique_results_fR2_120.mat', 'time_list', 'cost_list', 'info_list', 'output_table')
 %save('big_clique_results_32.mat_0', 'time_list', 'cost_list', 'info_list')
 
 
