@@ -25,7 +25,7 @@ K = [f >= 0, norm(x, 2)^2 <= Rx, norm([a;b], 2)^2<= Rab];
 
 m=4;
 %opts = sdpsettings('solver', 'moment', 'moment.order', m);
-opts = sdpsettings('solver', 'SparsePOP', 'moment.order', m);
+opts = sdpsettings('solver', 'SparsePOP', 'moment.relaxOrder', m);
 sol = optimize(K, obj, opts);
 [value(a), value(b), value(obj)]
 

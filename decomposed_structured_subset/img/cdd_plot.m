@@ -121,22 +121,72 @@ kCSDD = convhull(CSDD_proj(1, :), CSDD_proj(2, :));
 C = linspecer(5);
 figure(1)
 clf
-hold on
 
-%scatter(PSD_proj(1, :), PSD_proj(2, :),'.k')
-plot(D_proj(1, kD), D_proj(2, kD),'color', C(5, :), 'linewidth', 2)
+
+% DD in CDD
+subplot(2, 2, 1)
+hold on
 plot(DD_proj(1, kDD), DD_proj(2, kDD),'color', C(1, :), 'linewidth', 2)
 plot(CDD_proj(1, kCDD), CDD_proj(2, kCDD),'color', C(2, :),'linewidth', 2)
-plot(SDD_proj(1, kSDD), SDD_proj(2, kSDD),'color', C(3, :), 'linewidth', 2)
-plot(CSDD_proj(1, kCSDD), CSDD_proj(2, kCSDD),'color', C(4, :), 'linewidth', 2)
 plot(PSD_proj(1, kPSD), PSD_proj(2, kPSD),'k', 'linewidth', 2)
-text(I_proj(1), I_proj(2), 'I', 'interpreter', 'latex', 'Fontsize', 20)
-%plot(2*PSD_proj(1, kPSD), 2*PSD_proj(2, kPSD),':k')
-
-%scatter(DD_proj(1, :),DD_proj(2, :), 'b')
-%scatter(CDD_proj(1, :),CDD_proj(2, :), 'r')
-legend({'D', 'DD', 'DD(E, ?)', 'SDD', 'SDD(E, ?)', 'S_+'}, 'location', 'northwest', 'fontsize', 15)
-%title('Random affine cut of structured subsets', 'Fontsize', 16)
+text(I_proj(1), I_proj(2), 'I', 'interpreter', 'latex', 'Fontsize', 18)
 hold off
 axis square
 axis off
+title('$\mathcal{D}\mathcal{D} \subset \mathcal{D}\mathcal{D}(\mathcal{E}, ?) \subset S_+$', ...
+    'interpreter', 'latex', 'fontsize', 16)
+% DD in SDD
+subplot(2, 2, 2)
+hold on
+plot(DD_proj(1, kDD), DD_proj(2, kDD),'color', C(1, :), 'linewidth', 2)
+plot(SDD_proj(1, kSDD), SDD_proj(2, kSDD),'color', C(3, :), 'linewidth', 2)
+plot(PSD_proj(1, kPSD), PSD_proj(2, kPSD),'k', 'linewidth', 2)
+text(I_proj(1), I_proj(2), 'I', 'interpreter', 'latex', 'Fontsize', 18)
+hold off
+axis square
+axis off
+title('$\mathcal{D}\mathcal{D} \subset \mathcal{S}\mathcal{D}\mathcal{D} \subset S_+$',...
+    'interpreter', 'latex','fontsize', 14)
+% CDD in CSD
+subplot(2, 2, 3)
+hold on
+plot(CDD_proj(1, kCDD), CDD_proj(2, kCDD),'color', C(2, :),'linewidth', 2)
+plot(CSDD_proj(1, kCSDD), CSDD_proj(2, kCSDD),'color', C(4, :), 'linewidth', 2)
+plot(PSD_proj(1, kPSD), PSD_proj(2, kPSD),'k', 'linewidth', 2)
+text(I_proj(1), I_proj(2), 'I', 'interpreter', 'latex', 'Fontsize', 18)
+hold off
+axis square
+axis off
+title('$\mathcal{D}\mathcal{D}(\mathcal{E}, ?) \subset \mathcal{S}\mathcal{D}\mathcal{D}(\mathcal{E}, ?) \subset S_+$', ...
+    'interpreter', 'latex', 'fontsize', 16)
+% SDD in CSDD
+
+subplot(2, 2, 4)
+hold on
+plot(SDD_proj(1, kSDD), SDD_proj(2, kSDD),'color', C(3, :), 'linewidth', 2)
+plot(CSDD_proj(1, kCSDD), CSDD_proj(2, kCSDD),'color', C(4, :), 'linewidth', 2)
+plot(PSD_proj(1, kPSD), PSD_proj(2, kPSD),'k', 'linewidth', 2)
+text(I_proj(1), I_proj(2), 'I', 'interpreter', 'latex', 'Fontsize', 18)
+hold off
+axis square
+axis off
+title('$\mathcal{S}\mathcal{D}\mathcal{D} \subset \mathcal{S}\mathcal{D}\mathcal{D}(\mathcal{E}, ?) \subset S_+$', 'interpreter', 'latex', 'fontsize', 16)
+%'\mathcal{S}\mathcal{D}\mathcal{D}'
+% %scatter(PSD_proj(1, :), PSD_proj(2, :),'.k')
+% plot(D_proj(1, kD), D_proj(2, kD),'color', C(5, :), 'linewidth', 2)
+% plot(DD_proj(1, kDD), DD_proj(2, kDD),'color', C(1, :), 'linewidth', 2)
+% plot(CDD_proj(1, kCDD), CDD_proj(2, kCDD),'color', C(2, :),'linewidth', 2)
+% plot(SDD_proj(1, kSDD), SDD_proj(2, kSDD),'color', C(3, :), 'linewidth', 2)
+% plot(CSDD_proj(1, kCSDD), CSDD_proj(2, kCSDD),'color', C(4, :), 'linewidth', 2)
+% plot(PSD_proj(1, kPSD), PSD_proj(2, kPSD),'k', 'linewidth', 2)
+% text(I_proj(1), I_proj(2), 'I', 'interpreter', 'latex', 'Fontsize', 18)
+% %plot(2*PSD_proj(1, kPSD), 2*PSD_proj(2, kPSD),':k')
+
+%scatter(DD_proj(1, :),DD_proj(2, :), 'b')
+%scatter(CDD_proj(1, :),CDD_proj(2, :), 'r')
+%legend({'D', 'DD', 'DD(E, ?)', 'SDD', 'SDD(E, ?)', 'S_+'}, 'location', 'northwest', 'fontsize', 15)
+%title('Random affine cut of structured subsets', 'Fontsize', 16)
+%hold off
+%axis square
+%axis off
+
