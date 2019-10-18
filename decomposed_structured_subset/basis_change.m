@@ -1,4 +1,4 @@
-function [model_out]= basis_change(x, model)
+function [model_out, x_fake]= basis_change(x, model)
     %Cholesky basis change, based on original paper by Georgina and Amirali
     %
     %Input:
@@ -14,6 +14,7 @@ function [model_out]= basis_change(x, model)
     Count = K.f + K.l + sum(K.q);
     
     model_out = model;
+    x_fake = zeros(size(x));
     
     for i = 1:length(K.s)
         Ksi = K.s(i);

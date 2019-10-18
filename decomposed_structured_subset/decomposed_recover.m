@@ -27,8 +27,10 @@ for i = 1:length(info.dd)
 end
 
 %second order cone variables from original problem
-num_q = info.count_non_dd - count_dd;
-x_out(info.count_dd + (1:num_q)) = x(count_dd:info.count_non_dd);
+if info.count_non_dd > 0
+    num_q = info.count_non_dd - count_dd;
+    x_out(info.count_dd + (1:num_q)) = x(count_dd:info.count_non_dd);
+end
 
 %Factor Width Cones
 count_non_dd = info.count_non_dd;
