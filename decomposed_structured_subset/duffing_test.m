@@ -1,4 +1,4 @@
-N = 10;
+N = 5;
 b = (rand(N) + 0.5)/N;
 a = (rand(N,1)+0.5)/N/N;
 y = sdpvar(N, 1);
@@ -21,7 +21,7 @@ p = V - lam'*mult_term;
 F = sos(p);
 %obj = -g;
 obj = 0;
-opts_csp = sdpsettings('solver','SEDUMI');
+opts_csp = sdpsettings('solver','moment');
 opts_csp.sos.csp = 0;
 [model, recoverymodel] = export(F , obj, opts_csp);
 K0s = model.K.s;
