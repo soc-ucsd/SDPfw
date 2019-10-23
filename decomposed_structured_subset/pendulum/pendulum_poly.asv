@@ -70,9 +70,7 @@ sL = x'*Lmat*x;
 p = (x'*x)*(V - rho) + sL*Vdot;
 %p = sL*(V - rho) - Vdot;
 
-N = length(x);
-eps = 1e-5;
-cons = [sos(p); Lmat - eps*eye(N) >= 0];
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     cons = [sos(p); Lmat >= 0];
 %cons = sos(p);
 obj = -rho;
 

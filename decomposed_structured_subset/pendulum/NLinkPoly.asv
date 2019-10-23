@@ -28,14 +28,12 @@ f = clean(p_op.getPolyDynamics());
 x = V0.getFrame.getPoly;
 u = sys.getInputFrame.getPoly;
 
-subs(f, [x; u], [x00; u00])
+subs(f, [x; u], j0)
 %subs(f_cl, [x; u], j0)
 
 feed = c.D*(x-x00);
 
-f_cl = subs(f, u, feed);
 
-subs(f_cl, x, x00)
 
 % f_cl = f;
 % for i = 1:length(u)
@@ -46,8 +44,7 @@ subs(f_cl, x, x00)
 %copying from maxROAFeedback.m
 S0 = V0.S;
 K = c.D;
-
-save(strcat('N_link_system_',num2str(N),'.mat'), 'f' , 'f_cl', 'S0', 'x', 'u', 'K', 'x00')
+%save(strcat('N_link_system_',num2str(N),'.mat'), 'f', 'f_cl', 'S0', 'x', 'u', 'K')
 
 
 % prog = mssprog;
