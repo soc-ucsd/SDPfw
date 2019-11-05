@@ -6,19 +6,19 @@
 %% Stability Test: Generating data
 rng(62, 'twister')
 
-head = 30;      %size of central 'head'
-knuckle = 8;    %size of each knuckle
-t = 2;          %#links between head and first knuckle
-t_k = 4;        %#links between subsequent knuckles
+head = 40;      %size of central 'head'
+knuckle = 10;    %size of each knuckle
+t = 4;          %#links between head and first knuckle
+t_k = 2;        %#links between subsequent knuckles
 N = 6;          %#tentacles
-k = 4;          %#knuckles per tentacle
+k = 5;          %#knuckles per tentacle
 
 N_state = head + knuckle*N*k;
 
-G = sparse(N_state, N_state);
+Gw = sparse(N_state, N_state);
 
 %head is dense
-G(1:head, 1:head) = 1;
+Gw(1:head, 1:head) = 1;
 
 i_incr = head;
 t_incr = 0;
@@ -26,9 +26,9 @@ for i = 1:N
     %head to knuckle
     k_ind = i_incr + (1:knuckle);
     t_ind = t_incr + (1:t);
-    G(k_ind, k_ind) = 1;
-    G(k_ind, t_ind) = 1;
-    G(t_ind, k_ind) = 1;
+    Gw(k_ind, k_ind) = 3;
+    Gw(k_ind, t_ind) = 0.2;
+    Gw(t_ind, k_ind) = 0.2;
     i_incr = i_incr + knuckle;
     t_incr = t_incr + t;
     
@@ -38,9 +38,9 @@ for i = 1:N
         i_next = i_incr + (1:t_k);
         
         i_k = i_incr + (1:knuckle);
-        G(i_k, i_k) = 1;
-        G(i_prev, i_next) = 1;
-        G(i_next, i_prev) = 1;
+        Gw(i_k, i_k) = 3;
+        Gw(i_prev, i_next) = 0.2;
+        Gw(i_next, i_prev) = 0.2;
         
         i_incr = i_incr + knuckle;
     end
@@ -48,13 +48,15 @@ end
 
 figure(1)
 subplot(1,2,1)
-spy(G)
+spy(Gw)
 title('Sea Star Interactions', 'fontsize', 18)
 subplot(1,2,2)
-plot(graph(G, 'omitselfloops'), 'layout', 'force', 'Iterations', 500)
+plot(graph(Gw, 'omitselfloops'), 'layout', 'force', 'Iterations', 500)
 axis square
 title('Sea Star Visualization', 'fontsize', 18)
 
+
+G = (Gw > 0);
 Mc    = maximalCliques(G);
 %generate system
 N = N_state;
@@ -106,6 +108,9 @@ subplot(1,2,2)
 spy(mask2)
 title('$A^T P + P A^T + B B^T \leq -\epsilon I$', 'interpreter', 'latex', 'Fontsize', 18)
 
+figure(3)
+plot(sort(LOP.K.s), '.', 'Markersize', 10)
+title('Sea Star Clique Sizes', 'fontsize', 18)
 
 save('sea_star.mat', 'model', 'LOP', 'Sys', 'G', 'n', 'm', 'd')
 

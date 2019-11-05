@@ -87,6 +87,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
             cnew_lin = [cnew_lin; c_curr];
             info_curr.num_var = 1;
             is_dd = 0;
+            Knew.l = Knew.l + 1;
         elseif strcmp('dd', cone_curr)
             %DD
             K_temp.s = Ksi;
