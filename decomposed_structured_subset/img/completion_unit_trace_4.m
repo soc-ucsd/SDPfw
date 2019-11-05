@@ -140,7 +140,7 @@ out_csdd_dd = draw_feasibility(model_split, {'sdd', 'dd'}, th);
 
 
 
-%C = linspecer(6)
+C = linspecer(6)
 
 figure(30)
 clf
