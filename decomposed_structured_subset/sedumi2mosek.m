@@ -84,7 +84,7 @@ for j = 1:length(K0.s)
     top = top + n^2;
 end
 
-if K.q(1)>0    
+if ~isempty(K.q) && K.q(1)>0    
     prob.cones.type   = [repmat(0,1,length(K.q))];
     top = 1 + K.f + K.l;
     prob.cones.sub = [];
