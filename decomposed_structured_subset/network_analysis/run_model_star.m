@@ -1,5 +1,7 @@
 function  [Hout, package, time_solve, time_convert] = run_model_star(model, cone, use_mosek)    
     
+
+    %H2 and Hinf norm both require square roots
     if nargin < 3
         use_mosek = 1;
     end    
@@ -19,18 +21,25 @@ function  [Hout, package, time_solve, time_convert] = run_model_star(model, cone
         tic;    
         
         % Set log level (integer parameter)
-        param.MSK_IPAR_LOG = 1;
+        %param.MSK_IPAR_LOG = 1;
         % Select interior-point optimizer... (integer parameter)
-        param.MSK_IPAR_OPTIMIZER = 'MSK_OPTIMIZER_INTPNT';
-        % ... without basis identification (integer parameter)
-        param.MSK_IPAR_INTPNT_BASIS = 'MSK_BI_NEVER';
-        % Set relative gap tolerance (double parameter)
-        %param.MSK_DPAR_INTPNT_CO_TOL_REL_GAP = 1.0e-7;
-    
-        %[r,res] = mosekopt('minimize echo(0)',prob, param);
-        [r,res] = mosekopt('minimize',prob, param);
+        param.MSK_DPAR_INTPNT_CO_TOL_REL_GAP = 1.0e-6;
+        if all(strcmp(cone, 'dd') )
+            param.MSK_IPAR_OPTIMIZER = 'MSK_OPTIMIZER_INTPNT';
+            % ... without basis identification (integer parameter)
+            param.MSK_IPAR_INTPNT_BASIS = 'MSK_BI_NEVER';            
+        end
+        
+        [r,res] = mosekopt('minimize echo(0)',prob, param);
+        %[r,res] = mosekopt('minimize',prob, param)
+        
         time_solve = toc;
-        cost = res.sol.itr.pobjval;
+        if  strcmp(res.sol.itr.prosta, 'PRIMAL_AND_DUAL_FEASIBLE')        
+            cost = res.sol.itr.pobjval;
+        else
+            cost = NaN;
+        end
+
         package = res;
     else
         time_convert = toc;

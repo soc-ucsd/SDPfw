@@ -6,10 +6,10 @@
 %% Stability Test: Generating data
 rng(62, 'twister')
 
-star_size = 1;
-Flag  = 2;
-VISUALIZE = 0;
-BIG_REAL = 1;
+star_size = 0;
+Flag  = 3;
+VISUALIZE = 1;
+BIG_REAL = 0;
 
 if star_size == 3
     %Large
@@ -29,7 +29,7 @@ elseif star_size == 2
     N = 6;          %#arms
     k = 3;          %#knuckles per arm
     size_str = 'medium';
-else
+elseif star_size == 1
     %Small
     head = 10;      %size of central 'head'
     knuckle = 4;    %size of each knuckle
@@ -38,6 +38,16 @@ else
     N = 3;          %#arms
     k = 2;          %#knuckles per arm
     size_str = 'small';
+    
+else
+    %Tiny
+    head = 4;      %size of central 'head'
+    knuckle = 3;    %size of each knuckle
+    t = 1;          %#links between head and first knuckle
+    t_k = 1;        %#links between subsequent knuckles
+    N = 2;          %#arms
+    k = 1;          %#knuckles per arm
+    size_str = 'tiny';
 end
 
 
@@ -133,7 +143,7 @@ elseif Flag == 2
 else
     %Hinf norm
 
-    flag_str = 'Hinf';
+    
     if BIG_REAL
         gamma = sdpvar(1);
         Constraint2 = [[P*Sys.globalA+Sys.globalA'*P, P*Sys.globalB, Sys.globalC'; 
@@ -141,12 +151,14 @@ else
                                    Sys.globalC, Sys.globalD, -gamma*eye(sum(d))] + epsilon*eye(sum(n)+sum(m)+sum(d)) <= 0];
         Constraint = [Constraint, Constraint2];
         Cost = gamma;
+        flag_str = 'Hinf1';
     else
         gamma2 = sdpvar(1);
         Constraint2 = [[P*Sys.globalA+Sys.globalA'*P + Sys.globalC'*Sys.globalC, P*Sys.globalB + Sys.globalC'*Sys.globalD; 
                             Sys.globalB'*P + Sys.globalD'*Sys.globalC, Sys.globalD'*Sys.globalD-gamma2*eye(sum(m))] + epsilon*eye(sum(n)+sum(m)) <= 0];
         Constraint = [Constraint, Constraint2, gamma2>=0];
         Cost = gamma2;
+        flag_str = 'Hinf0';
     end
     
     %title_str = '$\begin{pmatrix}A^T P + P A^T & P^T B & C^T \\ B^T P& -\gamma I & 0 \\ C & 0 & -\gamma I \end{pmatrix}\leq -\epsilon I$';
@@ -198,6 +210,6 @@ if VISUALIZE
     hold off
 end
 
-fname = strcat('sea_star_',flag_str,'_',size_str, num2str(BIG_REAL),'.mat');
+fname = strcat('sea_star_',flag_str,'_',size_str,'.mat');
 
 save(fname, 'model', 'LOP', 'Sys', 'G', 'n', 'm', 'd')
