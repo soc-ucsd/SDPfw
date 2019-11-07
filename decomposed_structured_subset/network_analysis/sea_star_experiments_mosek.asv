@@ -1,0 +1,52 @@
+% head = 60;      %size of central 'head'
+% knuckle = 10;    %size of each knuckle
+% t = 4;          %#links between head and first knuckle
+% t_k = 2;        %#links between subsequent knuckles
+% N = 6;          %#arms
+% k = 6;          %#knuckles per arm
+
+%load('sea_star_hinf.mat')
+%load('sea_star_hinf.mat')
+load('sea_star_Hinf_small.mat')
+Ks = LOP.K.s';
+cone = cell(length(Ks), 1);
+
+% %Cone thresholds
+%[0, 22, 70]
+% cone_thresh = 70;
+
+cone_psd = cone_list(Ks, 0, 'psd');
+cone_dd  = cone_list(Ks, 0, 'dd');
+cone_22_dd  = cone_list(Ks, 22, 'dd');
+cone_50_dd  = cone_list(Ks, 50, 'dd');
+cone_70_dd  = cone_list(Ks, 70, 'dd');
+cone_100_dd  = cone_list(Ks, 100, 'dd');
+
+[Hinf, res, time_solve, time_convert] = run_model(LOP, cone_psd);
+[Hinf_dd, res_dd, time_solve_dd, time_convert_dd] = run_model(LOP, cone_dd);
+[Hinf_dd_22, res_dd_22, time_solve_dd_22, time_convert_dd_22] = run_model(LOP, cone_22_dd);
+[Hinf_dd_50, res_dd_50, time_solve_dd_50, time_convert_dd_50] = run_model(LOP, cone_50_dd);
+[Hinf_dd_70, res_dd_70, time_solve_dd_70, time_convert_dd_70] = run_model(LOP, cone_70_dd);
+[Hinf_dd_100, res_dd_100, time_solve_dd_100, time_convert_dd_100] = run_model(LOP, cone_100_dd);
+
+% [A, b, c, K, ~] = decomposed_subset(LOP.A,LOP.b,LOP.c,LOP.K, cone_70_dd);
+% At = A';
+% save('dd_70.mat', 'At', 'b', 'c', 'K');
+% 
+% [F,h] = loadsedumidata('dd_70.mat');
+% sol = optimize(F, h, sdpsettings('solver', 'mosek'));
+
+% prob = sedumi2mosek(A', b, c, K);
+% [r,res] = mosekopt('minimize',prob);
+% cost = res.sol.itr.pobjval;
+% Hinf_dd_70 = sqrt(-cost);
+
+%[F,h] = loadsedumidata('dd_70.mat');
+%sol = optimize(F, h, sdpsettings('solver', 'mosek'));
+%Hinf_dd_70 
+%output = [Hinf_dd_70 Hinf]
+output = [Hinf_dd Hinf_dd_22 Hinf_dd_50 Hinf_dd_70 Hinf_dd_10 Hinf]
+
+
+
+

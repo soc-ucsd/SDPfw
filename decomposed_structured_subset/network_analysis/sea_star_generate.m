@@ -6,19 +6,40 @@
 %% Stability Test: Generating data
 rng(62, 'twister')
 
-head = 60;      %size of central 'head'
-knuckle = 10;    %size of each knuckle
-t = 4;          %#links between head and first knuckle
-t_k = 2;        %#links between subsequent knuckles
-N = 6;          %#arms
-k = 6;          %#knuckles per arm
+star_size = 1;
+Flag  = 2;
+VISUALIZE = 0;
+BIG_REAL = 1;
 
-% head = 20;      %size of central 'head'
-% knuckle = 6;    %size of each knuckle
-% t = 2;          %#links between head and first knuckle
-% t_k = 2;        %#links between subsequent knuckles
-% N = 6;          %#arms
-% k = 3;          %#knuckles per arm
+if star_size == 3
+    %Large
+    head = 60;      %size of central 'head'
+    knuckle = 10;    %size of each knuckle
+    t = 4;          %#links between head and first knuckle
+    t_k = 2;        %#links between subsequent knuckles
+    N = 6;          %#arms
+    k = 6;          %#knuckles per arm
+    size_str = 'large';
+elseif star_size == 2
+    %Medium
+    head = 20;      %size of central 'head'
+    knuckle = 6;    %size of each knuckle
+    t = 2;          %#links between head and first knuckle
+    t_k = 2;        %#links between subsequent knuckles
+    N = 6;          %#arms
+    k = 3;          %#knuckles per arm
+    size_str = 'medium';
+else
+    %Small
+    head = 10;      %size of central 'head'
+    knuckle = 4;    %size of each knuckle
+    t = 2;          %#links between head and first knuckle
+    t_k = 2;        %#links between subsequent knuckles
+    N = 3;          %#arms
+    k = 2;          %#knuckles per arm
+    size_str = 'small';
+end
+
 
 N_state = head + knuckle*N*k;
 
@@ -59,16 +80,17 @@ for i = 1:N
     end
 end
 
- figure(1)
-subplot(1,2,1)
-spy(Gw)
-title('Sea Star Interactions', 'fontsize', 18, 'interpreter', 'latex')
-subplot(1,2,2)
- plot(graph(Gw, 'omitselfloops'), 'layout', 'force', ...
-     'Iterations', 6000, 'UseGravity', 'on', 'WeightEffect', 'inverse')
- axis square
- title('Sea Star Visualization', 'fontsize', 18, 'interpreter', 'latex')
-
+if VISUALIZE
+     figure(1)
+    subplot(1,2,1)
+    spy(Gw)
+    title('Sea Star Interactions', 'fontsize', 18, 'interpreter', 'latex')
+    subplot(1,2,2)
+     plot(graph(Gw, 'omitselfloops'), 'layout', 'force', ...
+         'Iterations', 6000, 'UseGravity', 'on', 'WeightEffect', 'inverse')
+     axis square
+     title('Sea Star Visualization', 'fontsize', 18, 'interpreter', 'latex')
+end
 
 
 G = (Gw > 0);
@@ -78,7 +100,7 @@ N = N_state;
 n     = randi(10,1,N);
 m     = randi(5,1,N);
 d     = randi(5,1,N);
-Flag  = 3;
+
 Sys   = GenerateDynamics(G,[],n,m,d,Flag);
 
 %% Call Yalmip to solve the problem
@@ -100,22 +122,33 @@ if Flag == 1
     Constraint = [Constraint, Sys.globalA*P + P*Sys.globalA'+ epsilon*eye(sum(n)) <= 0];
     Cost = 0;
     title_str = '$A^T P + P A^T \leq -\epsilon I$';
+    flag_str = 'Stab';
 elseif Flag == 2
     %H2 norm
     %Flag == 2
     Constraint = [Constraint, Sys.globalA*P + P*Sys.globalA' + Sys.globalB*Sys.globalB' + epsilon*eye(sum(n)) <= 0];
     Cost = trace(Sys.globalC*P*Sys.globalC');
-    title_str = '$A^T P + P A^T + B B^T \leq -\epsilon I$';
+    title_str = '$A^T P + P A^T + B B^T  \epsilon I \leq 0$';
+    flag_str = 'H2';
 else
     %Hinf norm
-    gamma = sdpvar(1);
+
+    flag_str = 'Hinf';
+    if BIG_REAL
+        gamma = sdpvar(1);
+        Constraint2 = [[P*Sys.globalA+Sys.globalA'*P, P*Sys.globalB, Sys.globalC'; 
+                                   Sys.globalB'*P, -gamma*eye(sum(m)), Sys.globalD';
+                                   Sys.globalC, Sys.globalD, -gamma*eye(sum(d))] + epsilon*eye(sum(n)+sum(m)+sum(d)) <= 0];
+        Constraint = [Constraint, Constraint2];
+        Cost = gamma;
+    else
+        gamma2 = sdpvar(1);
+        Constraint2 = [[P*Sys.globalA+Sys.globalA'*P + Sys.globalC'*Sys.globalC, P*Sys.globalB + Sys.globalC'*Sys.globalD; 
+                            Sys.globalB'*P + Sys.globalD'*Sys.globalC, Sys.globalD'*Sys.globalD-gamma2*eye(sum(m))] + epsilon*eye(sum(n)+sum(m)) <= 0];
+        Constraint = [Constraint, Constraint2, gamma2>=0];
+        Cost = gamma2;
+    end
     
-    
-    Constraint2 = [[P*Sys.globalA+Sys.globalA'*P, P*Sys.globalB, Sys.globalC'; 
-                           Sys.globalB'*P, -gamma*eye(sum(m)), Sys.globalD';
-                           Sys.globalC, Sys.globalD, -gamma*eye(sum(d))] + epsilon*eye(sum(n)+sum(m)+sum(d)) <= 0];
-    Constraint = [Constraint, Constraint2];
-    Cost = gamma;
     %title_str = '$\begin{pmatrix}A^T P + P A^T & P^T B & C^T \\ B^T P& -\gamma I & 0 \\ C & 0 & -\gamma I \end{pmatrix}\leq -\epsilon I$';
     title_str = 'Bounded Real Lemma';
 end
@@ -128,35 +161,43 @@ opts      = sdpsettings('verbose',1,'solver','sedumi');
 % c = model.C;
 % K.f = model.K.f;K.l = model.K.l;K.q = model.K.q;K.s = model.K.s;
 
+%yalmip outputs LMI
+parCoLO.domain    = 2;  % dConvCliqueTree  ---> equalities 
+parCoLO.range     = 1;   % rConvMatDecomp   ---> equalities 
+parCoLO.EQorLMI   = 2; % CoLOtoEQform     ---> LMI standard form
+parCoLO.SDPsolver = []; % CoLOtoEQform     ---> LMI standard form       
+%parCoLO.SDPsolver = 'sedumi'; % CoLOtoEQform     ---> LMI standard form       
 
-parCoLO.domain    = 1;  % dConvCliqueTree  ---> equalities 
-parCoLO.range     = 2;   % rConvMatDecomp   ---> equalities 
-parCoLO.EQorLMI   = 1; % CoLOtoEQform     ---> equality standard form
-parCoLO.SDPsolver = []; % CoLOtoEQform     ---> equality standard form       
 parCoLO.quiet     = 1; % Some peace and quiet       
 J.f = length(model.b);
 
 [~,~,~,cliqueDomain,cliqueRange,LOP] = sparseCoLO(model.A',model.b,model.C,model.K,J,parCoLO); 
 
-figure(2)
-SP = spones(spones(model.C) + sparse(sum(spones(model.A),2)));  % vector of 1s and 0s
-mask1 = reshape(SP(1:model.K.s(1)^2), model.K.s(1), model.K.s(1));
-mask2 = reshape(SP(model.K.s(1)^2 + (1:model.K.s(2)^2)), model.K.s(2), model.K.s(2));
+if VISUALIZE
+    figure(2)
+    clf
+    SP = spones(spones(model.C) + sparse(sum(spones(model.A),2)));  % vector of 1s and 0s
+    mask1 = reshape(SP(1:model.K.s(1)^2), model.K.s(1), model.K.s(1));
+    mask2 = reshape(SP(model.K.s(1)^2 + (1:model.K.s(2)^2)), model.K.s(2), model.K.s(2));
 
-subplot(1,2,1)
-spy(mask1)
-title('$P \geq \epsilon I$', 'interpreter', 'latex', 'Fontsize', 18)
-subplot(1,2,2)
-spy(mask2)
-title(title_str, 'interpreter', 'latex', 'Fontsize', 18)
+    subplot(1,2,1)
+    spy(mask1)
+    title('$P \geq \epsilon I$', 'interpreter', 'latex', 'Fontsize', 18)
+    subplot(1,2,2)
+    spy(mask2)
+    title(title_str, 'interpreter', 'latex', 'Fontsize', 18)
 
-figure(3)
-hold on
-plot(sort(LOP.K.s), '.', 'Markersize', 10)
-plot(xlim, [22,22], 'k:')
-plot(xlim, [100,100], 'k--')
-title('Sea Star Clique Sizes', 'fontsize', 18, 'Interpreter', 'latex')
-legend('Cliques', 'Size 22', 'Size 100', 'location', 'northwest')
-hold off
-save('sea_star_Hinf.mat', 'model', 'LOP', 'Sys', 'G', 'n', 'm', 'd')
+    figure(3)
+    clf
+    hold on
+    plot(sort(LOP.J.s), '.', 'Markersize', 10)
+    plot(xlim, [22,22], 'k:')
+    plot(xlim, [100,100], 'k--')
+    title('Sea Star Clique Sizes', 'fontsize', 18, 'Interpreter', 'latex')
+    legend('Cliques', 'Size 22', 'Size 100', 'location', 'northwest')
+    hold off
+end
 
+fname = strcat('sea_star_',flag_str,'_',size_str, num2str(BIG_REAL),'.mat');
+
+save(fname, 'model', 'LOP', 'Sys', 'G', 'n', 'm', 'd')

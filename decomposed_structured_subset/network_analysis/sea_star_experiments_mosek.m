@@ -5,45 +5,42 @@
 % N = 6;          %#arms
 % k = 6;          %#knuckles per arm
 
-load('sea_star_hinf.mat')
-Ks = LOP.K.s';
-cone = cell(length(Ks), 1);
+%load('sea_star_hinf.mat')
+%load('sea_star_Hinf.mat')
+%load('sea_star_Hinf_small0.mat')
+%load('sea_star_Hinf_medium1.mat')
+
+load('sea_star_H2_small1.mat')
+
+%load('sea_star_Hinf_medium.mat')
+Js = LOP.J.s';
+cone = cell(length(Js), 1);
 
 % %Cone thresholds
-%[0, 22, 100]
-% cone_thresh = 100;
-cone_thresh = 0;
-%cone_alt = 40;
-%cone_thresh = 120;
-%cone_alt = 20;
-%cone_thresh = 100;
-cone_alt = 'dd';
-for i = 1:length(Ks)
-    if Ks(i) <= cone_thresh
-        cone{i} = 'psd';
-    else
-        cone{i} = cone_alt;
-    end
-end
+%[0, 22, 70]
+% cone_thresh = 70;
 
-%cone = 'psd'
+cone_psd = cone_list(Js, 0, 'psd');
+cone_dd  = cone_list(Js, 0, 'dd');
+cone_22_dd  = cone_list(Js, 22, 'dd');
+cone_50_dd  = cone_list(Js, 50, 'dd');
+%cone_70_dd  = cone_list(Js, 70, 'dd');
+cone_100_dd  = cone_list(Js, 100, 'dd');
 
-[Hinf, res, time_solve, time_convert] = run_model(LOP, cone);
+use_mosek = 1;
 
-function  [Hinf, res, time_solve, time_convert] = run_model(model, cone)    
-    tic
-    [A, b, c, K, ~] = decomposed_subset(model.A,model.b,model.c,model.K, cone);
-    %pars.fid = 0;
-    %pars.fid = 1;    
-    %[x, ~, info] = sedumi(A, b, c, K, pars);
-    prob = sedumi2mosek(A', b, c, K);
-    time_convert = toc;
-    %[r,res] = mosekopt('minimize echo(0)',prob);
-    tic;
-    [r,res] = mosekopt('minimize',prob);
-    time_solve = toc;
-    cost = res.sol.itr.pobjval;
-    %H2 = sqrt(-cost);
-    Hinf = -cost;
-    
-end
+[Hout, res, time_solve, time_convert] = run_model_star(LOP, cone_psd, use_mosek);
+[Hout_dd, res_dd, time_solve_dd, time_convert_dd] = run_model_star(LOP, cone_dd, use_mosek);
+[Hout_dd_22, res_dd_22, time_solve_dd_22, time_convert_dd_22] = run_model_star(LOP, cone_22_dd, use_mosek);
+[Hout_dd_50, res_dd_50, time_solve_dd_50, time_convert_dd_50] = run_model_star(LOP, cone_50_dd, use_mosek);
+%[Hout_dd_70, res_dd_70, time_solve_dd_70, time_convert_dd_70] = run_model_star(LOP, cone_70_dd, use_mosek);
+[Hout_dd_100, res_dd_100, time_solve_dd_100, time_convert_dd_100] = run_model_star(LOP, cone_100_dd, use_mosek);
+
+output = [Hout_dd Hout_dd_22 Hout_dd_50 Hout_dd_100 Hout]
+%output = [Hout_dd Hout_dd_22 Hout_dd_50 Hout_dd_70 Hout_dd_100 Hout]
+%output = [Hout_dd Hout_dd_22 Hout_dd_100]
+
+
+
+
+
