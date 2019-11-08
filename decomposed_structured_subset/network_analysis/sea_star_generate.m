@@ -6,19 +6,37 @@
 %% Stability Test: Generating data
 rng(62, 'twister')
 
-star_size = 0;
+star_size = 3;
 Flag  = 3;
 VISUALIZE = 1;
 BIG_REAL = 0;
 
-if star_size == 3
-    %Large
+if star_size == 5
+    %Huge
     head = 60;      %size of central 'head'
     knuckle = 10;    %size of each knuckle
     t = 4;          %#links between head and first knuckle
     t_k = 2;        %#links between subsequent knuckles
     N = 6;          %#arms
     k = 6;          %#knuckles per arm
+    size_str = 'huge';
+elseif star_size == 4
+    %Huge
+    head = 40;      %size of central 'head'
+    knuckle = 10;    %size of each knuckle
+    t = 2;          %#links between head and first knuckle
+    t_k = 2;        %#links between subsequent knuckles
+    N = 6;          %#arms
+    k = 5;          %#knuckles per arm
+    size_str = 'verylarge';
+elseif star_size == 3
+    %Huge
+    head = 30;      %size of central 'head'
+    knuckle = 8;    %size of each knuckle
+    t = 2;          %#links between head and first knuckle
+    t_k = 2;        %#links between subsequent knuckles
+    N = 5;          %#arms
+    k = 4;          %#knuckles per arm
     size_str = 'large';
 elseif star_size == 2
     %Medium
@@ -56,10 +74,10 @@ N_state = head + knuckle*N*k;
 Gw = sparse(N_state, N_state);
 
 %head is dense
-weight_head = 0.8;
+weight_head = 0.9;
 weight_knuck = 4;
 weight_knuck_k = 4;
-weight_knuck_h = 2.5;
+weight_knuck_h = 2;
 
 
 Gw(1:head, 1:head) = weight_head;
@@ -156,7 +174,7 @@ else
         gamma2 = sdpvar(1);
         Constraint2 = [[P*Sys.globalA+Sys.globalA'*P + Sys.globalC'*Sys.globalC, P*Sys.globalB + Sys.globalC'*Sys.globalD; 
                             Sys.globalB'*P + Sys.globalD'*Sys.globalC, Sys.globalD'*Sys.globalD-gamma2*eye(sum(m))] + epsilon*eye(sum(n)+sum(m)) <= 0];
-        Constraint = [Constraint, Constraint2, gamma2>=0];
+        Constraint = [Constraint, Constraint2];
         Cost = gamma2;
         flag_str = 'Hinf0';
     end
@@ -203,11 +221,17 @@ if VISUALIZE
     clf
     hold on
     plot(sort(LOP.J.s), '.', 'Markersize', 10)
-    plot(xlim, [22,22], 'k:')
-    plot(xlim, [100,100], 'k--')
+    plot(xlim, [11,11], 'k--')
+%     plot(xlim, [60,60], 'k-.')
+%     plot(xlim, [100,100], 'k-')
+    plot(xlim, [40,40], 'k-.')
+    plot(xlim, [75,75], 'k-')
     title('Sea Star Clique Sizes', 'fontsize', 18, 'Interpreter', 'latex')
-    legend('Cliques', 'Size 22', 'Size 100', 'location', 'northwest')
-    hold off
+    legend({'Cliques', 'Size 11', 'Size 60', 'Size 100'},...
+        'location', 'northwest', 'fontsize', 12)
+    %hold off
+    xlabel('Clique  #', 'fontsize', 12)
+    ylabel('Size of Clique', 'fontsize', 12) 
 end
 
 fname = strcat('sea_star_',flag_str,'_',size_str,'.mat');
