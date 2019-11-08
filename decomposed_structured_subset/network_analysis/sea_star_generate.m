@@ -224,10 +224,13 @@ if VISUALIZE
     plot(xlim, [11,11], 'k--')
 %     plot(xlim, [60,60], 'k-.')
 %     plot(xlim, [100,100], 'k-')
-    plot(xlim, [40,40], 'k-.')
-    plot(xlim, [75,75], 'k-')
+    %plot(xlim, [40,40], 'k-.')
+    %plot(xlim, [75,75], 'k-')
+    plot(xlim, [41,41], 'k-.')
+    plot(xlim, [63,63], 'k-')
+    
     title('Sea Star Clique Sizes', 'fontsize', 18, 'Interpreter', 'latex')
-    legend({'Cliques', 'Size 11', 'Size 60', 'Size 100'},...
+    legend({'Cliques', 'Size 11', 'Size 41', 'Size 63'},...
         'location', 'northwest', 'fontsize', 12)
     %hold off
     xlabel('Clique  #', 'fontsize', 12)

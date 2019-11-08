@@ -25,7 +25,7 @@ Js = LOP.J.s';
 %thresh = [0, 11, 40, 75, 100];
 thresh = [0, 11, 41, 63];
 
-cones = {'dd', 1, 3, 5, 7, 15, 30, 50};
+cones = {'dd', 1, 5, 7, 15, 30, 50};
 %cones = {'dd', 1, 3, 5, 8, 15, 30, 60, 85};
 %cones = {'dd'};
 
@@ -69,7 +69,7 @@ for i = 1:Ncones
         output(i, j) = CONE{i,j}.Hout;
               %output
              %{cones{i}, thresh(j), output(i,j)}
-         fprintf('Cone: %s \t Thresh:  %d \t Hinf: %3f\n', num2str(cones{i}), thresh (j), output(i,j))
+         fprintf('Cone: %s \t Thresh:  %d \t Hinf: %0.3f \t Time: %0.1f\n', num2str(cones{i}), thresh (j), output(i,j), CONE{i,j}.time_solve)
 %         else
 %             CONE{i,j}.Hout = NaN;        
 %         end
@@ -77,9 +77,10 @@ save(outname, 'CONE', 'CONE0', 'cones', 'thresh')
     end
 end
 % 
-fprintf('Cone: PSD \t Hinf: %3f\n', CONE0.Hout)
+
 [CONE0.Hout, RES0, CONE0.time_solve, CONE0.time_convert]...
             = run_model_star(LOP, 'psd', use_mosek);
+fprintf('Cone: PSD \t Hinf: %3f\n', CONE0.Hout)
 save(outname, 'CONE', 'CONE0', 'cones', 'thresh')
 % [output ones(Ncones, 1)*CONE0.Hout]
 % 
