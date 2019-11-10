@@ -6,7 +6,8 @@
 %fname = 'sea_star_Hinf0_tiny.mat';
 %fname = 'sea_star_H2_small.mat';
 %fname = 'sea_star_Hinf0_medium.mat';
-fname = 'sea_star_Hinf0_large.mat';
+%fname = 'sea_star_Hinf0_large.mat';
+fname = 'sea_star_Hinf0_verylarge.mat';
 [filepath,name,ext] = fileparts(fname);
 outname = strcat(filepath,'output_',name,ext);
 
@@ -14,19 +15,16 @@ load(fname);
 
 Js = LOP.J.s';
 
-
-
-
 % %medium
 % thresh = [0, 11, 35, 100];
 % cones = {'dd', 1, 3, 5, 9, 18, 36};
 
 %large
-%thresh = [0, 11, 40, 75, 100];
-thresh = [0, 11, 41, 63];
+thresh = [0, 11, 60, 100];
+%thresh = [0, 11, 41, 63];
 
-cones = {'dd', 1, 5, 7, 15, 30, 50};
-%cones = {'dd', 1, 3, 5, 8, 15, 30, 60, 85};
+%cones = {'dd', 1, 5, 7, 15, 30, 50};
+cones = {'dd', 1, 3, 5, 8, 15, 30, 55, 70};
 %cones = {'dd'};
 
 %cones = {'dd', 'sdd', 3, 6, 12, 18, Inf};
@@ -57,10 +55,6 @@ use_mosek = 1;
 
 output = NaN*ones(Ncones, Nthresh);
 
-
-
-
-
 for i = 1:Ncones
     for j = 1:Nthresh
         [CONE{i,j}.Hout, RES{i,j}, CONE{i,j}.time_solve, CONE{i,j}.time_convert]...
@@ -69,7 +63,8 @@ for i = 1:Ncones
         output(i, j) = CONE{i,j}.Hout;
               %output
              %{cones{i}, thresh(j), output(i,j)}
-         fprintf('Cone: %s \t Thresh:  %d \t Hinf: %0.3f \t Time: %0.1f\n', num2str(cones{i}), thresh (j), output(i,j), CONE{i,j}.time_solve)
+         fprintf('Cone: %s \t Thresh:  %d \t Hinf: %0.3f \t \t Time Solve: %0.1f \t Time Convert: %0.1f\n', ...
+             num2str(cones{i}), thresh (j), output(i,j), CONE{i,j}.time_solve, CONE{i,j}.time_convert)
 %         else
 %             CONE{i,j}.Hout = NaN;        
 %         end
