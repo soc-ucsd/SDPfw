@@ -1,4 +1,13 @@
-function rays =  dd_extreme_rays(N)
+function rays =  dd_extreme_rays(N, vectorized)
+
+if nargin < 2
+    vectorized = 0;
+end
+
+%vectorized = 0
+%standard sedumi
+%vectorized = 1
+%svec style indexing
 
 L = N + 2*N*(N-1)/2;
 M = reshape(1:(N^2) , N, N);

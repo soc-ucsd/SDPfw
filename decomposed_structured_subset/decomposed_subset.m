@@ -1,4 +1,4 @@
-function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
+function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
 %DECOMPOSED_SUBSET Reformulate a decomposed SDP into structured subsets
 %   Each K.s clique is replaced by a cones in the list 'cones'
 % Input data
@@ -6,12 +6,18 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
 %       cones is a cell full of cones, one per entry in K.s.
 %           like {'dd', 'dd', 'psd'}. If it is a string instead of a cell,
 %           then all cliques get the same cones.
+%       dual: 0 (subset K) or 1 (subset K*). As an example, DD vs. DD*
 % Output data 
 %       Anew, bnew, cnew, Knew, new SDP data in sedumi form
 %       info.recover    A function that recovers output x into the desired
 %           vector, immersion of structured subset into PSD.
 
+
 %% Input check
+
+    if nargin < 6
+        dual = 0 ;
+    end
     if size(A,1) ~= length(b) 
         A = A';
     end
@@ -83,6 +89,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
         A_curr = A(:, Count + (1:Ksi^2));
         c_curr = c(Count + (1:Ksi^2), :);
         if Ksi == 1
+            %nonnegative entry, self dual
             Anew_lin = [Anew_lin A_curr];
             cnew_lin = [cnew_lin; c_curr];
             info_curr.num_var = 1;
@@ -142,7 +149,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
             info_curr.num_var = length(c_curr);
             is_dd = 0;
         else
-            %PSD
+            %PSD, self dual
             Anew_psd = [Anew_psd A_curr];
             cnew_psd = [cnew_psd; c_curr];
             Knew.s = [Knew.s Ksi];
