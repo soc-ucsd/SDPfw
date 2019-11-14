@@ -8,7 +8,7 @@ rng(62, 'twister')
 
 star_size = 4;
 Flag  = 3;
-VISUALIZE = 0;
+VISUALIZE = 1;
 BIG_REAL = 0;
 
 if star_size == 5
@@ -110,10 +110,10 @@ end
 
 if VISUALIZE
      figure(1)
-    subplot(1,2,1)
+    subplot(1,2,2)
     spy(Gw)
     title('Sea Star Interactions', 'fontsize', 18, 'interpreter', 'latex')
-    subplot(1,2,2)
+    subplot(1,2,1)
      plot(graph(Gw, 'omitselfloops'), 'layout', 'force', ...
          'Iterations', 6000, 'UseGravity', 'on', 'WeightEffect', 'inverse')
      axis square
@@ -220,21 +220,32 @@ if VISUALIZE
     figure(3)
     clf
     hold on
-    plot(sort(LOP.J.s), '.', 'Markersize', 10)
-    plot(xlim, [11,11], 'k--')
-%     plot(xlim, [60,60], 'k-.')
-%     plot(xlim, [100,100], 'k-')
-    %plot(xlim, [40,40], 'k-.')
-    %plot(xlim, [75,75], 'k-')
-    plot(xlim, [41,41], 'k-.')
-    plot(xlim, [63,63], 'k-')
-    
+    %plot(sort(LOP.J.s), '.', 'Markersize', 10)
+%     plot(xlim, [11,11], 'k--')
+% %     plot(xlim, [60,60], 'k-.')
+% %     plot(xlim, [100,100], 'k-')
+%     %plot(xlim, [40,40], 'k-.')
+%     %plot(xlim, [75,75], 'k-')
+%     plot(xlim, [41,41], 'k-.')
+%     plot(xlim, [63,63], 'k-')
+    [N_h,edges] = histcounts(LOP.J.s, 'BinMethod','integers');
+     yl = [0, max(N_h)];
+     plot([11,11], yl,'k--')
+     plot([60,60],  yl, 'k-.')
+     plot([100,100], yl, 'k-')
+
+    stem(edges([N_h 0] ~= 0), N_h(N_h ~= 0), '.', 'MarkerSize', 30)
     title('Sea Star Clique Sizes', 'fontsize', 18, 'Interpreter', 'latex')
-    legend({'Cliques', 'Size 11', 'Size 41', 'Size 63'},...
-        'location', 'northwest', 'fontsize', 12)
+
+
+     legend({'Size 11', 'Size 60', 'Size 100','Cliques'},...
+        'location', 'northeast', 'fontsize', 12)
+    %legend({'Cliques'}, 'location', 'northeast', 'fontsize', 12)
     %hold off
-    xlabel('Clique  #', 'fontsize', 12)
-    ylabel('Size of Clique', 'fontsize', 12) 
+    xlabel('Size of Clique')
+    ylabel('Number of Cliques')
+    %xlabel('Clique  #', 'fontsize', 12)
+    %ylabel('Size of Clique', 'fontsize', 12) 
 end
 
 fname = strcat('sea_star_',flag_str,'_',size_str,'.mat');

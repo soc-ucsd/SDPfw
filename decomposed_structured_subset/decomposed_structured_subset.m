@@ -47,7 +47,8 @@ LOP.At = LOP.A';
 
 
 %cone_list = {'sdd', 5, 10, 'psd'};
-cone_list = {'dd', 'sdd', 2, 5, 10, 'psd'};
+%cone_list = {'dd', 'sdd', 2, 5, 10, 'psd'};
+cone_list = {'psd'};
 model_list = {model, LOP, model_split};
 model_name = {'K', 'K(E_colo, ?)', 'K(E_sparse, ?)'};
 Cost_Matrix = zeros(length(cone_list), length(model_list));
@@ -64,7 +65,7 @@ for i = 1:length(cone_list)
     end 
 end
 
-save('block_arrow.mat', 'model_list', 'cone_list', 'cliqueDomain', 'Cost_Matrix', 'Info_Matrix')
+%save('block_arrow.mat', 'model_list', 'cone_list', 'cliqueDomain', 'Cost_Matrix', 'Info_Matrix')
 
 function  [cost, info, time] = run_model(model, cone)
     tic
