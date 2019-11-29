@@ -168,7 +168,7 @@ C = linspecer(6);
     xlabel('$a$', 'interpreter', 'latex', 'Fontsize', 16)
     ylabel('$b$', 'interpreter', 'latex', 'Fontsize', 16)
     axis square
-    title('$\mathcal{D}\mathcal{D}^4 \subset \mathcal{D}\mathcal{D}^4(E, ?) \subset S_+^4$', 'interpreter', 'latex', 'Fontsize', 18)
+    title('$\mathcal{D}\mathcal{D}^4 \subset \mathcal{D}\mathcal{D}^4(\mathcal{E}, ?) \subset S_+^4$', 'interpreter', 'latex', 'Fontsize', 18)
     l1 = {'$S_+^4$', ...
         '$\mathcal{D}\mathcal{D}^4(E, 0)$', ...
         '$\mathcal{D}\mathcal{D}^4$'  };    
@@ -186,7 +186,7 @@ C = linspecer(6);
     xlabel('$a$', 'interpreter', 'latex', 'Fontsize', 16)
     ylabel('$b$', 'interpreter', 'latex', 'Fontsize', 16)
     axis square
-    title('$\mathcal{D}\mathcal{D}^4(E, 0) \subset \mathcal{S}\mathcal{D}\mathcal{D}^4(E, ?) \subset S_+^4$', 'interpreter', 'latex', 'Fontsize', 18)
+    title('$\mathcal{D}\mathcal{D}^4(E, 0) \subset \mathcal{S}\mathcal{D}\mathcal{D}^4(\mathcal{E}, ?) \subset S_+^4$', 'interpreter', 'latex', 'Fontsize', 18)
 
     l1 = {'$S_+^4$', ...
         '$\mathcal{S}\mathcal{D}\mathcal{D}^4(E, 0)$', ...
@@ -227,10 +227,10 @@ C = linspecer(6);
     xlabel('$a$', 'interpreter', 'latex', 'Fontsize', 16)
     ylabel('$b$', 'interpreter', 'latex', 'Fontsize', 16)
     axis square
-    title('$\mathcal{S}\mathcal{D}\mathcal{D}^4 \subset \mathcal{S}\mathcal{D}\mathcal{D}^4(E, ?) \subset S_+^4$', 'interpreter', 'latex', 'Fontsize', 18)
+    title('$\mathcal{S}\mathcal{D}\mathcal{D}^4 \subset \mathcal{S}\mathcal{D}\mathcal{D}^4(\mathcal{E}, ?) \subset S_+^4$', 'interpreter', 'latex', 'Fontsize', 18)
     l1 = {'$S_+^4$', ...
          '$\mathcal{S}\mathcal{D}\mathcal{D}^4$', ...
-         '$\mathcal{S}\mathcal{D}\mathcal{D}^4(E, ?)$'};
+         '$\mathcal{S}\mathcal{D}\mathcal{D}^4(\mathcal{E}, ?)$'};
     legend(l1, 'interpreter', 'latex', 'location', 'SouthWest', 'fontsize', 12);
 
 %mixed cones
