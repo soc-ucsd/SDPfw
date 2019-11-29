@@ -8,6 +8,7 @@ rng(62, 'twister')
 
 star_size = 4;
 Flag  = 3;
+
 VISUALIZE = 1;
 BIG_REAL = 0;
 
@@ -55,9 +56,8 @@ elseif star_size == 1
     t_k = 2;        %#links between subsequent knuckles
     N = 3;          %#arms
     k = 2;          %#knuckles per arm
-    size_str = 'small';
-    
-else
+    size_str = 'small';    
+elseif star_size == 0
     %Tiny
     head = 4;      %size of central 'head'
     knuckle = 3;    %size of each knuckle
@@ -66,6 +66,15 @@ else
     N = 2;          %#arms
     k = 1;          %#knuckles per arm
     size_str = 'tiny';
+else
+    %Micro
+    head = 3;      %size of central 'head'
+    knuckle = 1;    %size of each knuckle
+    t = 1;          %#links between head and first knuckle
+    t_k = 1;        %#links between subsequent knuckles
+    N = 2;          %#arms
+    k = 1;          %#knuckles per arm
+    size_str = 'micro';
 end
 
 

@@ -73,19 +73,19 @@ function [Anew, bnew, cnew, Knew, info] = dd_star_convert(A,b,c,K)
                                          
         rays = dd_extreme_rays(Ksi);
         
-        [At_psd_dd, c_dd_free_new] = svecData(Apsd', cpsd, Ksi);
-        [rays_svec, ~] = svecData(rays', cpsd, Ksi);
+        [At_psd_dd, c_dd_free_new] = svecData_mod(Apsd', cpsd, Ksi);
+        [rays_svec, ~] = svecData_mod(rays', cpsd, Ksi);
         
         
         num_svec = length(c_dd_free);
         
         %cost, and standard affine constraints <Ai, X> = bi
-        A_dd_free = [A_dd_free; At_psd_dd'];
+        A_dd_free = [A_dd_free At_psd_dd'];
         c_dd_free = [c_dd_free; c_dd_free_new];
         
         %A_dd_lin  = [A_dd_lin; rays_svec'];
         c_dd_lin  = [c_dd_lin; sparse(num_dd, 1)];                                
-        A_dd_lin  = [A_dd_lin; sparse(length(b), num_dd)];
+        A_dd_lin  = [A_dd_lin sparse(length(b), num_dd)];
         %now relate the new variables together, rays*free = lin
         
         A_rel_free{PSDind} = rays_svec';

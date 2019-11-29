@@ -17,11 +17,13 @@ m_count = 0;
 n_count = 0;
 for B = 1:length(A)
     
-    row_ind = (1:m(B))'*ones(1, n(B)) + m_count;
-    col_ind = ones(m(B),1)*(1:n(B))   + n_count;
-    i = [i; row_ind(:)];
-    j = [j; col_ind(:)];
-    v = [v; A{B}(:)];
+    %row_ind = (1:m(B))'*ones(1, n(B)) + m_count;
+    %col_ind = ones(m(B),1)*(1:n(B))   + n_count;
+    
+    [ii, jj, vv] = find(A{B});
+    i = [i; ii + m_count];
+    j = [j; jj + n_count];
+    v = [v; vv];
     
     m_count = m_count + m(B);
     n_count = n_count + n(B);
