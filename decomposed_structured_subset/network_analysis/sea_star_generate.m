@@ -22,7 +22,7 @@ if star_size == 5
     k = 6;          %#knuckles per arm
     size_str = 'huge';
 elseif star_size == 4
-    %Huge
+    %Very Large
     head = 40;      %size of central 'head'
     knuckle = 10;    %size of each knuckle
     t = 2;          %#links between head and first knuckle
@@ -31,7 +31,7 @@ elseif star_size == 4
     k = 5;          %#knuckles per arm
     size_str = 'verylarge';
 elseif star_size == 3
-    %Huge
+    %Large
     head = 30;      %size of central 'head'
     knuckle = 8;    %size of each knuckle
     t = 2;          %#links between head and first knuckle
