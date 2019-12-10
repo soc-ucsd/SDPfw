@@ -93,8 +93,10 @@ model.At_sym = [];
 for k=1:m
     model_sym.At(:, k) =  A_sym{k}(ind_block).*w_block;
 end
+S_sym_block = S_sym(ind_block).*w_block;
 model_sym.b = model.b;
-model_sym.c = model.c(ind_block).*w_block;
+
+model_sym.c = model_sym.At*y + S_sym_block;
 
 model_sym.K =  model.K;
 model_sym.K.s =  [BlkSize*ones(1,nnz(orbit_weight>0)), N - head_start + 1];

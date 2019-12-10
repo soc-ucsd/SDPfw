@@ -137,6 +137,7 @@ cliques = {{2,3,4}, {1,2}};
 % da = a0 - as;
 % db = b0 - bs;
 
+out_dd_star = draw_feasibility(model, 'dd', th, 1);
 
 
 out    = draw_feasibility(model, 'psd', th);
@@ -277,7 +278,10 @@ l1 = {'$(\mathcal{S}\mathcal{D}\mathcal{D}^3, \mathcal{S}\mathcal{D}\mathcal{D}^
     '$(\mathcal{D}\mathcal{D}^3, \mathcal{S}\mathcal{D}\mathcal{D}^2)$', ...
     '$(\mathcal{D}\mathcal{D}^3, \mathcal{D}\mathcal{D}^2)$'};
 legend(l1, 'interpreter', 'latex', 'location', 'SouthWest', 'fontsize', 14);
-function out = draw_feasibility(model, cone, th)
+function out = draw_feasibility(model, cone, th, dual)
+    if  nargin < 4
+        dual = 0;
+    end
     N = length(th);
     out.a  = zeros(N, 1);
     out.b  = zeros(N, 1);
@@ -287,10 +291,18 @@ function out = draw_feasibility(model, cone, th)
     %c1 = c(1);
     %c2 = c(2);
     
-    [model_new.A,model_new.b,model_new.C,model_new.K, model_new.info] = ...
-        decomposed_subset(model.A, model.b, model.C, model.K, cone);
-    model_new.pars = model.pars;
     
+    if dual
+        %testing of DD*
+        [model_new.A,model_new.b,model_new.C,model_new.K, model_new.info] = ...
+            dd_star_convert(model.A, model.b, model.C, model.K);
+        model_new.pars = model.pars;
+    
+    else
+        [model_new.A,model_new.b,model_new.C,model_new.K, model_new.info] = ...
+            decomposed_subset(model.A, model.b, model.C, model.K, cone, dual);
+        model_new.pars = model.pars;
+    end
     
     %yalmip poses this as a dual optimization problem for some reason
     
@@ -308,7 +320,7 @@ function out = draw_feasibility(model, cone, th)
         %equality constraints. How to add these in?
         [x,y,info] = sedumi(model_new.A, model_new.b, C, model_new.K, model_new.pars);
         %K = model.K;
-        x = decomposed_recover(x, model_new.info);  
+        %x = decomposed_recover(x, model_new.info);  
         out.a(i) = x(1);
         out.b(i) = x(2);
         
