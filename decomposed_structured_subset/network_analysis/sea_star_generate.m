@@ -6,7 +6,7 @@
 %% Stability Test: Generating data
 rng(62, 'twister')
 
-star_size = 4;
+star_size = 0;
 Flag  = 3;
 
 VISUALIZE = 1;

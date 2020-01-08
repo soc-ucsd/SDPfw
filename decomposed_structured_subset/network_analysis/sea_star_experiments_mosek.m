@@ -1,4 +1,5 @@
 %load('sea_star_H2_small.mat')
+%load('sea_star_Hinf0_tiny.mat')
 %load('sea_star_Hinf0_small.mat')
 %load('sea_star_Hinf0_medium.mat')
 
@@ -7,7 +8,8 @@
 %fname = 'sea_star_H2_small.mat';
 %fname = 'sea_star_Hinf0_medium.mat';
 %fname = 'sea_star_Hinf0_large.mat';
-fname = 'sea_star_Hinf0_verylarge.mat';
+%fname = 'sea_star_Hinf0_verylarge.mat';
+fname = 'sea_star_Hinf0_tiny.mat';
 [filepath,name,ext] = fileparts(fname);
 outname = strcat(filepath,'output_',name,ext);
 
@@ -20,11 +22,12 @@ Js = LOP.J.s';
 % cones = {'dd', 1, 3, 5, 9, 18, 36};
 
 %large
-thresh = [0, 11, 60, 100];
+%thresh = [0, 11, 60, 100];
+thresh = 0;
 %thresh = [0, 11, 41, 63];
-
+cones = {'dd', Inf};
 %cones = {'dd', 1, 5, 7, 15, 30, 50};
-cones = {'dd', 1, 3, 5, 8, 15, 30, 55, 70};
+%cones = {'dd', 1, 3, 5, 8, 15, 30, 55, 70};
 %cones = {'dd'};
 
 %cones = {'dd', 'sdd', 3, 6, 12, 18, Inf};
