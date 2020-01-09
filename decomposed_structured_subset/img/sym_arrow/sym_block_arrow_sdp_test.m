@@ -7,12 +7,15 @@ BlkSize = 10;
 
 % nBlk = 6;
 % orbits = {[1,2,3,4],5, 6};
-% 
+% splits = [1 1 0];
 % visualize = 1;
-% 
+
 
 nBlk = 8;
 orbits = {[1,2,3,4], 5, 6, [7,8]};
+splits = [1, 0, 1, 0 ];
+
+
 %nBlk = 4;
 %orbits =  {1,2,3,4};
 %orbits =  {[1,2],3,4};
@@ -26,7 +29,7 @@ N = nBlk*BlkSize + ArrowHead;
 % orbits = {[1,2,3], 4, [5, 6], [7,  8,9, 10]};
 %orbits = {[1,3,4,9], [2,10], [5,8],  6, 7};
 %orbits = {1:10};
-[model, model_sym] = sym_block_arrow_sdp(m, nBlk, BlkSize, ArrowHead, orbits);
+[model, model_sym] = sym_block_arrow_sdp(m, nBlk, BlkSize, ArrowHead, orbits, splits);
 
 cone = 1;
 
@@ -68,6 +71,8 @@ cone = 1;
 [costK_sp,  infoK_sp , timeK_sp]     = run_model(model_sp, cone);
 [costK_sym_sp, infoK_sym_sp, timeK_sym_sp] = run_model(model_sym_sp, cone);
 
+
+%cost0_mat = [cost cost_sym; cost_sp costt_sym_sp]; 
 cost_mat = [costK costK_sym; costK_sp costK_sym_sp]; 
 time_mat = {timeK timeK_sym; timeK_sp timeK_sym_sp};
 time_pose_mat = cellfun(@(x) x(1) , time_mat);

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6745 64-bit) (preloaded format=pdflatex 2018.7.22)  6 DEC 2019 12:55
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6745 64-bit) (preloaded format=pdflatex 2018.7.22)  17 DEC 2019 12:55
 entering extended mode
 **./notes_copositive.tex
 (notes_copositive.tex
@@ -195,8 +195,7 @@ LaTeX Info: Thecontrolsequence`\]'isalreadyrobust on input line 129.
 \c@theorem=\count107
 \c@remark=\count108
 \c@proposition=\count109
-
-No file notes_copositive.aux.
+ (notes_copositive.aux)
 \openout1 = `notes_copositive.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 58.
@@ -211,6 +210,7 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 58.
 LaTeX Font Info:    ... okay on input line 58.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 58.
 LaTeX Font Info:    ... okay on input line 58.
+
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
 *geometry* verbose mode - [ preamble ] result:
@@ -376,47 +376,49 @@ LaTeX Warning: Citation `de2002approximation' on page 1 undefined on input line
 LaTeX Warning: Citation `pena2007computing' on page 1 undefined on input line 9
 6.
 
-
-LaTeX Warning: Citation `burer2009difference' on page 1 undefined on input line
- 100.
-
-
-LaTeX Warning: Citation `gouveia2018inner' on page 1 undefined on input line 10
-0.
-
-
-LaTeX Warning: Citation `ding2018higherorder' on page 1 undefined on input line
- 100.
-
-
-LaTeX Warning: Citation `zheng2019block' on page 1 undefined on input line 100.
-
-
 [1
 
 {C:/Users/jared/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}]
 
-LaTeX Warning: Citation `grone1984positive' on page 2 undefined on input line 1
-12.
+LaTeX Warning: Citation `burer2009difference' on page 2 undefined on input line
+ 102.
 
 
-LaTeX Warning: Citation `hogben2005copositive' on page 2 undefined on input lin
-e 112.
+LaTeX Warning: Citation `gouveia2018inner' on page 2 undefined on input line 10
+2.
 
 
-LaTeX Warning: Citation `berman2003completely' on page 2 undefined on input lin
-e 112.
+LaTeX Warning: Citation `ding2018higherorder' on page 2 undefined on input line
+ 102.
 
 
 LaTeX Warning: Citation `dobre2015exploiting' on page 2 undefined on input line
- 118.
+ 130.
 
 
 LaTeX Warning: Citation `grone1984positive' on page 2 undefined on input line 1
-24.
+34.
+
+
+LaTeX Warning: Citation `agler' on page 2 undefined on input line 140.
+
+
+Overfull \hbox (9.05034pt too wide) in paragraph at lines 141--142
+\OT1/cmr/bx/n/10 Theorem 2 \OT1/cmr/m/n/10 (Agler's The-o-rem [[]])\OT1/cmr/bx/
+n/10 . \OT1/cmr/m/it/10 Let $\OMS/cmsy/m/n/10 G\OT1/cmr/m/n/10 (\OMS/cmsy/m/n/1
+0 V\OML/cmm/m/it/10 ; \OMS/cmsy/m/n/10 E\OT1/cmr/m/n/10 )$ \OT1/cmr/m/it/10 be 
+a chordal graph with a set of max-i-mal cliques $\OMS/cmsy/m/n/10 fC[]\OML/cmm/
+m/it/10 ; \OMS/cmsy/m/n/10 C[]\OML/cmm/m/it/10 ; [] ; \OMS/cmsy/m/n/10 C[]g$\OT
+1/cmr/m/it/10 .
+ []
+
+[2]
+
+LaTeX Warning: Citation `berman2003completely' on page 3 undefined on input lin
+e 170.
 
 No file notes_copositive.bbl.
-[2] (notes_copositive.aux)
+[3] [4] (notes_copositive.aux)
 
 LaTeX Warning: There were undefined references.
 
@@ -425,13 +427,13 @@ LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
  ) 
 Here is how much of TeX's memory you used:
- 3657 strings out of 492973
- 53336 string characters out of 3126692
- 131247 words of memory out of 3000000
- 7453 multiletter control sequences out of 15000+200000
+ 3662 strings out of 492973
+ 53534 string characters out of 3126692
+ 133247 words of memory out of 3000000
+ 7456 multiletter control sequences out of 15000+200000
  17665 words of font info for 65 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,11n,32p,902b,197s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 55i,11n,32p,816b,197s stack positions out of 5000i,500n,10000p,200000b,50000s
 <C:/Users/jared/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts
 /cm/cmbx10.pfb><C:/Users/jared/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/pu
 blic/amsfonts/cm/cmbx12.pfb><C:/Users/jared/AppData/Local/Programs/MiKTeX 2.9/f
@@ -451,9 +453,9 @@ fb><C:/Users/jared/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfont
 s/cm/cmsy7.pfb><C:/Users/jared/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/pu
 blic/amsfonts/cm/cmti10.pfb><C:/Users/jared/AppData/Local/Programs/MiKTeX 2.9/f
 onts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on notes_copositive.pdf (2 pages, 178076 bytes).
+Output written on notes_copositive.pdf (4 pages, 190636 bytes).
 PDF statistics:
- 73 PDF objects out of 1000 (max. 8388607)
+ 79 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

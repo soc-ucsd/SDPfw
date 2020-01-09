@@ -1,8 +1,18 @@
-function [MG, MG_diag, U, block_perm] = sym_block_arrow(m, nBlk, BlkSize, ArrowHead, orbits)
-
+function [MG, MG_diag, U, block_perm] = sym_block_arrow(m, nBlk, BlkSize, ArrowHead, orbits, splits)
+%forms a set of matrices that are symmetrized block-arrow
+% Inputs:
+%   m:                          Number of matrices
+%   nBlk, BlkSize, ArrowHead:   Block Arrow parameters
+%   orbits:                     Orbits of the blocks (symmetry structure)
+%   splits:                     Which blocks should have additional
+%                               symmetry (Z2)
 
 %total size
 N = nBlk*BlkSize + ArrowHead;
+
+if nargin < 5
+    splits = zeros(size(orbits));
+end
 
 visualize = 1;
 
@@ -53,6 +63,7 @@ for k = 1:m
     MG{k} = M{k};
     for i = 1:length(orbit_ind)
         curr_orbit = orbit_ind{i};
+        curr_split = splits(i);
         num_orbits = size(curr_orbit, 2);
 
         Diag_block = zeros(BlkSize);
@@ -64,8 +75,17 @@ for k = 1:m
         w = sqrt(num_orbits);
         for j = 1:num_orbits
             curr_ind = curr_orbit(:, j);
-            Diag_block = Diag_block + M{k}(curr_ind, curr_ind)/w;
-            Arrow_block = Arrow_block + M{k}(curr_ind, arrow_ind)/w;
+            N_ind = length(curr_ind);
+            if curr_split
+                split_switch = [(N_ind/2+1):N_ind, 1:(N_ind/2)];
+                split_ind = curr_ind(split_switch);
+                Diag_block = Diag_block + (M{k}(curr_ind, curr_ind)/w + M{k}(split_ind, split_ind)/w)/2;
+                Arrow_block = Arrow_block + (M{k}(curr_ind, arrow_ind)/w + M{k}(split_ind, arrow_ind)/w)/2; 
+            else
+                Diag_block = Diag_block + M{k}(curr_ind, curr_ind)/w;
+                Arrow_block = Arrow_block + M{k}(curr_ind, arrow_ind)/w;
+            end
+            
         end
 
         %assign back into matrix
@@ -86,19 +106,49 @@ end
 U_dct = sparse(nBlk);
 %block_weight = ones(length(orbits));
 ind_first = [];
-ind_second = [];
+ind_split = [];
 ind_last = [];
 for i = 1:length(orbits)
-    curr_orbit = orbit_ind{i};
+    curr_orbit = orbit_ind{i};    
     num_orbits = size (curr_orbit, 2);
-    ind_first = [ind_first curr_orbit(:, 1)];    
-    if num_orbits > 1
-        ind_second = [ind_second curr_orbit(:, 2)];
-        ind_last  = [ind_last  curr_orbit(:, 2:end )]; 
+    if splits(i)
+        ind_first = [ind_first; curr_orbit(1:BlkSize/2, 1)]; 
+        
+        ind_split = [ind_split; reshape(curr_orbit((BlkSize/2+1):end, :), [], 1)];
+        if num_orbits > 1        
+            ind_last  = [ind_last; reshape(curr_orbit(1:(BlkSize/2), 2:end ), [], 1)]; 
+        end
+    else 
+        ind_first = [ind_first; curr_orbit(:, 1)];          
+
+        if num_orbits > 1        
+            ind_last  = [ind_last; reshape(curr_orbit(:, 2:end ), [], 1)]; 
+        end
+
     end
-    U_dct(orbits{i}, orbits{i}) = dctmtx(num_orbits);    
+
+    
+    
+    
+    
+    U_dct(orbits{i}, orbits{i}) = dctmtx(num_orbits);
 end
-U_dct_kron = kron(U_dct', speye(BlkSize));
+if any(splits) 
+    U_dct_part = full(kron(U_dct', speye(2)));
+    F = dctmtx(2);
+    for i = 1:length(orbits)
+        if splits(i)
+            for j = 1:length(orbits{i})
+                orb_curr = orbits{i}(j);
+                curr_ind = 2*orb_curr +  [-1, 0] ;
+                U_dct_part(curr_ind, :) = F*U_dct_part(curr_ind, :);
+            end
+        end        
+    end
+    U_dct_kron =  kron(U_dct_part, speye(BlkSize/2));
+else
+    U_dct_kron = kron(U_dct', speye(BlkSize));
+end
 U = [U_dct_kron, sparse(nBlk*BlkSize, ArrowHead);
     sparse(ArrowHead, nBlk*BlkSize), speye(ArrowHead)];
 
@@ -106,7 +156,7 @@ U = [U_dct_kron, sparse(nBlk*BlkSize, ArrowHead);
 %MG_blk = cellfun(@(x) U'*x*U, MG);
 
 %now shuffle indices around to form a block diagonal matrix
-block_perm = [ind_last(:); ind_first(:); arrow_ind'];
+block_perm = [ind_last; ind_split; ind_first; arrow_ind'];
 %MG_diag = MG_blk(block_perm, block_perm);
 %MG_diag(abs(MG_diag) < 1e-8) = 0;
 %MG_blk = cellfun(@(x) U'*x*U, MG);

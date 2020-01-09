@@ -1,4 +1,4 @@
-\documentclass{article}
+ \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage[margin=1in]{geometry}
 
@@ -64,11 +64,11 @@
 \maketitle
 
 
-Copositive and Completely Positive Programming are NP-hard convex conic optimization problems. Some standard cones in optimization include:
+Copositive and Completely Positive Programming are NP-hard convex conic optimization problems. Some standard cones in  general optimization include:
 
 \begin{align*}
     \psd^n &= \{M \in \R^{n \times n} \mid M = M^{\tr}\} \\
-    \psd_+^n &= \{M \in \psd^n \mid x^{\tr} M x \geq 0 \ \forall x \in \R\} \\
+    \psd_+^n &= \{M \in \psd^n \mid x^{\tr} M x \geq 0 \ \forall x \in \R^n\} \\
     \N_+^n &= \{M \in \psd^N \mid M_{ij} \geq 0\}
 \end{align*}
 
@@ -79,9 +79,9 @@ These are the set of symmetric matrices, positive semidefinite symmetric matrice
     \cp^n &= \{M \in \psd^n \mid M = U U^{\tr}, U \geq 0 \}
 \end{align*}
 
-Copositive matrices only necessitate nonnegative quadratic forms over the real orthant, and completely positive matrices have nonnegative factorizations (more general than PSD matrices which require  $\exists U \mid M = U U^{\tr}$). By these properties, $\cp^n \subset \psd_+^n \subset \cop^n$ \cite{berman2003completely}. The width of $U$ necessary to form this completely positive decomposition is known as the completely positive rank $\text{cp-rank}(M)$. These two cones are dual to each other: $\cop^n = (\cp^n)^*$.
+Copositive matrices only necessitate nonnegative quadratic forms over the real orthant, and completely positive matrices have nonnegative factorizations (more general than PSD matrices which require  $\exists U \mid M = U U^{\tr}$). By these properties, $\cp^n \subset \psd_+^n \subset \cop^n$ \cite{berman2003completely}. The width of $U$ necessary to form this completely positive decomposition is known as the completely positive rank $\text{cp-rank}(M)$. If such a $U$ exists, then its width is bounded above by $n(n+1)/2$. The cones of copositive and completely positive matrices are dual to each other: $\cop^n = (\cp^n)^*$.
 
-The stability number of a graph is the optimum value of a copositive program. Let $G$ be a graph with adjacency matrix $A_G$, $I$ be the identity matrix and $J = 1 1^{\tr}$ denote the all-ones matrix. The stability number $\alpha(G)$ is:
+Most NP-hard combinatorial problems can be reformulated as copositive or completely positive programs. Polynomial nonnegativity over a (possibly noncompact) region can be certified by the existence of a copositive form (cite Olga's thesis). As an additional example, the stability number of a graph is the optimum value of a copositive program. Let $G$ be a graph with adjacency matrix $A_G$, $I$ be the identity matrix and $J = 1 1^{\tr}$ denote the all-ones matrix. The stability number $\alpha(G)$ is:
 
 \[\alpha_G = \max_\lambda \lambda \mid \lambda(A_G + I) - J \in \cop^n\]
 
@@ -89,43 +89,103 @@ See \cite{de2002approximation} on how to derive this copositive program, and \ci
 
 \section{Inner and Outer Approximations}
 
-Inner and outer approximations of these cones can be developed through semidefinite programming. As a completely positive matrix is both PSD and has nonnegative entries, the Doubly Nonnegative cone $\dnn^n= \N^n \cap \psd_+^n \supset \cp^n$. By duality, $(\dnn^n)^* = \N^n + \psd_+^n \subset \cop^n$. Parrilo defined a hierarchy of LMI-representable cones that successively approximate the copositive cone \cite{parrilo2000structured}. Given a matrix $M$ with quadratic form $q_M(x) = x^T M x$, the $r$-th approximation to the copositive cone is:
+Inner and outer approximations of these cones can be developed through semidefinite programming. As a completely positive matrix is both PSD and has nonnegative entries, the Doubly Nonnegative cone $\dnn^n= \N^n \cap \psd_+^n \supset \cp^n$. By duality, $(\dnn^n)^* = \N^n + \psd_+^n \subset \cop^n$. Parrilo defined a hierarchy of LMI-representable cones that successively approximate the copositive cone \cite{parrilo2000structured},  where  $\dnn$ is the first level of this hierarchy. Given a matrix $M$ with quadratic form $q_M(x) = x^T M x$, the $r$-th approximation to the copositive cone is:
 
 $\mathcal{K}^r = \{M \mid \sum_i^n(x_i^2) q_M(x^{\circ^2}) \in SOS\}$
 
 $x^{\circ^2} = x \circ x$ is the elementwise squaring of the entries of $x$, and $SOS$ is the set of polynomials that can be represented as the sum of squared elements. The dual cones $(\mathcal{K}^r)^*$ will then produce successively smaller outer approximations to the completely positive cone. See \cite{de2002approximation, pena2007computing} for additional copositive hierarchies.
 
+In instances of large scale copositive optimization, the PSD constraints in the copositive hierarchy may lead to intractable semidefinite programs. These PSD matricescan be inner-approximatied through techniques including structured subsets in optimization. Examples of these sets  include (Scaled) Diagonally Dominant matrices, factor width, and block-factor width matrices. See  cite{majumdar17,  zhengblock} for more details on structured subsets.
+
 % de Klerk and Pasechnik use a Polya type result
 
-Inner approximations of the completely positive cone can be found by exploiting properties of the $\dnn$ cone. For $k = 1 \ldots 4$, $\dnn^k = \cp^k$. When $k \geq 5$, $\dnn^k \supset \cp^k$. A study of matrices in $\dnn^5$ that are not in $\cp^5$ is conducted in \cite{burer2009difference}. This inclusion allows for scaled diagonally dominant nonnegative approximations \cite{gouveia2018inner}, as well as extensions to factor width $\fw^n_{k \leq 4}$ \cite{ding2018higherorder}. Block Factor width  2 matrices with $2\times2$ blocks can also be used \cite{zheng2019block} (I have done this successfully, and it has better performance in time and cost as compared to SDD).
+Inner approximations of the completely positive cone can be found by exploiting properties of the $\dnn$ cone. For $k = 1 \ldots 4$, $\dnn^k = \cp^k$. When $k \geq 5$, $\dnn^k \supset \cp^k$. A study of matrices in $\dnn^5$ that are not in $\cp^5$ is conducted in \cite{burer2009difference}. This inclusion allows for scaled diagonally dominant nonnegative approximations \cite{gouveia2018inner}, as well as extensions to factor width $\fw^n_{k \leq 4}$ \cite{ding2018higherorder}. Block Factor width  2 matrices with $2\times2$ blocks can also be used cite{zheng2019block} (I have done this successfully, and it has better performance in time and cost as compared to SDD).
 
 \section{Employing Structure}
 
-Given the following conic program with cone $K$:
+Given the following conic program with variable $X \in \psd^n$ sitting inside cone $K$:
 
 \begin{align}%[t]
     p^* =\min_{X} \quad & \inp{C}{X} \nonumber \\
     & \inp{A_i}{X} = b_i, i = 1, \ldots, m,\label{Eq:SDPprimal}\\
-     & X \in K,   \nonumber \\
+     & X \in K^n,   \nonumber \\
 \end{align}
 
-Let $\es$ be the aggregate sparsity pattern of the matrices $C, A_i$ with maximal cliques $\{\cs_k\}_{k=1}^p$. In our previous paper, we defined the cone $K(\es, ?)$ as the decomposed structured subset where each clique is inside $K$. By Grone's theorem, the set of matrices with positive semidefinite completion is equal to $\psd_+(\es, ?)$ when $\es$ is chordal \cite{grone1984positive}. Partially copositive matrices can be completed to copositive matrices if all diagonal elements are specified, and this will hold during optimization over the graph augmented with self loops $\es^*$ \cite{hogben2005copositive}. Completely positive completions require a stronger block-clique completion \cite{berman2003completely}. A graph is block-clique if all maximal cliques intersect in at most one vertex. Block-clique graphs are a superset of chordal graphs.
+This program will return an optimum value $X^*$ with objective value $p^*$.                                                       In the usual case of strong duality, the dual objective $d^* =  p^*$. This conic program may contain structure (sparse, symmetric, algebraic) that allows for the large cone $K^n$ to be decomposed into a set of smaller cones $K_i^{n_i}$ under possible coupling constraints.
 
-If the copositive program has is sparse, it can be chordal extended and then decomposed through this copositive completion result. Copositive hierarchies such as $\dnn^*$ and $\mathcal{K}^*$ will be more accurate in finding inner approximations after decomposition. Completely positive optimization requires block-clique-extension, and then will produce more accurate inner completely positive approximations. By duality, this method allows for outer approximations over $\cp^n(\es, 0)$ when $\es$ is chordal and inner approximations of $\cop^n(\es, 0)$ when $\es$ is block-clique.
-
-% A proof of Agler's theorem for $\psd_+^n(\es, 0)$ is available in \cite{Kakimura2010}, we adapted this for use in DD and SDD matrices. I believe all steps here can be adapted for use in Copositive matrices (will need to check schur complement), which gives us a method to 
-
-Symmetry reduction allows for another class of possible decompositions. In the case of stability number computations, the symmetry group in question is the automorphism group of the graph. Symmetry reduction is possible in copositive programming \cite{dobre2015exploiting}, I will need to look if this is possible for completely positive programming as well.
+Symmetry and algebraic structure often allow for the block-diagonalization of conic programs. In case the cost and constraint matrices $(C, A_i)$ arise from a common *-algebra, there exists a matrix $P$ that simultaneously block-diagonalizes all $(C, A_i)$. The allowable block structures and sizes under transformation are detailed by Maschke's theorem. Certain blocks may have nontrivial multiplicities (the contents of the block are repeated),  which further reduces the complexity of optimization under algebraic structure. Symmetry is a specific case of algebraic structure, in which $(C, A_i)$ are invariant under group action and the solution $X$ commutes with this action. 
 
 
-\section{Next Steps}
-Find numerical examples to show improvement. Profile different structured subsets. Clean this up and turn it into a paper.
+%A conic program is invariant if $G^T C G = C$ for all matrices G (linear representations of a group action) and:
 
-\begin{theorem} [Grone \cite{grone1984positive}] \label{T:GroneTheorem}
+%\begin{align*}
+%G^T A_i C G = A_i & \qquad \text{matrix symmetry} \\
+%G^T  A_i C G = A_j & \qquad \text{program symmetry} \\
+%\end{align*}
+
+%Symmetry has already been used to reduce copositive programming problems, b
+
+%Symmetry reduction allows for another class of possible decompositions. 
+
+The symmetry group in question is typically related to the underlying geometry of the problem. For structural designs, the symmetry group is determined by the shape of the truss (i.e. dihedral symmetry). In the case of stability number computations, the symmetry group is the automorphism group of the graph. Symmetry reduction is possible in copositive programming \cite{dobre2015exploiting}, but likely cannot generally be applied to completely positive programming (if $X = U U^T \in \cp^n$ and $X$ is $G$ - invariant and can be block diagonalized by a matrix $P$, then $PU$ may not have all nonnegative entries).
+
+Chordal sparsity offers another approach to structure. Let $\es$ be the aggregate sparsity pattern of the matrices $C, A_i$ with maximal cliques $\{\cs_k\}_{k=1}^p$. A chordal graph is a graph $\es$ in which there exists a perfect elimination ordering; equivalently all cylces or length four or more have a 1-edge shortcut. Chordality can be checked in linear time, and edges can be added to a non-chordal graph to f orm a chordal embedding (triangulation/chordal extension). Define the cones $\psd_+(\es, 0)$ as the set of PSD matrices that are zero outside $\es$, and $\psd_+(\es, ?)$ as the set of matrices with entires on $\es$ that have a PSD completion. These two sets of matrices are dual to each other, and have a characterization based on Agler's  theorem and Grone's theorem:
+
+ \begin{theorem} [Grone \cite{grone1984positive}] \label{T:GroneTheorem}
      Let $\mathcal{G}(\mathcal{V},\mathcal{E})$ be a chordal graph with a set of maximal cliques $\{\mathcal{C}_1,\mathcal{C}_2, \ldots, \mathcal{C}_p\}$. Then, $X\in\mathbb{S}^n_+(\mathcal{E},?)$ if and only if
      $$ X_k = E_{\mathcal{C}_k} X E_{\mathcal{C}_k}^\tr \in \mathbb{S}^{\vert \mathcal{C}_k \vert}_+,
     \qquad k=1,\,\ldots,\,p.$$
     \end{theorem}
+
+\begin{theorem} [Agler's Theorem {\cite{agler}}] \label{T:ChordalConstructionTheorem}
+     Let $\mathcal{G}(\mathcal{V},\mathcal{E})$ be a chordal graph with a set of maximal cliques $\{\mathcal{C}_1,\mathcal{C}_2, \ldots, \mathcal{C}_p\}$. Then, $Z\in\mathbb{S}^n_+(\mathcal{E},0)$ if and only if there exist $Z_k \in \psd_+^{\abs{\cs_k}} $ where  
+    \end{theorem}
+$$ Z = \sum_{k=1}^p{E^T_{\mathcal{C}_k} Z_k E_{\mathcal{C}_k} }$$
+
+Grone and Agler's theorem can be used directly in optimization. As an example: 
+
+    \begin{equation} \label{Eq:PrimalSDPdecomposition}
+    \begin{aligned}
+    \min_{X} \quad & \langle C,X \rangle \\
+    \text{subject to} \quad & \langle A_i,X \rangle = b_i, i = 1, \ldots, m,\\
+    & E_{\mathcal{C}_k} X E_{\mathcal{C}_k}^T\in \mathbb{S}^{\vert \mathcal{C}_k \vert}_+, \;\;\, k = 1, \ldots, p, \\
+    & \text{rank}(E_{\mathcal{C}_k} X E_{\mathcal{C}_k}^T) \leq t, \, k = 1, \ldots, p,
+    \end{aligned}
+\end{equation}
+
+will have the same objective value as an SDP in $(C, A_i)$, and  solutions are mutually recoverable.
+
+Similar completion results can be applied to copositive optimization. Sparse matrices can be completed into copositive matrices if the sparsity pattern is chordal and each clique submatrix is copositive (cone $\cop(\es, ?)$):
+
+ \begin{theorem} [Hogben cite{hogben2005copositive}] \label{T:Hog enTheorem}
+     Let $\mathcal{G}(\mathcal{V},\mathcal{E})$ be a chordal graph with a set of maximal cliques $\{\mathcal{C}_1,\mathcal{C}_2, \ldots, \mathcal{C}_p\}$. Then, $X\in\cop^n_+(\mathcal{E},?)$ if and only if
+     $$ X_k = E_{\mathcal{C}_k} X E_{\mathcal{C}_k}^\tr \in \cop^{\vert \mathcal{C}_k \vert},
+    \qquad k=1,\,\ldots,\,p.$$
+    \end{theorem}
+
+Like Grone, this is a completion result that assumes all diagonal elements are specified, but this will always hold as all diagonal entries are optimization variables. 
+
+A subset of chordal graphs are block-clique graphs, where two cliques intersect in at most one vertex. These are useful for completely positive completions $\cp^n(\es,  ?)$:
+
+ \begin{theorem} [Berman \cite{berman2003completely}] \label{T:Hog enTheorem}
+     Let $\mathcal{G}(\mathcal{V},\mathcal{E})$ be a block-clique graph with a set of maximal cliques $\{\mathcal{C}_1,\mathcal{C}_2, \ldots, \mathcal{C}_p\}$. Then, $X\in\cp^n(\mathcal{E},?)$ if and only if
+     $$ X_k = E_{\mathcal{C}_k} X E_{\mathcal{C}_k}^\tr \in \cp^{\vert \mathcal{C}_k \vert},
+    \qquad k=1,\,\ldots,\,p.$$
+    \end{theorem}
+    
+ By convex duality, the set $\cop(\es, ?)^* = \cp(\es, 0)$ when $\es$ is chordal and $\cp(\es, ?)^* = \cop(\es, 0)$ when $\es$ is block-clique. In this manner, sparsity can be applied to copositive and completely positive optimization. In some cases, conic programs contain symmetry and sparsity, and this will allow for efficient and (relatively more) tractable copositive and completely positive optimization.
+
+
+\section{Copositive Decomposed Strurctured Subsets}
+In (our IFAC work) we introduced Decomposed Structured Subsets $\ks(\es, ?)$, in which $\ks = {K_k}_{k=1}^p$ are a set of clique cones. Each clique $E _{\cs_k}^\tr X E _{\cs_k} \in K_k$. In the motivating example, a single large clique can be approximated to be Diagonally Dominant while all small cliques remain PSD. This mixing of cones increases the effectiveness of approximations. The same concept can be extended to algebraic structure,  forming the cone $\ks^G$ where $\ks$ are the cones on each symmetric block.
+
+In the copositive case, this can be performed by allowing each clique or symmetric block to lie on different steps of the copositive hierarchy (Parrilo/Resnick/otherwise). As the size of the copositive blocks increase (and the size of the PSD matrices in the hierarchy grow likewise), some of those PSD matrices may be approximated by structured subsets. This process can be accomplished for inner and outer copositive approximations: outer approximations (inner completely positive approximations) will require adding optimization variables to form a block-clique sparsity pattern.
+
+
+\section{Next Steps}
+Find numerical examples to show improvement. Profile different structured subsets. Clean this up and turn it into a paper. Find an application of copositive programming that has sparse structure
+
+
 
 \medskip
 \bibliographystyle{IEEEtran}

@@ -1,12 +1,16 @@
-function [model, model_sym] = sym_block_arrow_sdp(m, nBlk, BlkSize, ArrowHead, orbits)
+function [model, model_sym] = sym_block_arrow_sdp(m, nBlk, BlkSize, ArrowHead, orbits, splits)
 %number of matrices
+
+ if nargin < 6
+     splits = zeros(size(orbits));
+ end
 
 N = nBlk*BlkSize + ArrowHead;
 
 orbit_ind = cellfun(@(x) (x-1)*BlkSize +  (1:BlkSize)', orbits , 'UniformOutput', false);
 arrow_ind = nBlk*BlkSize + (1:ArrowHead);
 
-[A, A_sym, U, block_perm] = sym_block_arrow(m+1, nBlk, BlkSize, ArrowHead, orbits);
+[A, A_sym, U, block_perm] = sym_block_arrow(m+1, nBlk, BlkSize, ArrowHead, orbits, splits);
 
 
 
@@ -51,6 +55,9 @@ model.c = S(:) + model.At*y;
 %% Symmetric Program
 model_sym = struct;
 orbit_weight = cellfun(@(x) length(x)-1, orbits);
+orbit_split = orbits(logical(splits));
+orbit_split_weight = cellfun(@(x) length(x), orbit_split);
+
 % %size remaining in the arrowhead block
 %orbit_rem = nBlk - sum(orbit_weight);
 %sym_blocks = nnz(orbit_weight)
@@ -69,17 +76,37 @@ orbit_weight = cellfun(@(x) length(x)-1, orbits);
 
 sub_block =  [];
 w_block = [];
-for i = 1:sum(orbit_weight)
+count = 0;
+K = [];
+Kw = [];
+for i = 1:length(orbit_weight)
     if orbit_weight(i) >  0
-        curr_ind = BlkSize*(i-1) + (1:BlkSize);
+        curr_size = BlkSize/(1+splits(i));         
+        curr_ind = count + (1:curr_size);
         [meshx, meshy] = meshgrid(curr_ind);
         sub_block = [sub_block; meshx(:) meshy(:)];
         w_block = [w_block; ones(length(meshx)^2, 1)*orbit_weight(i)];
+        count = count + orbit_weight(i)*curr_size;
+        K = [K curr_size];
+        Kw = [Kw curr_size*orbit_weight(i)];
     end
+end
+
+for i = 1:length(orbit_split_weight)
+    %if orbit_split_weight(i) >  0
+        curr_size = BlkSize/2;         
+        curr_ind = count + (1:curr_size);
+        [meshx, meshy] = meshgrid(curr_ind);
+        sub_block = [sub_block; meshx(:) meshy(:)];
+        w_block = [w_block; ones(length(meshx)^2, 1)*orbit_split_weight(i)];
+        count = count + curr_size*orbit_split_weight(i);
+        K = [K curr_size];
+        Kw = [Kw curr_size*orbit_split_weight(i)];
+    %end
 end
     
 %now the arrowhead
-head_start = (BlkSize)*(sum(orbit_weight))+1;
+head_start = sum(Kw)+1;
 head_ind = head_start:N;
 [meshx, meshy] = meshgrid(head_ind);
 sub_block = [sub_block; meshx(:) meshy(:)];
@@ -99,7 +126,7 @@ model_sym.b = model.b;
 model_sym.c = model_sym.At*y + S_sym_block;
 
 model_sym.K =  model.K;
-model_sym.K.s =  [BlkSize*ones(1,nnz(orbit_weight>0)), N - head_start + 1];
+model_sym.K.s =  [K, N - head_start + 1];
 
 %model_sym.At(:, i) = A_sym{i}(:);
 
