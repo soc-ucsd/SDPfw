@@ -41,7 +41,7 @@ for k = 1:m
     f2 = figure(2);
     set(gcf, 'units','normalized','outerposition',[0 0 1 1]);
     clf
-    subplot(1, 3, 1)
+    subplot(2, 2, 1)
     hold on
     Colors = linspecer(length(orbits) + nnz(splits));
     color_count = 1;
@@ -76,7 +76,7 @@ for k = 1:m
     
     rectangle('Position', [nBlk*BlkSize, nBlk*BlkSize, ArrowHead, ArrowHead], 'FaceColor', 'k')
     set(gca, 'YDir','reverse')
-    title('Permutation Orbits', 'FontSize', 22)
+    title('Permutation Orbits', 'FontSize', 22, 'interpreter', 'latex')
 %    plot elements of *-algebra
     %figure(1)    
     
@@ -88,20 +88,28 @@ for k = 1:m
 %         imagesc(M_display)
 %         axis square
 %         title('Sparse Random')
-        subplot(1,3,2)
+        subplot(2,2,2)
         %imagesc(MG)
         M_display = MG{k};
         M_display(M_display == 0) = NaN;
         imagesc(M_display)
         axis square
-        title('Group-Invariant Matrix', 'FontSize', 22)
-        subplot(1,3,3)
+        title('Group-Invariant Matrix $X$', 'FontSize', 22, 'interpreter', 'latex')
+        
+        subplot(2,2,3)
+        U_display = U;
+        imagesc(U_display)
+        axis square
+        title('Block-Diagonalizer $P$', 'FontSize', 22, 'interpreter', 'latex')
+        
+        
+        subplot(2,2,4)
         
         M_display = MG_diag{k};
         M_display(M_display == 0) = NaN;
         imagesc(M_display)
         axis square
-        title('Block Diagonalization', 'FontSize', 22)
+        title('Block Diagonalization $X_k$', 'FontSize', 22,'interpreter', 'latex')
         pause(0.5);
         fname = strcat('sym_block_arrow-', num2str(k));
         %export_fig(fname, '-png', '-m', '4');
