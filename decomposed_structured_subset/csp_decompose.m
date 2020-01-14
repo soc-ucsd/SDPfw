@@ -34,7 +34,7 @@ f = f_R + f_Q;
  
 
 if CONSTRAINED  
-    d_cons = 6;
+    d_cons = 2;
     F_psatz = f - lower;
     %g = [1 + x; 1 - x];
     %g = [1 - sum(x(1:3).^2), 1 - sum(x(4:6).^2)];
@@ -75,4 +75,25 @@ sol = optimize(F_m, obj_m, opts2);
 
 Ks = model_csp.K.s';
 mKs = max(model_csp.K.s);
+
+figure(1)
+clf
+hold on
+[N_h,edges] = histcounts(Ks, 'BinMethod','integers');
+yl = [0, max(N_h)];
+plot([30,30], yl,'k--')
+plot([100,100],  yl, 'k-.')
+stem(edges([N_h 0] ~= 0), N_h(N_h ~= 0), '.', 'MarkerSize', 30)
+hold off
+
+title('LR Constrained Clique Sizes', 'fontsize', 18, 'Interpreter', 'latex')
+
+
+legend({'Size 20', 'Size 70', 'Cliques'},...
+'location', 'northeast', 'fontsize', 12)
+%legend({'Cliques'}, 'location', 'northeast', 'fontsize', 12)
+%hold off
+xlabel('Size of Clique')
+ylabel('Number of Cliques')
+
 %save('polynomial_big_clique.mat', 'N', 'b', 'model_csp')
