@@ -23,8 +23,8 @@ ylabel('Number of Cliques')
  
  subplot(2,1,2)   
 hold on
- [N_h,edges] = histcounts(model.K.s, 'BinMethod','integers');
- stem([1, edges([N_h 0] ~= 0)+0.5], [model.K.l, N_h(N_h ~= 0)], '.', 'MarkerSize', 40)
+ [N_h,edges] = histcounts(model_c.K.s, 'BinMethod','integers');
+ stem([1, edges([N_h 0] ~= 0)+0.5], [model_c.K.l, N_h(N_h ~= 0)], '.', 'MarkerSize', 40)
  yl = [0, max(N_h)];
  plot([11,11], yl,'k--')
  plot([45,45],  yl, 'k-.')
