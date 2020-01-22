@@ -1,6 +1,8 @@
 %testing to make sure that the decomposed structured subset scheme works
 rng(500, 'twister')
 
+
+%Block arrow
 m = 80;
 nBlk = 15;
 BlkSize = 10;
@@ -12,7 +14,9 @@ ArrowHead = 10;
 
 SP = spones(spones(model.c) + sparse(sum(spones(model.At),2)));  % vector of 1s and 0s
 mask = reshape(SP, model.K.s, model.K.s);
-%spy(mask)
+spy(mask)
+
+
 
 
 %% SDP optimization
