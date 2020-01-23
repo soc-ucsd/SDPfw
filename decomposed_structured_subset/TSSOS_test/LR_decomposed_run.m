@@ -4,17 +4,19 @@ load('LR_120.mat')
 
 
 %cones = {20};
-cones = {'dd'};
-%cones = {'dd', 'sdd', 2, 3, 5, 6, 11, 20, 30, 40, 'psd'};
+ones = {'dd'};
+cones = {'dd', 'sdd', 2, 3, 5, 6, 11, 20, 30, 40, 'psd'};
 
-%thresh = [0, 11, 45, 100];
-thresh = 100;
+thresh = [0, 11, 45, 100];
+%thresh = 100;
 
-outname_c = 'LR120_output_cons.mat';
-support_LR(model_c, outname_c, cones, thresh);
 
 outname_unc = 'LR120_output_uncons.mat';
 support_LR(model_unc, outname_unc, cones, thresh);
+
+
+outname_c = 'LR120_output_cons.mat';
+support_LR(model_c, outname_c, cones, thresh);
 
 function support_LR(model, outname, cones, thresh)
     Ncones = length(cones);
@@ -44,12 +46,12 @@ function support_LR(model, outname, cones, thresh)
             cost(i, j) = CONE{i,j}.cost;
                   %output
                  %{cones{i}, thresh(j), output(i,j)}
-             fprintf('Cone: %s \t Thresh:  %d \t Hinf: %0.3f \t \t Time Solve: %0.1f \t Time Convert: %0.1f\n', ...
+             fprintf('Cone: %s \t Thresh:  %d \t Cost: %0.3f \t \t Time Solve: %0.1f \t Time Convert: %0.1f\n', ...
                  num2str(cones{i}), thresh (j), cost(i,j), CONE{i,j}.time_solve, CONE{i,j}.time_convert)
     %         else
     %             CONE{i,j}.Hout = NaN;        
     %         end
-    %save(outname, 'CONE', 'CONE0', 'cones', 'thresh')
+    save(outname, 'CONE', 'cones', 'thresh')
         end
     end
 end
