@@ -1,5 +1,5 @@
 %LR test 
-sos= 1;
+sos= 0;
 if sos
     load('LR_120_sos.mat')
     outname = 'LR120_output_uncons_sos.mat';
@@ -15,11 +15,12 @@ else
     cones = {'dd', 'sdd', 2, 3, 5, 6, 11, 20, 30, 40, 'psd'};
 
     thresh = [0, 11, 45, 100];
-    outname_unc = 'LR120_output_uncons.mat';
-    support_LR(model_unc, outname_unc, cones, thresh);
+    
+%     outname_unc = 'LR120_output_uncons.mat';
+%     support_LR(model_unc, outname_unc, cones, thresh);
 
 
-    outname_c = 'LR120_output_cons.mat';
+    outname_c = 'LR120_output_cons_rsl.mat';
     support_LR(model_c, outname_c, cones, thresh);
 
 end
@@ -30,7 +31,19 @@ end
 
 %thresh = 100;
 
-
+figure(1)
+hold on
+model_unc = model_csp;
+[N_h_unc,edges_unc] = histcounts(model_unc.K.s, 'BinMethod','integers');
+ yl_unc = [0, max(N_h_unc)];
+ %plot([11,11], yl_unc,'k--')
+ plot([100,100], yl_unc, 'k-')
+ 
+ stem([1, edges_unc([N_h_unc 0] ~= 0)+0.5], [model_unc.K.l, N_h_unc(N_h_unc ~= 0)], '.', 'MarkerSize', 40)
+ title('Unconstrained CSP clique sizes', 'FontSize', 18, 'Interpreter', 'latex')
+ hold off
+xlabel('Size of Clique')
+ylabel('Number of Cliques')
 
 function support_LR(model, outname, cones, thresh)
     Ncones = length(cones);
@@ -75,3 +88,4 @@ end
 %             = run_model_star(model, 'psd', use_mosek);
 % fprintf('Cone: PSD \t Hinf: %3f\n', CONE0.Hout)
 % save(outname, 'CONE', 'CONE0', 'cones', 'thresh')
+
