@@ -1,12 +1,12 @@
 lower = sdpvar(1,1);
 rng( 40, 'twister');
-N = 60;
+%N = 60;
 %N = 72;
-%N = 120;
+N = 120;
 %N = 36;
 %N = 6;
 b = floor(N/6);
-CONSTRAINED = 1;
+CONSTRAINED = 0;
 
 x = sdpvar(N, 1);
 
@@ -16,7 +16,8 @@ xi = x(1:end-3);
 xi1 = x(2:end-2);
 xi2 = x(3:end-1);
 xi3 = x(4:end);
-f_R = sum(10*((xi2 + 2*xi1 - xi.^2).^2 + (1-xi -xi3).^2));
+%f_R = sum(10*((xi2 + 2*xi1 - xi.^2).^2 + (1-xi -xi3).^2));
+f_R = sum(10*((xi2 + 2*xi1 - xi.^2).^2) + (1-xi -xi3).^2);
 
 %mBasis = monolist(x(1:b),2);
 %Q = rand(length(mBasis));
@@ -57,43 +58,54 @@ else
 end
 obj =  -lower;
 
+
+
+%%CSP
 opts_csp = sdpsettings('solver','SEDUMI');
 %[model, recoverymodel] = export(F , obj, opts);
 
 %opts_csp = opts;
 opts_csp.sos.csp = 1;
-%[model_csp, recoverymodel_csp] = export(F, obj, opts_csp, [lower; c]);
-%[model_csp, recoverymodel_csp] = export(F, obj, opts_csp);
+
 
 [F_m, obj_m, monomials] = sosmodel(F, obj, opts_csp, [lower; c]);
 [model_csp, recoverymodel_csp] = export(F_m, obj_m, opts_csp);
-%[x_csp, y_csp, info_csp] = sedumi(model_csp.A', model_csp.b, model_csp.C, model_csp.K);
-%cost_csp = model_csp.C'*x_csp;
-
-opts2 = sdpsettings('solver', 'Mosek');
-sol = optimize(F_m, obj_m, opts2);
-
-Ks = model_csp.K.s';
-mKs = max(model_csp.K.s);
-
-figure(1)
-clf
-hold on
-[N_h,edges] = histcounts(Ks, 'BinMethod','integers');
-yl = [0, max(N_h)];
-plot([30,30], yl,'k--')
-plot([100,100],  yl, 'k-.')
-stem(edges([N_h 0] ~= 0), N_h(N_h ~= 0), '.', 'MarkerSize', 30)
-hold off
-
-title('LR Constrained Clique Sizes', 'fontsize', 18, 'Interpreter', 'latex')
+% %[x_csp, y_csp, info_csp] = sedumi(model_csp.A', model_csp.b, model_csp.C, model_csp.K);
+% %cost_csp = model_csp.C'*x_csp;
+% 
+% 
+% [model_curr.A, model_curr.b, model_curr.C, model_curr.K, ~] = decomposed_subset(model_csp.A,model_csp.b,model_csp.C,model_csp.K, 20);
+% prob_curr = convert_sedumi2mosek(model_curr.A, model_curr.b, model_curr.C, model_curr.K);
+% 
+% [r,res] = mosekopt('minimize',prob_curr);
 
 
-legend({'Size 20', 'Size 70', 'Cliques'},...
-'location', 'northeast', 'fontsize', 12)
-%legend({'Cliques'}, 'location', 'northeast', 'fontsize', 12)
-%hold off
-xlabel('Size of Clique')
-ylabel('Number of Cliques')
 
-%save('polynomial_big_clique.mat', 'N', 'b', 'model_csp')
+
+% opts2 = sdpsettings('solver', 'Mosek');
+% sol = optimize(F_m, obj_m, opts2);
+% 
+% Ks = model_csp.K.s';
+% mKs = max(model_csp.K.s);
+% 
+% figure(1)
+% clf
+% hold on
+% [N_h,edges] = histcounts(Ks, 'BinMethod','integers');
+% yl = [0, max(N_h)];
+% plot([30,30], yl,'k--')
+% plot([100,100],  yl, 'k-.')
+% stem(edges([N_h 0] ~= 0), N_h(N_h ~= 0), '.', 'MarkerSize', 30)
+% hold off
+% 
+% title('LR Clique Sizes', 'fontsize', 18, 'Interpreter', 'latex')
+% 
+% 
+% legend({'Size 20', 'Size 70', 'Cliques'},...
+% 'location', 'northeast', 'fontsize', 12)
+% %legend({'Cliques'}, 'location', 'northeast', 'fontsize', 12)
+% %hold off
+% xlabel('Size of Clique')
+% ylabel('Number of Cliques')
+% 
+save('LR_120_sos.mat', 'N', 'b', 'model_csp')

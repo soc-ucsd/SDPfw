@@ -11,8 +11,8 @@ thresh = [0, 11, 45, 100];
 %thresh = 100;
 
 
-outname_unc = 'LR120_output_uncons.mat';
-support_LR(model_unc, outname_unc, cones, thresh);
+%outname_unc = 'LR120_output_uncons.mat';
+%support_LR(model_unc, outname_unc, cones, thresh);
 
 
 outname_c = 'LR120_output_cons.mat';

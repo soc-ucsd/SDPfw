@@ -1,13 +1,13 @@
 lower = sdpvar(1,1);
 %rng( 40, 'twister');
-%N = 18;
-N = 64;
+N = 18;
+%N = 64;
 %N = 72;
 %N = 120;
 %N = 32;
 b = N/6;
-%x = sdpvar(N, 1);
-x = sym('x',[N, 1]);
+x = sdpvar(N, 1);
+%x = sym('x',[N, 1]);
 
 %f_R  = sum(100*(x(2:end ) - x(1:end-1) .^2).^2 +  (1 -x(1:end-1 )).^2);
 
@@ -37,6 +37,6 @@ f = f_R + f_Q;
 
 
 
-d = 4;
-solver = 'mosek';
-[opt,data,status]=blockpop_uncons_first(f,N,d,solver);
+%d = 2;
+%solver = 'mosek';
+%[opt,data,status]=blockpop_uncons_first(f,N,d,solver);
