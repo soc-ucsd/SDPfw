@@ -1,22 +1,36 @@
 %LR test 
-load('LR_120.mat')
+sos= 1;
+if sos
+    load('LR_120_sos.mat')
+    outname = 'LR120_output_uncons_sos.mat';
+    thresh = [0, 100];
+    cones = {'dd', 'sdd', 2, 3, 5, 11, 21, 40, 'psd'};
+    model = model_csp;
+    model.c = -model.C;
+    support_LR(model, outname, cones, thresh);
+
+else
+    load('LR_120.mat')
+    ones = {'dd'};
+    cones = {'dd', 'sdd', 2, 3, 5, 6, 11, 20, 30, 40, 'psd'};
+
+    thresh = [0, 11, 45, 100];
+    outname_unc = 'LR120_output_uncons.mat';
+    support_LR(model_unc, outname_unc, cones, thresh);
+
+
+    outname_c = 'LR120_output_cons.mat';
+    support_LR(model_c, outname_c, cones, thresh);
+
+end
 
 
 
 %cones = {20};
-ones = {'dd'};
-cones = {'dd', 'sdd', 2, 3, 5, 6, 11, 20, 30, 40, 'psd'};
 
-thresh = [0, 11, 45, 100];
 %thresh = 100;
 
 
-%outname_unc = 'LR120_output_uncons.mat';
-%support_LR(model_unc, outname_unc, cones, thresh);
-
-
-outname_c = 'LR120_output_cons.mat';
-support_LR(model_c, outname_c, cones, thresh);
 
 function support_LR(model, outname, cones, thresh)
     Ncones = length(cones);
@@ -31,8 +45,6 @@ function support_LR(model, outname, cones, thresh)
             CONE{i,j}.cone = cone_list(model.K.s, thresh(j), cones{i});
         end
     end
-
-    cone = cell(length(model.K.s), 1);
 
     use_mosek = 1;
 
