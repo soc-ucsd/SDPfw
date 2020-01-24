@@ -1,8 +1,8 @@
-function [cost, package, time_solve, time_convert] = run_model_LR(model, cone, use_mosek)
+function [cost, package, time_solve, time_convert] = run_model_LR(model, cone, use_mosek, fname)
 
     if nargin < 3
         use_mosek = 1;
-    end    
+    end           
     
     tic
     
@@ -26,7 +26,11 @@ function [cost, package, time_solve, time_convert] = run_model_LR(model, cone, u
             param.MSK_IPAR_INTPNT_BASIS = 'MSK_BI_NEVER';            
         end
         
-        [r,res] = mosekopt('minimize echo(0)',prob, param);
+        if nargin < 4
+            [r,res] = mosekopt('minimize echo(0)',prob, param);
+        else
+            [r,res] = mosekopt(strcat('minimize echo(0) log(', fname, ')'),prob, param);
+        end
         %[r,res] = mosekopt('minimize',prob, param);
         
         time_solve = toc;

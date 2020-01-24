@@ -65,6 +65,7 @@ function support_LR(model, outname, cones, thresh)
 
     for i = 1:Ncones
         for j = 1:Nthresh
+            fname = strcat('mosek_log\\', outname_c(1:end-4), '_', num2str(cones{i}), '_', num2str(thresh(j)), '.log');
             [CONE{i,j}.cost, RES{i,j}, CONE{i,j}.time_solve, CONE{i,j}.time_convert]...
                 = run_model_LR(model, CONE{i,j}.cone, use_mosek);              
 
