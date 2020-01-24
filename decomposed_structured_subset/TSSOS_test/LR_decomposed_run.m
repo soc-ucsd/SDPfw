@@ -10,18 +10,18 @@ if sos
     support_LR(model, outname, cones, thresh);
 
 else
-    load('LR_120.mat')
+    load('LR_120.mat', 'model_cons_trans')
     ones = {'dd'};
     cones = {'dd', 'sdd', 2, 3, 5, 6, 11, 20, 30, 40, 'psd'};
 
-    thresh = [0, 11, 45, 100];
+    thresh = [0, 12, 45, 100];
     
 %     outname_unc = 'LR120_output_uncons.mat';
 %     support_LR(model_unc, outname_unc, cones, thresh);
 
 
-    outname_c = 'LR120_output_cons_rsl.mat';
-    support_LR(model_c, outname_c, cones, thresh);
+    outname_c = 'LR120_output_cons_trans.mat';
+    support_LR(model_cons_trans, outname_c, cones, thresh);
 
 end
 
