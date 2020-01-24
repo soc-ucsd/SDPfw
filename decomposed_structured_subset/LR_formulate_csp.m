@@ -2,7 +2,7 @@ lower = sdpvar(1,1);
 rng( 40, 'twister');
 %N = 60;
 %N = 72;
-N = 120;
+%N = 18;
 %N = 36;
 %N = 6;
 b = floor(N/6);
@@ -66,10 +66,21 @@ opts_csp = sdpsettings('solver','SEDUMI');
 
 %opts_csp = opts;
 opts_csp.sos.csp = 1;
+opts_csp.sos.model = 2;
 
 
 [F_m, obj_m, monomials] = sosmodel(F, obj, opts_csp, [lower; c]);
 [model_csp, recoverymodel_csp] = export(F_m, obj_m, opts_csp);
+
+%opts_pop = sdpsettings('solver', 'SparsePOP', 'moment.relaxOrder', 2);
+opts_POP = sdpsettings('solver', 'sparsePOP', 'moment.order', 2);
+F_POP = [f-lower >=0, norm(x, 2)^2 <= 1e3];
+%[model_pop, recoverymodel_pop] = export(F_POP, obj, opts_pop);
+sol = optimize(F_POP, obj, opts_POP);
+%[value(a), value(b), value(obj)]
+%[F_m, obj_m, monomials] = sosmodel(F, obj, opts_csp, [lower; c]);
+%[model_csp, recoverymodel_csp] = export(F_m, obj_m, opts_csp);
+
 % %[x_csp, y_csp, info_csp] = sedumi(model_csp.A', model_csp.b, model_csp.C, model_csp.K);
 % %cost_csp = model_csp.C'*x_csp;
 % 
@@ -108,4 +119,4 @@ opts_csp.sos.csp = 1;
 % xlabel('Size of Clique')
 % ylabel('Number of Cliques')
 % 
-save('LR_120_sos.mat', 'N', 'b', 'model_csp')
+%save(strcat('LR_',num2str(N), '_sos.mat'), 'N', 'b', 'model_csp')

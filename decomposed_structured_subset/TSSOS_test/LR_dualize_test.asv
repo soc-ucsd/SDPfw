@@ -1,0 +1,4 @@
+load('model_LR_18.mat')
+
+sedumi2yalmip(model.At,b,c,K);
+
