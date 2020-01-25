@@ -29,7 +29,7 @@ function [cost, package, time_solve, time_convert] = run_model_LR(model, cone, u
         if nargin < 4
             [r,res] = mosekopt('minimize echo(0)',prob, param);
         else
-            [r,res] = mosekopt(strcat('minimize echo(0) log(', fname, ')'),prob, param);
+            [r,res] = mosekopt(strcat('minimize log(', fname, ')'),prob, param);
         end
         %[r,res] = mosekopt('minimize',prob, param);
         
