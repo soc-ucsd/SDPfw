@@ -1,13 +1,15 @@
 %LR test 
-sos= 0;
+sos= 1;
 if sos
-    load('LR_120_sos.mat')
-    outname = 'LR120_output_uncons_sos.mat';
+    load('LR_120_sos.mat', 'model_dual')
+    outname = 'LR120_output_uncons_sos_dual_aug.mat';
     thresh = [0, 100];
-    cones = {'dd', 'sdd', 2, 3, 5, 11, 21, 40, 'psd'};
-    model = model_csp;
-    model.c = -model.C;
-    support_LR(model, outname, cones, thresh);
+    %cones = {'dd', 'sdd', 2, 3, 5, 11, 21, 40, 'psd'};
+    cones = {8, 14, 17};
+    %model = model_csp;
+    %model.c = -model.C;
+    model_dual.c = -model_dual.C;
+    support_LR(model_dual, outname, cones, thresh);
 
 else
     load('LR_120.mat', 'model_cons_trans')
@@ -65,9 +67,9 @@ function support_LR(model, outname, cones, thresh)
 
     for i = 1:Ncones
         for j = 1:Nthresh
-            fname = strcat(outname(1:end-4), '_', num2str(cones{i}), '_', num2str(thresh(j)), '.log');
+            fname = strcat(outname(1:end-4), '_', num2str(cones{i}), '_', num2str(thresh(j)), '.txt');
             [CONE{i,j}.cost, RES{i,j}, CONE{i,j}.time_solve, CONE{i,j}.time_convert]...
-                = run_model_LR(model, CONE{i,j}.cone, use_mosek);              
+                = run_model_LR(model, CONE{i,j}.cone, use_mosek, fname);              
 
             cost(i, j) = CONE{i,j}.cost;
                   %output

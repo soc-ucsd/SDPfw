@@ -1,6 +1,8 @@
 %load('LR_24.mat')
 load('LR_120.mat', 'model_cons_trans')
+%load('LR_120_sos.mat')
 model = model_cons_trans;
+%model = model_csp;
 %model_dual = model_cons_trans_dual;
 
 [F, obj] = sedumi2yalmip(model.A',model.b,model.c,model.K);
@@ -15,11 +17,13 @@ opts.sos.model = 2;
 
 %dualize (primalize?)
 [Fd,objd,X,t,err] = dualize(F,obj,0);
-[model_dual_cons_trans, ~] = export(Fd, objd, opts);
+[model_dual, ~] = export(Fd, objd, opts);
+
+%[model_dual_cons_trans, ~] = export(Fd, objd, opts);
 
 %maybe?
-model_dual_cons_trans.A = -model_dual_cons_trans.A;
-
+%model_dual_cons_trans.A = -model_dual_cons_trans.A;
+model_dual.A = -model_dual.A;
 
 %model_dual_unc = model_dual;
 %CSP
@@ -41,4 +45,5 @@ model_dual_cons_trans.A = -model_dual_cons_trans.A;
 %[x_dual, y_dual, info_dual] = sedumi(-model_dual.A, model_dual.b,model_dual.C,  model_dual.K);
 %res_dual_unc = convert_sedumi2mosek(-model_dual.A',model_dual.b,model_dual.C,model_dual.K);
 save('LR_120.mat', '-append', 'model_dual_cons_trans')
+%save('LR_120_sos.mat', '-append', 'model_dual')
 %save('LR_120.mat', '-append', 'res_dual_unc', 'model_dual_unc')

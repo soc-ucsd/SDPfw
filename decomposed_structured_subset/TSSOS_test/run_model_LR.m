@@ -26,15 +26,17 @@ function [cost, package, time_solve, time_convert] = run_model_LR(model, cone, u
             param.MSK_IPAR_INTPNT_BASIS = 'MSK_BI_NEVER';            
         end
         
-        if nargin < 4
-            [r,res] = mosekopt('minimize echo(0)',prob, param);
-        else
-            [r,res] = mosekopt(strcat('minimize log(', fname, ')'),prob, param);
-        end
+        [r,res] = mosekopt('minimize',prob, param);
+        %if nargin < 4
+        %    [r,res] = mosekopt('minimize echo(0)',prob, param);
+        %else
+        %call_str = char(strcat('minimize log(', fname, ')'));
+        %[r,res] = mosekopt(call_str,prob, param);
+        %end
         %[r,res] = mosekopt('minimize',prob, param);
         
         time_solve = toc;
-        if  strcmp(res.sol.itr.prosta, 'PRIMAL_AND_DUAL_FEASIBLE')        
+        if isfield(res, 'sol') && strcmp(res.sol.itr.prosta, 'PRIMAL_AND_DUAL_FEASIBLE')        
             cost = res.sol.itr.pobjval;
         else
             cost = NaN;

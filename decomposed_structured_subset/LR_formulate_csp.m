@@ -1,6 +1,7 @@
 lower = sdpvar(1,1);
 rng( 40, 'twister');
 %N = 60;
+N = 120;
 %N = 72;
 %N = 18;
 %N = 36;
@@ -69,8 +70,8 @@ opts_csp.sos.csp = 1;
 opts_csp.sos.model = 2;
 
 
-[F_m, obj_m, monomials] = sosmodel(F, obj, opts_csp, [lower; c]);
-[model_csp, recoverymodel_csp] = export(F_m, obj_m, opts_csp);
+%[F_m, obj_m, monomials] = sosmodel(F, obj, opts_csp, [lower; c]);
+%[model_csp, recoverymodel_csp] = export(F_m, obj_m, opts_csp);
 
 %opts_pop = sdpsettings('solver', 'SparsePOP', 'moment.relaxOrder', 2);
 opts_POP = sdpsettings('solver', 'sparsePOP', 'moment.order', 2);
