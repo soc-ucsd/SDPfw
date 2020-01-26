@@ -33,11 +33,11 @@ c = sparse(loc, ones(num, 1), val, Ainds(end), 1);
 c = sparse([prob.c; c]);
 
 % Convert A
-subi = [prob.bara.subi; prob.bara.subi];
-subj = [prob.bara.subj; prob.bara.subj];
-subk = [prob.bara.subk; prob.bara.subl];
-subl = [prob.bara.subl; prob.bara.subk];
-val = [prob.bara.val; prob.bara.val];
+subi = [prob.bara.subi, prob.bara.subi];
+subj = [prob.bara.subj, prob.bara.subj];
+subk = [prob.bara.subk, prob.bara.subl];
+subl = [prob.bara.subl, prob.bara.subk];
+val = [prob.bara.val, prob.bara.val];
 num = length(val);
 loc = zeros(num, 1);
 for v = 1:num

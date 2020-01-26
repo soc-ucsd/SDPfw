@@ -10,6 +10,8 @@ fname = 'LR120_trans_box.json';
 
 data = jsondecode(fileread(fname));
 
+disp("Read JSON")
+
 N = data.n;
 
 %N_f = length(data.fbasis)/N;
@@ -44,6 +46,7 @@ f_psatz = 0;
 Q = [];
 F = [];
 % 
+disp("Starting with f")
 suppf = reshape(data.ssupp{1}, N, []);
 f_basis = mon_basis(x, suppf);
 coef  = data.coe{1};
@@ -53,16 +56,21 @@ f_ref = f - lower;
 
 %unconstrained terms
 for i = 1:length(fblocks)
+    if i
+    disp(strcat("starting f", num2str(j)))
     x_basis = mon_basis(x, fbasis(:, fblocks{i}));
     Qi = sdpvar(length(x_basis));
     F = [F; Qi >= 0];    
     pi = x_basis'*Qi*x_basis;
     f_psatz = f_psatz + pi;
+    
     %[si,ci] = polynomial(x_basis,2);
     %s = [s; si];
     %c = [c; ci];
     %F = [F; sos(si)];
 end
+
+disp("finished with f")
 
 %constrained terms
 for j = 1:length(gblocks)
@@ -74,6 +82,7 @@ for j = 1:length(gblocks)
     coej  = data.coe{j+1};
     g_basis = mon_basis(x, suppj);
     gj = coej'*g_basis;
+    disp(strcat("starting g", num2str(j)))
     
     for i = 1:length(gblocks_curr)
         x_basis = mon_basis(x, gbasis_curr(:, gblocks_curr{i}));
@@ -88,15 +97,25 @@ for j = 1:length(gblocks)
     f_psatz = f_psatz + pgj * gj;
 end
 
-F = [F; coefficients(f_ref - f_psatz, x) == 0];
+disp("About to take Coefficients")
+[cp] = coefficients(f_ref - f_psatz, x);
+%F_lmi = F;
+F = [F; cp == 0];
+
 
 obj = -lower;
 
-opts = sdpsettings('solver', 'sedumi');
-
-%sol = optimize(
-[model, recoverymodel] = export(F, obj, opts);
+opts = sdpsettings('solver', 'mosek', 'savedebug', 1, 'savesolverinput', 1);
+disp("Ready to Optimize")
+diagnostics = optimize(F, obj, opts);
+disp("Done Optimizing")
+model = diagnostics.solverinput;
+save("LR120_cons_trans_mosek_input.mat", "model")
+%[model, recoverymodel] = export(F, obj, opts);
 %optimize(F, obj, opts);
-[~,name, ~] = fileparts(fname);
-outname = strcat(name, "_sos.mat");
-save(outname, "model", "data")
+%[~,name, ~] = fileparts(fname);
+%outname = strcat(name, "_sos.mat");
+%save(outname, "model", "data")
+
+
+
