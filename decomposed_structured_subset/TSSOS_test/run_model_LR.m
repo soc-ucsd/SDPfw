@@ -9,7 +9,7 @@ function [cost, package, time_solve, time_convert] = run_model_LR(model, cone, u
     %Cross over because this is an LMI problem
     %[y,x,infoSeDuMi] = sedumi(-model.A',-model.c,-model.b,model.J,pars);
         
-    [A, b, c, K, ~] = decomposed_subset(model.A,model.b,-model.c,model.K, cone);
+    [A, b, c, K, ~] = decomposed_subset(model.A,model.b,model.c,model.K, cone);
 
     if use_mosek
         prob = convert_sedumi2mosek(A, b, c, K);
@@ -37,7 +37,7 @@ function [cost, package, time_solve, time_convert] = run_model_LR(model, cone, u
         
         time_solve = toc;
         if isfield(res, 'sol') && strcmp(res.sol.itr.prosta, 'PRIMAL_AND_DUAL_FEASIBLE')        
-            cost = res.sol.itr.pobjval;
+            cost = -res.sol.itr.pobjval;
         else
             cost = NaN;
         end
@@ -50,7 +50,7 @@ function [cost, package, time_solve, time_convert] = run_model_LR(model, cone, u
         %pars.fid = 0;
         [x, y, info] = sedumi(A, b, c, K, pars);
         time_solve = toc;
-        cost = c'*x;
+        cost = -c'*x;
         package.x = x;
         package.y = y;
         package.info = info;

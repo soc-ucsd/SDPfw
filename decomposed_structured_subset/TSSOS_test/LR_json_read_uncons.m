@@ -43,7 +43,7 @@ F = [];
 disp("Starting with f")
 supp = reshape(data.supp, N, []);
 f_basis = mon_basis(x, supp);
-coef  = data.coe{1};
+coef  = data.coe;
 f = coef'*f_basis;
 
 f_ref = f - lower;

@@ -1,5 +1,6 @@
 %LR test 
-sos= 1;
+%CSP
+sos= 0;
 if sos
     load('LR_120_sos.mat', 'model_dual')
     outname = 'LR120_output_uncons_sos_dual_aug.mat';
@@ -12,17 +13,21 @@ if sos
     support_LR(model_dual, outname, cones, thresh);
 
 else
-    load('LR_120.mat', 'model_cons_trans')
-    ones = {'dd'};
-    cones = {'dd', 'sdd', 2, 3, 5, 6, 11, 20, 30, 40, 'psd'};
-
-    thresh = [0, 12, 45, 100];
+    %load('LR_120.mat', 'model_c')
+    load('LR120_box_1_2.mat', 'model_cons_trans')
+    %cones = {'dd', 'sdd', 2, 3, 5, 6, 11, 20, 30, 40, 'psd'};
+    %cones = {'dd', 20, 'psd'};
+    cones = {'dd'}
+    thresh = [0];
+    %thresh = [0, 12, 45, 100];
+    %thresh = [0, 100];
+    %model_dual_unc.c = model_dual_unc.C;
     
 %     outname_unc = 'LR120_output_uncons.mat';
 %     support_LR(model_unc, outname_unc, cones, thresh);
 
-
-    outname_c = 'LR120_output_cons_trans.mat';
+    outname_c = 'LR120_tester_1_2.mat';
+    %outname_c = 'LR120_output_uncons_dual_TSSOS.mat';
     support_LR(model_cons_trans, outname_c, cones, thresh);
 
 end
@@ -33,19 +38,19 @@ end
 
 %thresh = 100;
 
-figure(1)
-hold on
-model_unc = model_csp;
-[N_h_unc,edges_unc] = histcounts(model_unc.K.s, 'BinMethod','integers');
- yl_unc = [0, max(N_h_unc)];
- %plot([11,11], yl_unc,'k--')
- plot([100,100], yl_unc, 'k-')
- 
- stem([1, edges_unc([N_h_unc 0] ~= 0)+0.5], [model_unc.K.l, N_h_unc(N_h_unc ~= 0)], '.', 'MarkerSize', 40)
- title('Unconstrained CSP clique sizes', 'FontSize', 18, 'Interpreter', 'latex')
- hold off
-xlabel('Size of Clique')
-ylabel('Number of Cliques')
+% figure(1)
+% hold on
+% model_unc = model_dual_unc;
+% [N_h_unc,edges_unc] = histcounts(model_unc.K.s, 'BinMethod','integers');
+%  yl_unc = [0, max(N_h_unc)];
+%  %plot([11,11], yl_unc,'k--')
+%  plot([100,100], yl_unc, 'k-')
+%  
+%  stem([1, edges_unc([N_h_unc 0] ~= 0)+0.5], [model_unc.K.l, N_h_unc(N_h_unc ~= 0)], '.', 'MarkerSize', 40)
+%  title('Unconstrained CSP clique sizes', 'FontSize', 18, 'Interpreter', 'latex')
+%  hold off
+% xlabel('Size of Clique')
+% ylabel('Number of Cliques')
 
 function support_LR(model, outname, cones, thresh)
     Ncones = length(cones);
