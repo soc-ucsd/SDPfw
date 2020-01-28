@@ -212,9 +212,6 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
 %                 Anew_quad = [Anew_quad A_curr];
 %                 cnew_quad = [cnew_quad; c_curr];
 %                 
-%                 %function F = sdp2socp(M)
-%                 %F=rcone(M(1,2),.5*M(1,1),M(2,2));
-%                 %I think this is the magic
 %             else
             [i_curr, j_curr, v_curr] = find(A_curr);
             

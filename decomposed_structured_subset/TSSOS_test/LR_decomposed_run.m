@@ -13,25 +13,29 @@ if sos
     support_LR(model_dual, outname, cones, thresh);
 
 else
-    %load('LR_120.mat', 'model_c')
+    load('LR_120.mat', 'model_c')
     %load('LR120_box_1_2.mat', 'model_cons_trans')
-    load('LR_24.mat', 'model_cons_trans')
+    %load('LR_24.mat', 'model_cons_trans')
     %cones = {'dd', 'sdd', 2, 3, 5, 6, 11, 20, 30, 40, 'psd'};
-    cones = {'dd', 'sdd', 2, 3, 5, 6, 10, 15, 20, 'psd'};
+    %cones = {'dd', 'sdd', 2, 3, 5, 6, 10, 15, 20, 'psd'};
     %cones = {'dd', 20, 'psd'};
-    %cones = {'dd'};
-    thresh = [0 ,10, 20];
-    %thresh = [0, 12, 45, 100];
+    cones = {'dd'};
+    %thresh = [0 ,10, 20];
+    thresh = [0, 4, 12, 45, 100];
     %thresh = [0, 100];
     %thresh = [100];
     %model_dual_unc.c = model_dual_unc.C;
     
 %     outname_unc = 'LR120_output_uncons.mat';
 %     support_LR(model_unc, outname_unc, cones, thresh);
-
+    model = model_cons_trans;
+    %it just gives values of zero. i don't know why, is that actually the
+    %optimum?
+    %model.c = -model.c;
+    
     outname_c = 'LR120_tester_1_2.mat';
     %outname_c = 'LR120_output_uncons_dual_TSSOS.mat';
-    support_LR(model_cons_trans, outname_c, cones, thresh);
+    support_LR(model, outname_c, cones, thresh);
 
 end
 
