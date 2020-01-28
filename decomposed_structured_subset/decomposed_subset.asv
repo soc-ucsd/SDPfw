@@ -109,7 +109,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
     
     %define new matrices
     
-    Count = K.f + K.l + sum(K.q);
+    Count = K.f + K.l + K.q;
     
     Count_lin = 0;
     Count_psd = 0;
@@ -225,13 +225,13 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
             jnew_psd = [jnew_psd; j_curr];
             vnew_psd = [vnew_psd; v_curr]; 
             
-            Count_psd = Count_psd + sum(K_curr.s.^2);
+            Count_psd = Count_psd + sum(K_curr.^2);
 
             %Anew_psd = [Anew_psd K_curr];
             cnew_psd = [cnew_psd; c_curr];
             
             
-            Knew.s = [Knew.s; K_curr.s];
+            Knew.s = [Knew.s; K_curr];
             info_curr.num_var = length(c_curr);
             is_dd = 0;
         else
@@ -251,7 +251,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
             info_curr.num_var = length(c_curr);
             is_dd = 0;
             Count_psd = Count_psd + Ksi^2;
-            Knew.s = [Knew.s; Ksi];
+            
         end
         info_curr.ind_orig = Count + (1:Ksi^2);
         
@@ -267,11 +267,11 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
     %Anew = [A_free_lin Anew_lin A_quad Anew_quad Anew_psd];
     
     Anew_lin = sparse(inew_lin, jnew_lin, vnew_lin, length(b) ,Count_lin);
-    Anew_psd = sparse(inew_psd, jnew_psd, vnew_psd, length(b), Count_psd);
+    Anew_psd = sparse(inew_psd, jnew_psd, vnew_psd, Count_psd);
     
     Anew = [A_free_lin Anew_lin A_quad Anew_psd];
     
-    cnew = [c_free_lin; cnew_lin; c_quad; cnew_psd];
+    cnew = [c_free_lin; cnew_lin; c_quad; cnew_quad; cnew_psd];
     bnew = b;
     
     Knew.q(Knew.q == 0) = [];
@@ -281,7 +281,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
     info.dd = info_dd;
     info.count_dd = K.f+K.l;
     info.non_dd = info_non_dd;
-    info.count_non_dd = Count_lin + sum(K.q);
+    info.count_non_dd = Count_dd + sum(K.q);
     info.prev_var = length(c);
     
 end

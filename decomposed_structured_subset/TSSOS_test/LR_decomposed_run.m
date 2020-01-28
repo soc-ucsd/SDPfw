@@ -14,13 +14,16 @@ if sos
 
 else
     %load('LR_120.mat', 'model_c')
-    load('LR120_box_1_2.mat', 'model_cons_trans')
+    %load('LR120_box_1_2.mat', 'model_cons_trans')
+    load('LR_24.mat', 'model_cons_trans')
     %cones = {'dd', 'sdd', 2, 3, 5, 6, 11, 20, 30, 40, 'psd'};
+    cones = {'dd', 'sdd', 2, 3, 5, 6, 10, 15, 20, 'psd'};
     %cones = {'dd', 20, 'psd'};
-    cones = {'dd'}
-    thresh = [0];
+    %cones = {'dd'};
+    thresh = [0 ,10, 20];
     %thresh = [0, 12, 45, 100];
     %thresh = [0, 100];
+    %thresh = [100];
     %model_dual_unc.c = model_dual_unc.C;
     
 %     outname_unc = 'LR120_output_uncons.mat';
