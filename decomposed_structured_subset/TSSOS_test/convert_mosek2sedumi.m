@@ -17,10 +17,17 @@ for j = 1:n_sdp
 end
 
 % Convert c
-subj = [prob.barc.subj; prob.barc.subj];
-subl = [prob.barc.subl; prob.barc.subk];
-subk = [prob.barc.subk; prob.barc.subl];
-val = [prob.barc.val; prob.barc.val];
+if size(prob.barc.val, 1) > size(prob.barc.val, 2)
+    subj = [prob.barc.subj; prob.barc.subj];
+    subl = [prob.barc.subl; prob.barc.subk];
+    subk = [prob.barc.subk; prob.barc.subl];
+    val = [prob.barc.val; prob.barc.val];
+else
+    subj = [prob.barc.subj, prob.barc.subj];
+    subl = [prob.barc.subl, prob.barc.subk];
+    subk = [prob.barc.subk, prob.barc.subl];
+    val = [prob.barc.val, prob.barc.val];
+end
 num = length(val);
 loc = zeros(num, 1);
 for v = 1:num
@@ -33,11 +40,20 @@ c = sparse(loc, ones(num, 1), val, Ainds(end), 1);
 c = sparse([prob.c; c]);
 
 % Convert A
-subi = [prob.bara.subi; prob.bara.subi];
-subj = [prob.bara.subj; prob.bara.subj];
-subk = [prob.bara.subk; prob.bara.subl];
-subl = [prob.bara.subl; prob.bara.subk];
-val = [prob.bara.val; prob.bara.val];
+if size(prob.bara.val, 1) > size(prob.bara.val, 2)
+    subi = [prob.bara.subi; prob.bara.subi];
+    subj = [prob.bara.subj; prob.bara.subj];
+    subk = [prob.bara.subk; prob.bara.subl];
+    subl = [prob.bara.subl; prob.bara.subk];
+    val = [prob.bara.val; prob.bara.val];
+else
+    subi = [prob.bara.subi, prob.bara.subi];
+    subj = [prob.bara.subj, prob.bara.subj];
+    subk = [prob.bara.subk, prob.bara.subl];
+    subl = [prob.bara.subl, prob.bara.subk];
+    val = [prob.bara.val, prob.bara.val];
+end
+
 num = length(val);
 loc = zeros(num, 1);
 for v = 1:num
