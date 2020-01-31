@@ -1,7 +1,8 @@
 %fname = 'LR12_trans_box.json';
 %fname = 'LR120_trans_box.json';
 %fname = 'LR120_uncons_3.json';
-fname = 'LR120_cons_1.json';
+%fname = 'LR120_cons_1.json';
+fname = 'LR24_cons_2.json';
 
 %This is the golden file.
 %Protect it at all costs
@@ -106,17 +107,20 @@ F = [F; cp == 0];
 
 obj = -lower;
 
+
+
 opts = sdpsettings('solver', 'mosek', 'savedebug', 1, 'savesolverinput', 1);
 disp("Ready to Optimize")
-diagnostics = optimize(F, obj, opts);
-disp("Done Optimizing")
-model = diagnostics.solverinput;
-save("LR120_cons_trans_mosek_input.mat", "model")
-%[model, recoverymodel] = export(F, obj, opts);
+diagnostics = optimize(F, -obj, opts);
+%disp("Done Optimizing")
+%model = diagnostics.solverinput;
+%save("LR120_cons_trans_mosek_input.mat", "model")
+opts2 = sdpsettings('solver', 'sedumi');
+[model, recoverymodel] = export(F, obj, opts);
 %optimize(F, obj, opts);
-%[~,name, ~] = fileparts(fname);
-%outname = strcat(name, "_sos.mat");
-%save(outname, "model", "data")
+[~,name, ~] = fileparts(fname);
+outname = strcat(name, "_sos.mat");
+save(outname, "model", "data")
 
 
 
