@@ -15,7 +15,7 @@ if sos
 else
     %load('LR_120.mat', 'model_unc')
     %load('LR_120.mat', 'model_c')
-    %load('LR120_box_1_2.mat', 'model_cons_trans')
+    load('LR120_box_1_2.mat', 'model_cons_trans')
     %load('LR_18.mat', 'model_uncons', 'model_cons_trans')
     %res_cons_trans = load('LR120_box_1_2.mat', 'res_cons_trans');
     %model = model_uncons;
@@ -29,14 +29,17 @@ else
     %load('LR120_disk2_box_cons_3.mat', 'model_cons_trans')
     %load('LR_24.mat')
     %cones = {'dd', 'sdd', 2, 3, 5, 6, 11, 20, 30, 40, 'psd'};
-    cones = {'dd', 'sdd', 2, 3, 5, 6, 10, 15, 20, 'psd'};
+    %cones = {'dd', 'sdd', 2, 3, 5, 6, 10, 15, 20, 'psd'};
+    cones = {3};
     %cones = {'dd', 20, 'psd'};
     %cones = {'psd'};
     %cones = {20};
     %cones = {'dd'};
     %cones = {'dd', 2, 6};
     %thresh = [0 ,10, 20];
-    thresh = [0, 5, 12, 45, 100];
+    %thresh = [0, 5, 12, 45, 100];
+    %thresh = [0, 5, 12, 45];
+    thresh = [0];
     %thresh = [0, 100];
     %thresh = [0, 11, 100, 10000];
     %thresh = [100];
@@ -57,7 +60,7 @@ else
     %model.b = -model.b;
     %
     %outname_c = 'LR120_box.mat';
-    outname_c = 'LR120_output_box_1_2.mat';
+    outname_c = 'LR120_output_box_1_2_bonus.mat';
     %outname_c = 'LR120_output_uncons_dual_TSSOS.mat';
     support_LR(model, outname_c, cones, thresh);
 

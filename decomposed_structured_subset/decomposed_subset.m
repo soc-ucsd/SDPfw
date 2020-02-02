@@ -152,9 +152,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
             %figure out how to preallocate this
             inew_lin = [inew_lin; i_curr];
             jnew_lin = [jnew_lin; j_curr];
-            vnew_lin = [vnew_lin; v_curr]; 
-            
-            Count_lin = Count_lin + Ksi^2;
+            vnew_lin = [vnew_lin; v_curr];                        
             
             cnew_lin = [cnew_lin; c_curr];
             

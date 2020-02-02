@@ -1,5 +1,7 @@
-load('LR_120.mat', 'model_unc', 'model_cons_trans', 'model_csp')
+load('LR_120.mat', 'model_unc')
 
+
+load('LR120_box_1_2.mat', 'model_cons_trans')
 %[r, res_out2] = mosekopt('maximize', res_unc.prob);
 
 C = linspecer(5);
@@ -33,7 +35,7 @@ hold on
  hold off
  %title('Lehmer-Rosenbrock Clique Sizes with 120 Variables','FontSize', 18,'Interpreter', 'latex')
  %legend('Unconstrained', 'Box-constrained')
- title('Box-constrained $[2,4]^N$ clique sizes','FontSize', 18,'Interpreter', 'latex')
+ title('Box-constrained $[1,2]^{120}$ clique sizes','FontSize', 18,'Interpreter', 'latex')
 xlabel('Size of Clique')
 ylabel('Number of Cliques')
 

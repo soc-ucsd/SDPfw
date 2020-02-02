@@ -9,13 +9,18 @@ function  [Hout, package, time_solve, time_convert] = run_model_star(model, cone
     tic
     
     %Cross over because this is an LMI problem
-    %[y,x,infoSeDuMi] = sedumi(-model.A',-model.c,-model.b,model.J,pars);
+    %[y,x,infoSeDuMi] = sedumi(-model.A',-model.c,-model.b,model.J);
         
-    [A, b, c, K, ~] = decomposed_subset(-model.A',-model.c,-model.b,model.J, cone);
+    %[A, b, c, K, ~] = decomposed_subset(-model.A',-model.c,-model.b,model.J, cone);
+    [A, b, c, K, ~] = decomposed_subset(model.A',model.b,model.c,model.K, cone);
     %pars.fid = 0;
     %pars.fid = 1;    
     %[x, ~, info] = sedumi(A, b, c, K, pars);
     if use_mosek
+        %prob = convert_sedumi2mosek(A', b, c, K);
+        %prob0 = convert_sedumi2mosek(-model.A',-model.c,-model.b,model.J);
+        %[r0, res0] = mosekopt('minimize', prob0);
+        
         prob = sedumi2mosek(A', b, c, K);
         time_convert = toc;
         tic;    
