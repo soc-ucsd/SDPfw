@@ -200,17 +200,35 @@ opts      = sdpsettings('verbose',1,'solver','sedumi');
 % c = model.C;
 % K.f = model.K.f;K.l = model.K.l;K.q = model.K.q;K.s = model.K.s;
 
+
+%yalmip outputs SDP
+parCoLO0.domain    = 1;  % dConvCliqueTree  ---> equalities 
+parCoLO0.range     = 2;   % rConvMatDecomp   ---> equalities 
+parCoLO0.EQorLMI   = 1; % CoLOtoEQform     ---> LMI standard form
+parCoLO0.SDPsolver = []; % CoLOtoEQform     ---> LMI standard form       
+parCoLO0.quiet     = 1; % Some peace and quiet 
+
 %yalmip outputs LMI
 parCoLO.domain    = 2;  % dConvCliqueTree  ---> equalities 
 parCoLO.range     = 1;   % rConvMatDecomp   ---> equalities 
 parCoLO.EQorLMI   = 2; % CoLOtoEQform     ---> LMI standard form
 parCoLO.SDPsolver = []; % CoLOtoEQform     ---> LMI standard form       
-%parCoLO.SDPsolver = 'sedumi'; % CoLOtoEQform     ---> LMI standard form       
+    
 
 parCoLO.quiet     = 1; % Some peace and quiet       
 J.f = length(model.b);
 
 [~,~,~,cliqueDomain,cliqueRange,LOP] = sparseCoLO(model.A',model.b,model.C,model.K,J,parCoLO); 
+[~,~,~,cliqueDomain,cliqueRange,LOP_dual] = sparseCoLO(model.A',model.b,model.C,model.K,J,parCoLO0); 
+
+
+model_upper = struct;
+model_upper.A = -LOP.A';
+model_upper.b = -LOP.c;
+model_upper.c = -LOP.b;
+model_upper.K = LOP.J;
+
+model_lower = LOP_dual;
 
 if VISUALIZE
     figure(2)
@@ -228,7 +246,7 @@ if VISUALIZE
 
     figure(3)
     clf
-    hold on
+
     %plot(sort(LOP.J.s), '.', 'Markersize', 10)
 %     plot(xlim, [11,11], 'k--')
 % %     plot(xlim, [60,60], 'k-.')
@@ -237,14 +255,18 @@ if VISUALIZE
 %     %plot(xlim, [75,75], 'k-')
 %     plot(xlim, [41,41], 'k-.')
 %     plot(xlim, [63,63], 'k-')
-    [N_h,edges] = histcounts(LOP.J.s, 'BinMethod','integers');
+    %[N_h,edges] = histcounts(model_upper.K.s, 'BinMethod','integers');
+    subplot(2,1,1)
+        hold on
+    [N_h,edges] = histcounts(model_lower.K.s, 'BinMethod','integers');
+    edges = edges+0.5;
      yl = [0, max(N_h)];
      plot([11,11], yl,'k--')
      plot([60,60],  yl, 'k-.')
      plot([100,100], yl, 'k-')
 
     stem(edges([N_h 0] ~= 0), N_h(N_h ~= 0), '.', 'MarkerSize', 30)
-    title('Sea Star Clique Sizes', 'fontsize', 18, 'Interpreter', 'latex')
+    title(strcat('Sea Star Lower Bound Clique Sizes $(p=', num2str(length(model_lower.K.s)),')$'), 'fontsize', 18, 'Interpreter', 'latex')
 
 
      legend({'Size 11', 'Size 60', 'Size 100','Cliques'},...
@@ -253,10 +275,31 @@ if VISUALIZE
     %hold off
     xlabel('Size of Clique')
     ylabel('Number of Cliques')
+    
+    subplot(2,1,2)
+        hold on
+    [N_h,edges] = histcounts(model_upper.K.s, 'BinMethod','integers');
+    edges = edges+0.5;
+     yl = [0, max(N_h)];
+     plot([11,11], yl,'k--')
+     plot([60,60],  yl, 'k-.')
+     plot([100,100], yl, 'k-')
+
+    stem(edges([N_h 0] ~= 0), N_h(N_h ~= 0), '.', 'MarkerSize', 30)
+    title(strcat('Sea Star Upper Bound Clique Sizes $(p=', num2str(length(model_upper.K.s)),')$'),'fontsize', 18, 'Interpreter', 'latex')
+
+
+     legend({'Size 11', 'Size 60', 'Size 100','Cliques'},...
+        'location', 'northeast', 'fontsize', 12)
+    %legend({'Cliques'}, 'location', 'northeast', 'fontsize', 12)
+    %hold off
+    xlabel('Size of Clique')
+    ylabel('Number of Cliques')
+    
     %xlabel('Clique  #', 'fontsize', 12)
     %ylabel('Size of Clique', 'fontsize', 12) 
 end
 
 fname = strcat('sea_star_',flag_str,'_',size_str,'.mat');
 
-save(fname, 'model', 'LOP', 'Sys', 'G', 'n', 'm', 'd')
+save(fname, 'model', 'model_upper', 'model_lower', 'Sys', 'G', 'n', 'm', 'd')

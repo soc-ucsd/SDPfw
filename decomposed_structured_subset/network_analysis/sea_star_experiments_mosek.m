@@ -2,7 +2,7 @@
 %load('sea_star_Hinf0_small.mat')
 %load('sea_star_Hinf0_medium.mat')
 
-DUAL = 1;
+LOWER = 1;
 
 %fname = 'sea_star_H2_tiny.mat';
 %fname = 'sea_star_Hinf0_tiny.mat';
@@ -12,14 +12,20 @@ DUAL = 1;
 fname = 'sea_star_Hinf0_verylarge.mat';
 [filepath,name,ext] = fileparts(fname);
 
-if DUAL
-    outname = strcat(filepath,'output_',name,'_DUAL',ext);
+
+
+if LOWER
+    outname = strcat(filepath,'output_',name,'_LOWER',ext);
+    load(fname, 'model_lower');
+    model = model_lower;
 else
     outname = strcat(filepath,'output_',name,ext);
+    load(fname, 'model_upper');
+    model = model_upper;
 end
 
 
-load(fname);
+
 
 
 
@@ -29,17 +35,22 @@ load(fname);
 
 %large
 %
-thresh = [0, 11, 60, 100];
-%thresh = [0, 5];
+%thresh = [0, 11, 60, 100];
+thresh = [100];
+%thresh = [0, 5, 11];
 %thresh = [];
 %thresh = [0, 11, 41, 63];
 
 %cones = {'dd', 1, 5, 7, 15, 30, 50};
-cones = {'dd', 1, 3, 5, 8, 15, 30, 55, 70};
+%cones = {'dd', 1, 3, 5, 8, 15, 30, 55, 70};
+%cones = {1, 3, 5, 8, 15, 30, 55, 70};
+cones = {73};
 %cones = {'dd'};
-
+%cones = {};
 %cones = {'dd', 'sdd', 3, 6, 12, 18, Inf};
-%cones = {'dd', 2, 6};
+%cones = {'dd', 2, 4, 6};
+%cones = {1,2,3,4,5, 6};
+%cones = {1,2, 4, 5, 8, 10};
 %thresh = [0, 22, 50, Inf];
 %thresh = [0, 11, 35, Inf];
 %thresh = [0, 11, 30, 50,  Inf];
@@ -68,12 +79,6 @@ output = NaN*ones(Ncones, Nthresh);
 %     [Fp, hp] = sedumi2yalmip(modelp.A, modelp.b, modelp.C, modelp.K);
 %     [Fd,hd,X,t,err] = dualize(F,h,0);
 %     [model,~] = export(Fd, -hd, sdpsettings('solver', 'sedumi', 'removeequalities', 1));
-
-
-model = model_dual;
-
-     model.c = model.C;
-     model = rmfield(model,'C');
 
 
 %       LOP_dual = model;
@@ -114,7 +119,7 @@ for i = 1:Ncones
             = run_model_star(model, CONE{i,j}.cone, use_mosek);              
              
         
-        if DUAL
+        if LOWER
             CONE{i,j}.Hout = imag(CONE{i,j}.Hout);
         end
         
@@ -134,11 +139,13 @@ end
 
 
 
+
+
 [CONE0.Hout, RES0, CONE0.time_solve, CONE0.time_convert]...
             = run_model_star(model, 'psd', use_mosek);
 
-if DUAL
-    CONE0.Hout = imag(CONE0.Hout)
+if LOWER
+    CONE0.Hout = imag(CONE0.Hout);
 end
         fprintf('Cone: PSD \t Hinf: %3f\n', CONE0.Hout)
 save(outname, 'CONE', 'CONE0', 'cones', 'thresh')
@@ -147,5 +154,9 @@ save(outname, 'CONE', 'CONE0', 'cones', 'thresh')
 
 
 
+CONE73=struct;
+cone73 = cone_list(Js, 100, 73);
+[CONE73.Hout, RES73, CONE73.time_solve, CONE73.time_convert]...
+            = run_model_star(model, cone73, use_mosek);
 
 

@@ -14,6 +14,8 @@ function [Anew, bnew, cnew, Knew, info] = factorwidth(A,b,c,K,opts)
 %       opts.nop     integer, number of blocks in the partion alpha
 %       opts.size    alternative to nop, number of entries in each block
 %       opts.socp    1 or 0,  reformualte 2 by 2 PSD cone with a second-order cone
+%       opts.dual    1 or 0, whether this should be dual or primal block
+%                    factorwidth two cone
 % Output data 
 %       Anew, bnew, cnew, Knew, new SDP data in sedumi form
 %       info.Ech    an index vector that maps back to the original solution
@@ -57,48 +59,56 @@ function [Anew, bnew, cnew, Knew, info] = factorwidth(A,b,c,K,opts)
     Ech  = Ech(:);
 
     
-    
-  Count = K.f+K.l+K.q;  
-  for PSDind = 1:length(K.s)   % multiple PSD cone
-      
-       if isfield(opts, 'block')
-            opts.nop = max(floor(K.s(PSDind)/opts.block), 1);
-       end
-      
-       Apsd = A(:,Count + 1:Count + K.s(PSDind)^2);   % PSD data 
-       cpsd = c(Count + 1:Count + K.s(PSDind)^2, :);
-   
-      if K.s(PSDind) <= opts.nop   % the size of PSD cone must be bigger than the number of partiiton
-          nop = K.s(PSDind);
-      else
-          nop = opts.nop;
-      end
-            SizeU = ceil(K.s(PSDind)/nop);
-            SizeL = floor(K.s(PSDind)/nop);
-            if SizeU == SizeL
-                alpha = ones(nop,1)*SizeU;
-            else
-                x = (K.s(PSDind) - SizeL*nop)./(SizeU-SizeL);
-                alpha = [ones(x,1)*SizeU;ones(nop-x,1)*SizeL];
-            end
-            [clique] = ConeSplit(alpha);    %% maximal cliques
-            Knew.s   = [Knew.s;clique.NoElem];
-            Ak       = cell(clique.NoC,1);
-            ck       = cell(clique.NoC,1);
-            for k = 1:clique.NoC   
-                Tn  = cumsum([1;clique.NoElem]);
-                ind = Tn(k):Tn(k+1)-1;
 
-                Position = zeros(sum(alpha));
-                Position(clique.Elem(ind),clique.Elem(ind)) = 1;
-                Index  = find(Position == 1);
-                Ak{k}  = Apsd(:,Index);
-                ck{k}  = cpsd(Index,:);
-                Anew = [Anew,Ak{k}];
-                cnew = [cnew;ck{k}];
-                Ech  = [Ech;Index + Count];
-            end
-      Count  = Count + K.s(PSDind)^2;
+Count = K.f+K.l+K.q;  
+for PSDind = 1:length(K.s)   % multiple PSD cone
+
+    if isfield(opts, 'block')
+        opts.nop = max(floor(K.s(PSDind)/opts.block), 1);
+    end
+
+    Apsd = A(:,Count + 1:Count + K.s(PSDind)^2);   % PSD data 
+    cpsd = c(Count + 1:Count + K.s(PSDind)^2, :);
+
+
+    %get the partition 
+    if K.s(PSDind) <= opts.nop   % the size of PSD cone must be bigger than the number of partiiton
+        nop = K.s(PSDind);
+    else
+        nop = opts.nop;
+    end
+
+    
+    SizeU = ceil(K.s(PSDind)/nop);
+    SizeL = floor(K.s(PSDind)/nop);
+    if SizeU == SizeL
+        alpha = ones(nop,1)*SizeU;
+    else
+        x = (K.s(PSDind) - SizeL*nop)./(SizeU-SizeL);
+        alpha = [ones(x,1)*SizeU;ones(nop-x,1)*SizeL];
+    end
+    [clique] = ConeSplit(alpha);    %% maximal cliques
+    
+    
+    %iterate through array
+    Knew.s   = [Knew.s;clique.NoElem];
+    Ak       = cell(clique.NoC,1);
+    ck       = cell(clique.NoC,1);
+    for k = 1:clique.NoC   
+        Tn  = cumsum([1;clique.NoElem]);
+        ind = Tn(k):Tn(k+1)-1;
+
+        Position = zeros(sum(alpha));
+        Position(clique.Elem(ind),clique.Elem(ind)) = 1;
+        Index  = find(Position == 1);
+        Ak{k}  = Apsd(:,Index);
+        ck{k}  = cpsd(Index,:);
+        Anew = [Anew,Ak{k}];
+        cnew = [cnew;ck{k}];
+        Ech  = [Ech;Index + Count];
+    end
+    Count  = Count + K.s(PSDind)^2;
+    
   end 
   
   Anew = [Anonpsd,Anew];
