@@ -2,8 +2,8 @@
 %load('sea_star_Hinf0_small.mat')
 %load('sea_star_Hinf0_medium.mat')
 
-LOWER = 1;
-
+LOWER = 0;
+CONVERT = 1;
 %fname = 'sea_star_H2_tiny.mat';
 %fname = 'sea_star_Hinf0_tiny.mat';
 %fname = 'sea_star_H2_small.mat';
@@ -20,7 +20,18 @@ if LOWER
     model = model_lower;
 else
     outname = strcat(filepath,'output_',name,ext);
-    load(fname, 'model_upper');
+    if CONVERT
+        load(fname, 'model_lower');
+        [F, h] = sedumi2yalmip(model_lower.A, model_lower.b,model_lower.c,model_lower.K);
+        [Fd, hd] = dualize(F, h, 0);
+        model_upper = export(Fd, -hd, sdpsettings('solver', 'sedumi'));
+        model_upper.c = model_upper.C;
+        save(fname, '-append', 'model_upper');
+        outname = strcat(filepath,'output_CONVERT_',name,ext);
+    else
+        load(fname, 'model_upper');
+    end
+    
     model = model_upper;
 end
 
@@ -35,16 +46,16 @@ end
 
 %large
 %
-%thresh = [0, 11, 60, 100];
-thresh = [100];
+thresh = [0, 11, 60, 100];
+%thresh = [100];
 %thresh = [0, 5, 11];
-%thresh = [];
+%thresh = [0, 11, 40];
 %thresh = [0, 11, 41, 63];
 
 %cones = {'dd', 1, 5, 7, 15, 30, 50};
-%cones = {'dd', 1, 3, 5, 8, 15, 30, 55, 70};
+cones = {'dd', 1, 3, 5, 8, 15, 30, 55, 70};
 %cones = {1, 3, 5, 8, 15, 30, 55, 70};
-cones = {73};
+%cones = {73};
 %cones = {'dd'};
 %cones = {};
 %cones = {'dd', 'sdd', 3, 6, 12, 18, Inf};
@@ -154,9 +165,9 @@ save(outname, 'CONE', 'CONE0', 'cones', 'thresh')
 
 
 
-CONE73=struct;
-cone73 = cone_list(Js, 100, 73);
-[CONE73.Hout, RES73, CONE73.time_solve, CONE73.time_convert]...
-            = run_model_star(model, cone73, use_mosek);
+% CONE73=struct;
+% cone73 = cone_list(Js, 100, 73);
+% [CONE73.Hout, RES73, CONE73.time_solve, CONE73.time_convert]...
+%             = run_model_star(model, cone73, use_mosek);
 
 
