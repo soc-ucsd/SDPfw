@@ -8,6 +8,26 @@ C = linspecer(5);
 figure(3)
 clf
 
+% subplot(1,2,1)
+% stem([1, edges_unc([N_h_unc 0] ~= 0)+0.5], [model_unc.K.l, N_h_unc(N_h_unc ~= 0)], '.', 'MarkerSize', 40)
+% box off
+% xticks([1, 6, 12, 45, 100, max(edges_unc)-0.5])
+% yticks([0, max([model_unc.K.l, N_h_unc])])
+% xlabel('Size')
+% ylabel('Frequency')
+% title('Unconstrained Cliques','FontSize', 18,'Interpreter', 'latex')
+% 
+% 
+% subplot(1,2,2)
+% stem([1, edges([N_h 0] ~= 0)+0.5], [model_cons_trans.K.l, N_h(N_h ~= 0)], '.', 'MarkerSize', 40)
+% box off
+% xticks([1, 6, 12, 45, 100, max(edges)-0.5])
+% yticks([0, max([model_cons_trans.K.l, N_h])])
+% xlabel('Size')
+% ylabel('Frequency')
+% title('Constrained Cliques','FontSize', 18,'Interpreter', 'latex')
+
+
 subplot(2,1,1)
 hold on
 [N_h_unc,edges_unc] = histcounts(model_unc.K.s, 'BinMethod','integers');
