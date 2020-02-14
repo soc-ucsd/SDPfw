@@ -120,17 +120,17 @@ if OPTIMIZE
     model_split.K.q = [];
     model_split.pars.fid = 0;
     cliques = {{2,3,4}, {1,2}}; 
-
-    
-    [F, h] = sedumi2yalmip(model.A, model.b, model.C, model.K);
-    [Fd, hd] = dualize(F, h);
-    model_dual = export(Fd, -hd, sdpsettings('solver', 'sedumi'));
-    model_dual.pars = model.pars;
-    
-    [F, h] = sedumi2yalmip(model_split.A, model_split.b, model_split.C, model_split.K);
-    [Fd, hd] = dualize(F, h);
-    model_dual_split = export(Fd, -hd, sdpsettings('solver', 'sedumi'));
-    
+% 
+%     
+%     [F, h] = sedumi2yalmip(model.A, model.b, model.C, model.K);
+%     [Fd, hd] = dualize(F, h);
+%     model_dual = export(Fd, -hd, sdpsettings('solver', 'sedumi'));
+%     model_dual.pars = model.pars;
+%     
+%     [F, h] = sedumi2yalmip(model_split.A, model_split.b, model_split.C, model_split.K);
+%     [Fd, hd] = dualize(F, h);
+%     model_dual_split = export(Fd, -hd, sdpsettings('solver', 'sedumi'));
+%     
     % Cs = model_split.C;
     % 
     % Cs(1) = -1;
@@ -174,17 +174,17 @@ if OPTIMIZE
     %out.dd_psd = draw_feasibility(model_split, {'dd', 'psd'}, th);
     %out.psd_dd = draw_feasibility(model_split, {'psd', 'dd'}, th);
     
-    out.dd_dual = draw_feasibility(model_dual, 'dd', th, 1);
+%     out.dd_dual = draw_feasibility(model_dual, 'dd', th, 1);
     
     C = linspecer(6);
-    save(strcat('sos_quartic_', num2str(N), '.mat'), 'out', 'C', 'N')
+    save(strcat('sos_quartic_', num2str(N), '.mat'), '-append', 'model', 'model_split', 'out', 'C', 'N')
 end
 
 
-if DRAW
+
 %homogenous cones
     figure(30)
-    clf
+    clfif DRAW
     subplot(2, 2, 1)
     hold on
     % plot(out.psd.a, out.psd.b, 'k', 'linewidth', 2)
