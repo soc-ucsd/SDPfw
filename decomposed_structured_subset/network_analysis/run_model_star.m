@@ -35,8 +35,8 @@ function  [Hout, package, time_solve, time_convert] = run_model_star(model, cone
             param.MSK_IPAR_INTPNT_BASIS = 'MSK_BI_NEVER';            
         end
         
-        [r,res] = mosekopt('minimize echo(0)',prob, param);
-        %[r,res] = mosekopt('minimize',prob, param);
+        %[r,res] = mosekopt('minimize echo(0)',prob, param);
+        [r,res] = mosekopt('minimize',prob, param);
         
         time_solve = toc;
         if  strcmp(res.sol.itr.prosta, 'PRIMAL_AND_DUAL_FEASIBLE')        

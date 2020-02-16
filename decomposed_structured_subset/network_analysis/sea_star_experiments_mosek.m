@@ -3,13 +3,14 @@
 %load('sea_star_Hinf0_medium.mat')
 
 LOWER = 0;
-CONVERT = 1;
+CONVERT = 0;
 %fname = 'sea_star_H2_tiny.mat';
 %fname = 'sea_star_Hinf0_tiny.mat';
 %fname = 'sea_star_H2_small.mat';
 %fname = 'sea_star_Hinf0_medium.mat';
 %fname = 'sea_star_Hinf0_large.mat';
-fname = 'sea_star_Hinf0_verylarge.mat';
+%fname = 'sea_star_Hinf0_verylarge.mat';
+fname = 'sea_star_Hinf0_giant.mat';
 [filepath,name,ext] = fileparts(fname);
 
 
@@ -21,13 +22,14 @@ if LOWER
 else
     outname = strcat(filepath,'output_',name,ext);
     if CONVERT
-        load(fname, 'model_lower');
-        [F, h] = sedumi2yalmip(model_lower.A, model_lower.b,model_lower.c,model_lower.K);
-        [Fd, hd] = dualize(F, h, 0);
-        model_upper = export(Fd, -hd, sdpsettings('solver', 'sedumi'));
-        model_upper.c = model_upper.C;
-        save(fname, '-append', 'model_upper');
-        outname = strcat(filepath,'output_CONVERT_',name,ext);
+%         load(fname, 'model_lower');
+%         [F, h] = sedumi2yalmip(model_lower.A, model_lower.b,model_lower.c,model_lower.K);
+%         [Fd, hd] = dualize(F, h, 0);
+%         model_upper = export(Fd, -hd, sdpsettings('solver', 'sedumi'));
+%         model_upper.c = model_upper.C;
+%         model_upper_c = model_upper;
+%         save(fname, '-append', 'model_upper_c');
+%         outname = strcat(filepath,'output_CONVERT_',name,ext);
     else
         load(fname, 'model_upper');
     end
@@ -53,10 +55,10 @@ thresh = [0, 11, 60, 100];
 %thresh = [0, 11, 41, 63];
 
 %cones = {'dd', 1, 5, 7, 15, 30, 50};
-cones = {'dd', 1, 3, 5, 8, 15, 30, 55, 70};
+%cones = {'dd', 1, 3, 5, 8, 15, 30, 55, 70};
 %cones = {1, 3, 5, 8, 15, 30, 55, 70};
 %cones = {73};
-%cones = {'dd'};
+cones = {'dd'};
 %cones = {};
 %cones = {'dd', 'sdd', 3, 6, 12, 18, Inf};
 %cones = {'dd', 2, 4, 6};

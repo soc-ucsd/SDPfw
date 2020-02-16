@@ -6,13 +6,22 @@
 %% Stability Test: Generating data
 rng(62, 'twister')
 
-star_size = 4;
-Flag  = 3;
+star_size = 6;
+Flag  = 3; %3 for Hinf
 
-VISUALIZE = 1;
+VISUALIZE = 0;
 BIG_REAL = 0;
 
-if star_size == 5
+if star_size == 6
+    %Giant
+    head = 60;      %size of central 'head'
+    knuckle = 10;    %size of each knuckle
+    t = 3;          %#links between head and first knuckle
+    t_k = 3;        %#links between subsequent knuckles
+    N = 6;          %#arms
+    k = 6;          %#knuckles per arm
+    size_str = 'giant';
+elseif star_size == 5
     %Huge
     head = 60;      %size of central 'head'
     knuckle = 10;    %size of each knuckle
@@ -127,6 +136,7 @@ if VISUALIZE
          'Iterations', 6000, 'UseGravity', 'on', 'WeightEffect', 'inverse')
      axis square
      title('Sea Star Visualization', 'fontsize', 18, 'interpreter', 'latex')
+     box off
 end
 
 
