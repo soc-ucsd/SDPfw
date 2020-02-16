@@ -13,13 +13,24 @@ if sos
     support_LR(model_dual, outname, cones, thresh);
 
 else
+    CONSTRAINED = 1;
+    
+    if CONSTRAINED
+        load('LR120_box_1_2.mat', 'model_cons_trans')
+        model = model_cons_trans;      
+        %outname = 'LR120_output_cons_fix_sleep.mat';
+        %outname = 'LR120_output_cons_v2.mat';
+        outname = 'LR120_output_cons_30_40.mat';
+    else
+        load('LR_120.mat', 'model_unc')    
+        model = model_unc;
+        outname = 'LR120_output_uncons_v2.mat';
+    end
     %load('LR_120.mat', 'model_unc')
     %load('LR_120.mat', 'model_c')
-    load('LR120_box_1_2.mat', 'model_cons_trans')
     %load('LR_18.mat', 'model_uncons', 'model_cons_trans')
     %res_cons_trans = load('LR120_box_1_2.mat', 'res_cons_trans');
-    %model = model_uncons;
-    model = model_cons_trans;
+    %
     
     
     %unconstrained: model.c = -model.c
@@ -30,16 +41,19 @@ else
     %load('LR_24.mat')
     %cones = {'dd', 'sdd', 2, 3, 5, 6, 11, 20, 30, 40, 'psd'};
     %cones = {'dd', 'sdd', 2, 3, 5, 6, 10, 15, 20, 'psd'};
-    cones = {3};
+    %cones = {'dd', 'sdd', 2, 3, 5, 6, 10, 15, 20, 30, 40, 'psd'};
+    cones = {30,40};
+    %cones = {3};
     %cones = {'dd', 20, 'psd'};
     %cones = {'psd'};
     %cones = {20};
     %cones = {'dd'};
     %cones = {'dd', 2, 6};
     %thresh = [0 ,10, 20];
-    %thresh = [0, 5, 12, 45, 100];
+    thresh = [0, 5, 12, 45, 100];
+    %thresh = [0, 12, 45, 100];
     %thresh = [0, 5, 12, 45];
-    thresh = [0];
+    %thresh = [0];
     %thresh = [0, 100];
     %thresh = [0, 11, 100, 10000];
     %thresh = [100];
@@ -47,7 +61,7 @@ else
     %thresh = [0];
     %model_dual_unc.c = model_dual_unc.C;
     
-%     outname_unc = 'LR120_output_uncons.mat';
+    
 %     support_LR(model_unc, outname_unc, cones, thresh);
     %model = model_cons_trans;
     %it just gives values of zero. i don't know why, is that actually the
@@ -60,9 +74,10 @@ else
     %model.b = -model.b;
     %
     %outname_c = 'LR120_box.mat';
-    outname_c = 'LR120_output_box_1_2_bonus.mat';
+    %outname_c = 'LR120_output_box_1_2_bonus.mat';
     %outname_c = 'LR120_output_uncons_dual_TSSOS.mat';
-    support_LR(model, outname_c, cones, thresh);
+%    support_LR(model, outname_c, cones, thresh);
+    support_LR(model, outname, cones, thresh);
 
 end
 
@@ -86,6 +101,10 @@ end
 % xlabel('Size of Clique')
 % ylabel('Number of Cliques')
 
+% CONE0 = struct;
+% [CONE0.cost, RES0, CONE0.time_solve, CONE0.time_convert] = run_model_LR(model, 'psd', 1); 
+% save(outname_unc, '-append', 'CONE0', 'RES0');
+
 function support_LR(model, outname, cones, thresh)
     Ncones = length(cones);
     Nthresh = length(thresh);
@@ -108,7 +127,7 @@ function support_LR(model, outname, cones, thresh)
         for j = 1:Nthresh
             fname = strcat(outname(1:end-4), '_', num2str(cones{i}), '_', num2str(thresh(j)), '.txt');
             [CONE{i,j}.cost, RES{i,j}, CONE{i,j}.time_solve, CONE{i,j}.time_convert]...
-                = run_model_LR(model, CONE{i,j}.cone, use_mosek, fname);              
+                = run_model_LR(model, CONE{i,j}.cone, use_mosek);              
 
             cost(i, j) = CONE{i,j}.cost;
                   %output

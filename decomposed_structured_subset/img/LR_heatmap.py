@@ -20,15 +20,9 @@ import matplotlib.pyplot as plt
 uncons_cost = np.genfromtxt('../LR120_uncons_dual_cost.csv', delimiter = ',')
 uncons_time = np.genfromtxt('../LR120_uncons_dual_time.csv', delimiter = ',')
 
-uncons_cost[-2, :] = []
-uncons_time[-2, :] = []
 cons_cost = np.genfromtxt('../LR120_output_box_1_2_cost.csv', delimiter = ',')
 cons_time = np.genfromtxt('../LR120_output_box_1_2_time.csv', delimiter = ',')
 
-
-#need to rerun (B20, 0), index [8, 0], currently time of 21501
-
-cons_time[8, 0] = 2328.7
 
 
 uncons_mask = np.zeros_like(uncons_time)

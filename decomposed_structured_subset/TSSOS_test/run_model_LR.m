@@ -1,4 +1,4 @@
-function [cost, package, time_solve, time_convert] = run_model_LR(model, cone, use_mosek, fname)
+function [cost, package, time_solve, time_convert] = run_model_LR(model, cone, use_mosek)
 
     if nargin < 3
         use_mosek = 1;
