@@ -89,7 +89,7 @@ thresh = (0, 5, 12, 45, 100)
 tick_size = 18
 #sup_size = 22
 title_size = 28
-label_size = 20
+label_size = 18
 cbar_size = 18
 
 #%%
@@ -97,20 +97,21 @@ with sns.axes_style("white"):
     fig = plt.figure(3)
     fig.clf()
     plt.subplot(1, 2, 1)
-    sns.heatmap(uncons_time, mask=uncons_mask)
-    plt.xticks(np.arange(uncons_cost.shape[1])+0.5, thresh, size=tick_size)
-    plt.yticks(np.arange(uncons_cost.shape[0])+0.5, cone, size=tick_size)
-    plt.xlabel('PSD threshold', size = label_size)
-#    plt.ylabel('Cone Complexity', size = label_size)
+    sns.heatmap(uncons_time.T, mask=uncons_mask.T)
+    plt.yticks(np.arange(uncons_cost.shape[1])+0.5, thresh, size=tick_size)
+    plt.xticks(np.arange(uncons_cost.shape[0])+0.5, cone, size=tick_size)
+    plt.ylabel('PSD threshold', size = label_size)
+    plt.xlabel('Cone Complexity', size = label_size)
     plt.title('Unconstrained $f^*=-110.2$', size=title_size)
 
     
     plt.subplot(1, 2, 2)
-    sns.heatmap(cons_time, mask=cons_mask)
-    plt.xticks(np.arange(cons_cost.shape[1])+0.5, thresh, size=tick_size)
-    plt.yticks(np.arange(cons_cost.shape[0])+0.5, cone, size=tick_size)
-    plt.xlabel('PSD threshold', size = label_size)
-#    plt.ylabel('Cone Complexity', size = label_size)
+    sns.heatmap(cons_time.T, mask=cons_mask.T )
+    #plt.yticks(np.arange(cons_cost.shape[1])+0.5, thresh, size=tick_size)
+    plt.yticks([])
+    plt.xticks(np.arange(cons_cost.shape[0])+0.5, cone, size=tick_size)
+    #plt.ylabel('PSD threshold', size = label_size)
+    plt.xlabel('Cone Complexity', size = label_size)
     plt.title('Constrained $f^*=4939.1$', size=title_size)
     
     
