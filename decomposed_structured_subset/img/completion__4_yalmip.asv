@@ -1,0 +1,69 @@
+M = sdpvar(4, 4);
+
+a = sdpvar(1);
+b = sdpvar(1);
+%M(2,2) == 2-b,
+F = [
+    M(1,1) == 1,    
+    M(2,2) == 2,
+    M(3,3) == 5,
+    M(4,4) == 2,        
+    M(1,2) == 1+a,
+    M(2,3) == -2*a,
+    M(2,4) == a + b,    
+    M(3,4) == b/2,   
+];
+
+Mr = reshape(M, [], 1);
+rays = dd_extreme_rays(4);
+F_dd = [F, rays'*Mr >= 0];
+F_psd = [F, M >= 0];
+%F = [F, M >= 0];
+
+%th = sdpvar(1);
+obj = cos(th) * a + sin(th)*b;
+
+P_psd = optimizer(F_psd, obj, sdpsettings('solver', 'mosek'), ...
+    th, {a, b});
+P_dd = optimizer(F_dd, obj, sdpsettings('solver', 'mosek'), ...
+    th, {a, b});
+model_dd_dual = export(F_dd, obj, sdpsettings('solver', 'sedumi'));
+
+N = 50;
+
+th_list = linspace(0, 2*pi, N);
+out_dd = struct;
+out_dd.a = zeros(N, 1);
+out_dd.b = zeros(N, 1);
+
+out_psd = struct;
+out_psd.a = zeros(N, 1);
+out_psd.b = zeros(N, 1);
+
+for i = 1:N
+    th_curr = th_list(i);
+    xval = P_dd(th_curr);
+    out_dd.a(i) = xval{1};
+    out_dd.b(i) = xval{2};
+    
+    xval = P_psd(th_curr);
+    out_psd.a(i) = xval{1};
+    out_psd.b(i) = xval{2};
+end
+
+
+figure(55)
+clf
+plot_region(out_dd, [0, 0.5, 0])
+plot_region(out_psd, [0, 0,  0])
+% th = 3*pi/4;
+% 
+% obj = cos(th) * a + sin(th)*b;
+% 
+% model_dd_dual2 = export(F, obj, sdpsettings('solver', 'sedumi', 'dualize', 2));
+% 
+% 
+% 
+% 
+% sol = optimize(F, obj);
+% 

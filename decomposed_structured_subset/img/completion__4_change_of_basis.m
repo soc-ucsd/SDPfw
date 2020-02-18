@@ -1,9 +1,11 @@
-OPT = 0
-DRAW = 1
+OPT  = 0;
+DRAW = 1;
+
+
+load('sos_quartic_200.mat', 'N', 'model_split', 'out')
 
 if OPT
 
-load('sos_quartic_200.mat', 'N', 'model_split', 'out')
 
 th = linspace(0,2*pi, N);
 
@@ -61,6 +63,7 @@ plot_region(reg_3, C(9, :))
 A0 = [0, 2.5];
 A1 = A0 + [cos(theta_star)*r, sin(theta_star)*r];
 arrow(A0, A1, 'width', 2, 'Length', 40);
+text(0., 2.5, '$\langle C, X \rangle$', 'Interpreter', 'latex', 'Fontsize', 50)
 % 
 % hold off
 %xlabel('$a$', 'interpreter', 'latex', 'Fontsize', 16)

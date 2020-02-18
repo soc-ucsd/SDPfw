@@ -83,7 +83,7 @@ if OPTIMIZE
 
     %bs = [bs; 1; 1; 1; 1];
 
-    %X(1, 2) = 1/2+a
+    %X(1, 2) = 1+a
     is =  [is; 6; 6; 6];
     js =  [js; 1; 13; 14];
     vs =  [vs; -2; 1; 1];
@@ -173,7 +173,7 @@ if OPTIMIZE
     %out.dd_psd = draw_feasibility(model_split, {'dd', 'psd'}, th);
     %out.psd_dd = draw_feasibility(model_split, {'psd', 'dd'}, th);
     
-    %out.dd_dual = draw_feasibility(model_dd_star_dual, 'dd', th);
+    out.dd_dual = draw_feasibility(model_dd_star_dual, 'dd', th);
     %out.dd_dual = draw_feasibility_dual(model_dd_dual, 'psd', th, 0);
     C = linspecer(6);
     save(strcat('sos_quartic_', num2str(N), '.mat'), '-append', 'model', 'model_split', 'out', 'C', 'N')

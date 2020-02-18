@@ -186,14 +186,14 @@ else
         Constraint2 = [[P*Sys.globalA+Sys.globalA'*P, P*Sys.globalB, Sys.globalC'; 
                                    Sys.globalB'*P, -gamma*eye(sum(m)), Sys.globalD';
                                    Sys.globalC, Sys.globalD, -gamma*eye(sum(d))] + epsilon*eye(sum(n)+sum(m)+sum(d)) <= 0];
-        Constraint = [Constraint, Constraint2];
+        Constraint = [Constraint, Constraint2, gamma >= 0];
         Cost = gamma;
         flag_str = 'Hinf1';
     else
         gamma2 = sdpvar(1);
         Constraint2 = [[P*Sys.globalA+Sys.globalA'*P + Sys.globalC'*Sys.globalC, P*Sys.globalB + Sys.globalC'*Sys.globalD; 
                             Sys.globalB'*P + Sys.globalD'*Sys.globalC, Sys.globalD'*Sys.globalD-gamma2*eye(sum(m))] + epsilon*eye(sum(n)+sum(m)) <= 0];
-        Constraint = [Constraint, Constraint2];
+        Constraint = [Constraint, Constraint2, gamma >= 0];
         Cost = gamma2;
         flag_str = 'Hinf0';
     end
