@@ -51,62 +51,6 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
         end
     end
     
-    
-    %first pass through the PSD cones for allocation
-    %offsets for the cones in the system
-    %reformulated problem's linear variables will start at Count_l (for
-    %example) 
-    %Count_lin = K.f + K.l; 
-    %Count_psd = K.f + K.l + sum(K.q);
-    
-%     new_l = 0;
-%     new_s = [];
-%     for i = 1:numPSD
-%         Ksi = K.s(i);
-%         if strcmp('sdd', cones{i}) 
-%             cones{i} = 1;
-%         end
-%         
-%         cone_curr = cones{i};
-%         
-%         if Ksi == 1
-%             %singleton PSD  block ==> linear constraint
-%             Knew.l = Knew.l + 1;
-%             %Count_psd = Count_psd + 1;
-%         elseif strcmp('dd', cone_curr)
-%             %diagonally dominant
-%             %Count_psd = Count_psd + Ksi^2;
-%             Knew.l = Knew.l + Ksi^2;
-%         elseif isnumeric(cone_curr)  && (cone_curr > 0)    
-%             %block-factor width
-%             
-%             %Copy and paste from factorwidth.m
-%             %I know, DRY and all. still.
-%             %number of partition
-%             nop = max(floor(Ksi/cone_curr), 1);
-%             
-%             SizeU = ceil(K.s(PSDind)/nop);
-%             SizeL = floor(K.s(PSDind)/nop);
-%             if SizeU == SizeL
-%                 alpha = ones(nop,1)*SizeU;
-%             else
-%                 x = (K.s(PSDind) - SizeL*nop)./(SizeU-SizeL);
-%                 alpha = [ones(x,1)*SizeU;ones(nop-x,1)*SizeL];
-%             end
-%             Knew.s = [Knew.s; alpha];
-%         else
-%             %PSD
-%             Knew.s = [Knew.s; Ksi];
-%         end                
-%     end
-    
-    
-    %Nvars = Knew.f + Knew.l + Knew.q + sum(Knew.s.^2);
-    
-    %Anew_lin  = [];
-    %Anew_quad = [];
-    %Anew_psd  = [];
-    
     %define new matrices
     
     Count = K.f + K.l + sum(K.q);
@@ -202,15 +146,6 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
             [A_curr, ~, c_curr, K_curr, info_curr] = ...
                 factorwidth(A_curr, b, c_curr, K_temp, opts);            
 
-            
-%             if opts.socp && (cone_curr == 1)
-%                 K_curr.q(K_curr.q == 0) = [];
-%                 Knew.q = [Knew.q K_curr.q];
-%                 
-%                 Anew_quad = [Anew_quad A_curr];
-%                 cnew_quad = [cnew_quad; c_curr];
-%                 
-%             else
             [i_curr, j_curr, v_curr] = find(A_curr);
             
             j_curr = j_curr + Count_psd;

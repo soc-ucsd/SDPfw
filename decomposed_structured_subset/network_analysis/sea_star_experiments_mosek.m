@@ -10,7 +10,8 @@ CONVERT = 0;
 %fname = 'sea_star_Hinf0_medium.mat';
 %fname = 'sea_star_Hinf0_large.mat';
 %fname = 'sea_star_Hinf0_verylarge.mat';
-fname = 'sea_star_Hinf0_giant.mat';
+%fname = 'sea_star_Hinf0_giant.mat';
+fname = 'sea_star_Hinf0_wide_small.mat';
 [filepath,name,ext] = fileparts(fname);
 
 
@@ -58,10 +59,10 @@ thresh = [0, 11, 60, 100];
 %cones = {'dd', 1, 3, 5, 8, 15, 30, 55, 70};
 %cones = {1, 3, 5, 8, 15, 30, 55, 70};
 %cones = {73};
-cones = {'dd'};
+%cones = {'dd'};
 %cones = {};
 %cones = {'dd', 'sdd', 3, 6, 12, 18, Inf};
-%cones = {'dd', 2, 4, 6};
+cones = {'dd', 2, 4, 6};
 %cones = {1,2,3,4,5, 6};
 %cones = {1,2, 4, 5, 8, 10};
 %thresh = [0, 22, 50, Inf];

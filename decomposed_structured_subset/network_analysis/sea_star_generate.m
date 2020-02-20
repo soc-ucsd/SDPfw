@@ -6,13 +6,30 @@
 %% Stability Test: Generating data
 rng(62, 'twister')
 
-star_size = 6;
+star_size = 8;
 Flag  = 3; %3 for Hinf
 
-VISUALIZE = 0;
+VISUALIZE = 1;
 BIG_REAL = 0;
-
-if star_size == 6
+if star_size == 8
+    %wide_small
+    head = 18;      %size of central 'head'
+    knuckle = 5;    %size of each knuckle
+    t = 2;          %#links between head and first knuckle
+    t_k = 2;        %#links between subsequent knuckles
+    N = 7;          %#arms
+    k = 1;          %#knuckles per arm
+    size_str = 'wide_small';
+elseif star_size == 7
+    %wide
+    head = 90;      %size of central 'head'
+    knuckle = 9;    %size of each knuckle
+    t = 3;          %#links between head and first knuckle
+    t_k = 3;        %#links between subsequent knuckles
+    N = 12;          %#arms
+    k = 3;          %#knuckles per arm
+    size_str = 'wide';
+elseif star_size == 6
     %Giant
     head = 60;      %size of central 'head'
     knuckle = 10;    %size of each knuckle
@@ -182,18 +199,18 @@ else
 
     
     if BIG_REAL
-        gamma = sdpvar(1);
+        gamma2 = sdpvar(1);
         Constraint2 = [[P*Sys.globalA+Sys.globalA'*P, P*Sys.globalB, Sys.globalC'; 
                                    Sys.globalB'*P, -gamma*eye(sum(m)), Sys.globalD';
                                    Sys.globalC, Sys.globalD, -gamma*eye(sum(d))] + epsilon*eye(sum(n)+sum(m)+sum(d)) <= 0];
-        Constraint = [Constraint, Constraint2, gamma >= 0];
-        Cost = gamma;
+        Constraint = [Constraint, Constraint2, gamma2 >= 0];
+        Cost = gamma2;
         flag_str = 'Hinf1';
     else
         gamma2 = sdpvar(1);
         Constraint2 = [[P*Sys.globalA+Sys.globalA'*P + Sys.globalC'*Sys.globalC, P*Sys.globalB + Sys.globalC'*Sys.globalD; 
                             Sys.globalB'*P + Sys.globalD'*Sys.globalC, Sys.globalD'*Sys.globalD-gamma2*eye(sum(m))] + epsilon*eye(sum(n)+sum(m)) <= 0];
-        Constraint = [Constraint, Constraint2, gamma >= 0];
+        Constraint = [Constraint, Constraint2, gamma2 >= 0];
         Cost = gamma2;
         flag_str = 'Hinf0';
     end
