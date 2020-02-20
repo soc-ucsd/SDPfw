@@ -2,7 +2,7 @@
 %load('sea_star_Hinf0_small.mat')
 %load('sea_star_Hinf0_medium.mat')
 
-LOWER = 0;
+LOWER = 1;
 CONVERT = 0;
 %fname = 'sea_star_H2_tiny.mat';
 %fname = 'sea_star_Hinf0_tiny.mat';
@@ -152,7 +152,8 @@ end
 
 
 
-
+cost = cellfun(@(x) x.Hout, CONE);
+time = cellfun(@(x) x.time_solve + x.time_convert, CONE);
 
 
 [CONE0.Hout, RES0, CONE0.time_solve, CONE0.time_convert]...
