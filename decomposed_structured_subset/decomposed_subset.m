@@ -1,4 +1,4 @@
-function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
+function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
 %DECOMPOSED_SUBSET Reformulate a decomposed SDP into structured subsets
 %   Each K.s clique is replaced by a cones in the list 'cones'
 % Input data
@@ -6,7 +6,6 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
 %       cones is a cell full of cones, one per entry in K.s.
 %           like {'dd', 'dd', 'psd'}. If it is a string instead of a cell,
 %           then all cliques get the same cones.
-%       dual: 0 (subset K) or 1 (subset K*). As an example, DD vs. DD*
 % Output data 
 %       Anew, bnew, cnew, Knew, new SDP data in sedumi form
 %       info.recover    A function that recovers output x into the desired
@@ -15,9 +14,6 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
 
 %% Input check
 
-    if nargin < 6
-        dual = 0 ;
-    end
     if size(A,1) ~= length(b) 
         A = A';
     end
@@ -46,22 +42,6 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
     Knew.q = K.q;
     Knew.s = [];
     
-    Anew_lin  = [];
-    Anew_quad = [];
-    Anew_psd  = [];
-    cnew_lin  = [];
-    cnew_quad = [];
-    cnew_psd  = [];
-    
-    %offset in current x for where the semidefinite variables are
-    Count = K.f + K.l + sum(K.q);
-    
-    %offsets in the new x on where the cones are.
-    Count_dd = K.f + K.l;
-    %Count_non_dd = K.f + K.l + sum(K.q);
-    
-    info_dd = {};
-    info_non_dd = {};
     %set up cones array
     if ~iscell(cones)
         cone_str = cones;
@@ -71,30 +51,60 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
         end
     end
     
+    %define new matrices
+    
+    Count = K.f + K.l + sum(K.q);
+    
+    Count_lin = 0;
+    Count_psd = 0;
+    
+    inew_lin = [];
+    jnew_lin = [];
+    vnew_lin = [];    
+    
+    inew_psd = [];
+    jnew_psd = [];
+    vnew_psd = [];
+    
+    cnew_lin  = [];
+    %cnew_quad = [];
+    cnew_psd  = [];
+    %offset in current x for where the semidefinite variables are
+            
+    info_dd = {};
+    info_non_dd = {};
+
     for i = 1:numPSD
-        K_temp = struct;
-        
+        K_temp = struct;        
         
         cone_curr = cones{i};
         info_curr = struct;
         
-        if strcmp('sdd', cone_curr) 
-            cone_curr = 1;
-        end
-        
         Ksi = K.s(i);
-        
+         
         info_curr.ind_orig = Count + (1:Ksi^2);
         
         A_curr = A(:, Count + (1:Ksi^2));
         c_curr = c(Count + (1:Ksi^2), :);
         if Ksi == 1
             %nonnegative entry, self dual
-            Anew_lin = [Anew_lin A_curr];
+            %Anew_lin = [Anew_lin A_curr];
+            [i_curr, j_curr, v_curr] = find(A_curr);
+            
+            j_curr = j_curr + Count_lin;
+            
+            %figure out how to preallocate this
+            inew_lin = [inew_lin; i_curr];
+            jnew_lin = [jnew_lin; j_curr];
+            vnew_lin = [vnew_lin; v_curr];                        
+            
             cnew_lin = [cnew_lin; c_curr];
+            
             info_curr.num_var = 1;
             is_dd = 0;
+            
             Knew.l = Knew.l + 1;
+            Count_lin = Count_lin + 1;
         elseif strcmp('dd', cone_curr)
             %DD
             K_temp.s = Ksi;
@@ -105,19 +115,27 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
             info_curr.rays = info_curr.rays{1};
             info_curr.num_var = K_dd_curr.l;            
             
-            Anew_lin = [Anew_lin A_dd_curr];
+            %Anew_lin = [Anew_lin A_dd_curr];
+            
+            
+            [i_curr, j_curr, v_curr] = find(A_dd_curr);
+            
+            j_curr = j_curr + Count_lin;
+            
+            %figure out how to preallocate this
+            inew_lin = [inew_lin; i_curr];
+            jnew_lin = [jnew_lin; j_curr];
+            vnew_lin = [vnew_lin; v_curr]; 
+            
+            Count_lin = Count_lin + Ksi^2;
+            Knew.l = Knew.l + Ksi^2;
+            
             cnew_lin = [cnew_lin; c_dd_curr];
             
-            Knew.l = Knew.l + K_dd_curr.l;            
-            is_dd = 1;
-            
-            Count_dd = Count_dd + K_dd_curr.l;
+            is_dd = 1;            
         elseif isnumeric(cone_curr)  && (cone_curr > 0)           
             %SDD
-            %SDD
-            %Partition = Inf;
             opts.bfw  = 1;
-            %opts.nop  = Partition;
             %opts.socp = 1;   % second-order cones constraints
             opts.socp = 0;   % No SOCP constraints, they are bugged
             opts.block = cone_curr;
@@ -128,34 +146,42 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
             [A_curr, ~, c_curr, K_curr, info_curr] = ...
                 factorwidth(A_curr, b, c_curr, K_temp, opts);            
 
+            [i_curr, j_curr, v_curr] = find(A_curr);
             
-            if opts.socp && (cone_curr == 1)
-                K_curr.q(K_curr.q == 0) = [];
-                Knew.q = [Knew.q K_curr.q];
-                
-                Anew_quad = [Anew_quad A_curr];
-                cnew_quad = [cnew_quad; c_curr];
-                
-                %function F = sdp2socp(M)
-                %F=rcone(M(1,2),.5*M(1,1),M(2,2));
-                %I think this is the magic
-            else
-                Knew.s = [Knew.s K_curr.s'];
-                
-                Anew_psd = [Anew_psd A_curr];
-                cnew_psd = [cnew_psd; c_curr];
-            end
+            j_curr = j_curr + Count_psd;
             
+            %figure out how to preallocate this
+            inew_psd = [inew_psd; i_curr];
+            jnew_psd = [jnew_psd; j_curr];
+            vnew_psd = [vnew_psd; v_curr]; 
+            
+            Count_psd = Count_psd + sum(K_curr.s.^2);
+
+            %Anew_psd = [Anew_psd K_curr];
+            cnew_psd = [cnew_psd; c_curr];
+            
+            
+            Knew.s = [Knew.s; K_curr.s];
             info_curr.num_var = length(c_curr);
             is_dd = 0;
         else
             %PSD, self dual
-            Anew_psd = [Anew_psd A_curr];
+            %Anew_psd = [Anew_psd A_curr];
+            
+            [i_curr, j_curr, v_curr] = find(A_curr);
+            
+            j_curr = j_curr + Count_psd;
+            
+            %figure out how to preallocate this
+            inew_psd = [inew_psd; i_curr];
+            jnew_psd = [jnew_psd; j_curr];
+            vnew_psd = [vnew_psd; v_curr]; 
+            
             cnew_psd = [cnew_psd; c_curr];
-            Knew.s = [Knew.s Ksi];
             info_curr.num_var = length(c_curr);
             is_dd = 0;
-            
+            Count_psd = Count_psd + Ksi^2;
+            Knew.s = [Knew.s; Ksi];
         end
         info_curr.ind_orig = Count + (1:Ksi^2);
         
@@ -168,8 +194,14 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
     end
 
     %output results
-    Anew = [A_free_lin Anew_lin A_quad Anew_quad Anew_psd];
-    cnew = [c_free_lin; cnew_lin; c_quad; cnew_quad; cnew_psd];
+    %Anew = [A_free_lin Anew_lin A_quad Anew_quad Anew_psd];
+    
+    Anew_lin = sparse(inew_lin, jnew_lin, vnew_lin, length(b) ,Count_lin);
+    Anew_psd = sparse(inew_psd, jnew_psd, vnew_psd, length(b), Count_psd);
+    
+    Anew = [A_free_lin Anew_lin A_quad Anew_psd];
+    
+    cnew = [c_free_lin; cnew_lin; c_quad; cnew_psd];
     bnew = b;
     
     Knew.q(Knew.q == 0) = [];
@@ -179,7 +211,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
     info.dd = info_dd;
     info.count_dd = K.f+K.l;
     info.non_dd = info_non_dd;
-    info.count_non_dd = Count_dd + sum(K.q);
+    info.count_non_dd = Count_lin + sum(K.q);
     info.prev_var = length(c);
     
 end
