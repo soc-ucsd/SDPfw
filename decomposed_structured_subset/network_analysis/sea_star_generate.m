@@ -131,6 +131,7 @@ end
 
 
 G = (Gw > 0);
+Gc = G;
 Mc    = maximalCliques(G);
 %generate system
 N = N_state;
@@ -167,7 +168,7 @@ elseif Flag == 2
     Cost = trace(Sys.globalC*P*Sys.globalC');
     title_str = '$A^T P + P A^T + B B^T  \epsilon I \leq 0$';
     flag_str = 'H2';
-else
+elseif Flag == 3
     %Hinf norm
 
     
@@ -190,6 +191,34 @@ else
     
     %title_str = '$\begin{pmatrix}A^T P + P A^T & P^T B & C^T \\ B^T P& -\gamma I & 0 \\ C & 0 & -\gamma I \end{pmatrix}\leq -\epsilon I$';
     title_str = 'Bounded Real Lemma';
+else
+    %Flag == 5
+    %H2 Control
+    
+    Z = [];
+    for i = 1:N
+        Z = blkdiag(Z,sdpvar(d(i)));
+    end
+
+    cumM = cumsum([1;m(:)]);
+    cumN = cumsum([1;n(:)]);
+    
+    %Controller
+    W = sdpvar(sum(m),sum(n));
+    for i = 1:N
+        for j = 1:N
+            if Gc(i,j) == 0 && i~=j
+                W(cumM(i):cumM(i+1)-1,cumN(j):cumN(j+1)-1) = zeros(m(i),n(j)); 
+            end
+        end
+    end
+
+%     Constraint1 = [P - epsilon*eye(sum(n)) >= 0];
+    Constraint2 = [Sys.globalA*P + Sys.globalB2*W + (Sys.globalA*P + Sys.globalB2*W)' + Sys.globalB1*Sys.globalB1' + epsilon*eye(sum(n)) <= 0];
+    Constraint3 = [[-Z,Sys.globalC*P+Sys.globalD*W; (Sys.globalC*P+Sys.globalD*W)', -P] + epsilon*eye(sum(n)+sum(d)) <= 0];
+    Constraint = [Constraint,Constraint2,Constraint3];
+    Cost = trace(Z);
+
 end
 % by SeDuMi
 opts      = sdpsettings('verbose',1,'solver','sedumi');
@@ -216,6 +245,9 @@ if VISUALIZE
     figure(2)
     clf
     SP = spones(spones(model.C) + sparse(sum(spones(model.A),2)));  % vector of 1s and 0s
+    
+    %if Flag == 1
+    %Do H2 later    
     mask1 = reshape(SP(1:model.K.s(1)^2), model.K.s(1), model.K.s(1));
     mask2 = reshape(SP(model.K.s(1)^2 + (1:model.K.s(2)^2)), model.K.s(2), model.K.s(2));
 

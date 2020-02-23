@@ -1,4 +1,4 @@
-function Sys = GenerateDynamics(Gp,Gc,n,m,d,Flag,Q,R)
+ function Sys = GenerateDynamics(Gp,Gc,n,m,d,Flag,Q,R)
 % Generate a network of linear hetergoeneous systems
 % Gp: Plant graph
 % Gc: Communication graph
