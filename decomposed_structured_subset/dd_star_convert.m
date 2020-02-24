@@ -1,4 +1,4 @@
-function [Anew, bnew, cnew, Knew, info] = dd_star_convert(A,b,c,K)
+function [Anew, bnew, cnew, Knew, info] = dd_star_convert(A,b,c,K, keep_split)
 %  Reformulating a primal SDP with a Diagonally Dominant * cone
 %  The DD* cone is larger than the PSD cone, and will have a lower
 %  objective value (is an outer approximation).
@@ -12,14 +12,17 @@ function [Anew, bnew, cnew, Knew, info] = dd_star_convert(A,b,c,K)
 %       A, b, c, K are SDP data in seudmi form
 % Output data 
 %       Anew, bnew, cnew, Knew, new SDP data in sedumi form
-%       info.Ech how to recover free variables into 
-
-% How to recover the original variable x
-%       after geting a solution from SeDuMi, [x;y],  for the new data Anew,
-%       bnew, cnew, Knew, the recovered solution will be x(info.Ech)
-%       
+%       info for recovery 
+%
+% keep_split = 0: perform decomposition and new SDP
+% keep_split = 1: don't merge together relation SDPs
 
 %% Input check
+
+    if nargin <= 4
+        keep_split = 0;
+    end
+
     if size(A,1) ~= length(b) 
         A = A';
     end
@@ -62,9 +65,10 @@ function [Anew, bnew, cnew, Knew, info] = dd_star_convert(A,b,c,K)
     
     %%PSD part
     Count = K.f+K.l+K.q;
+    %Count_dd
     Count_dd_free = 0;
 %    Count_dd_lin  = K.f + K.l;
-    Count_dd_lin  = 0;
+    %Count_dd_lin  = 0;
     
     %info.rays = cell(length(K.s), 1);
     info.ind  = cell(length(K.s), 1);
@@ -94,6 +98,9 @@ function [Anew, bnew, cnew, Knew, info] = dd_star_convert(A,b,c,K)
         [i_curr, j_curr, v_curr] = find(At_psd_dd);
 
         j_curr = j_curr + Count_dd_free;
+        
+        info.ind{PSDind} = reshape(Count + tri_indexer(Ksi), [], 1);
+        
         Count_dd_free = Count_dd_free + Ksi*(Ksi+1)/2;
         %figure out how to preallocate this
         i_dd_free = [i_dd_free; i_curr];
@@ -123,28 +130,37 @@ function [Anew, bnew, cnew, Knew, info] = dd_star_convert(A,b,c,K)
         %Count_dd_lin  = Count_dd_lin + num_svec + num_dd;
         
         %Count_dd = Count_dd + Ksi^2;
-        Count = Count + num_dd;
-        info.ind{PSDind} = reshape(tri_indexer(Ksi), [], 1);
+        Count = Count + num_dd;        
     end
     
-    
     A_dd_free = sparse(i_dd_free, j_dd_free, v_dd_free);
-    Anew = [A_free A_dd_free A_lin  A_dd_lin A_quad];
-    cnew = [c_free; c_dd_free; c_lin; c_dd_lin; c_quad];
+    
+    if keep_split
+        Anew = [];
+        bnew = [];
+        cnew = [];
+        info.A_dd_free = A_dd_free;
+        info.A_dd_lin  = A_dd_lin;
+        info.A_rel_free  = A_rel_free;
+        info.c_dd_free = c_dd_free;
+        info.c_dd_lin  = c_dd_lin;
+    else        
+        Anew = [A_free A_dd_free A_lin  A_dd_lin A_quad];
+        cnew = [c_free; c_dd_free; c_lin; c_dd_lin; c_quad];
 
-    
-    A_rel_free_diag = cell_blkdiag(A_rel_free);
-    A_rel_lin_diag  = cell_blkdiag(A_rel_lin);
-    
-    num_rel = size(A_rel_free_diag, 1);
-    A_rel = [sparse(num_rel, length(c_free)) A_rel_free_diag ...
-             sparse(num_rel, length(c_lin))  A_rel_lin_diag ...
-             sparse(num_rel, length(c_quad))];
-    b_rel = sparse(num_rel, 1);
-    
-    Anew = [Anew; A_rel];
-    bnew = [bnew; b_rel];
-    
+
+        A_rel_free_diag = cell_blkdiag(A_rel_free);
+        A_rel_lin_diag  = cell_blkdiag(A_rel_lin);
+
+        num_rel = size(A_rel_free_diag, 1);
+        A_rel = [sparse(num_rel, length(c_free)) A_rel_free_diag ...
+                 sparse(num_rel, length(c_lin))  A_rel_lin_diag ...
+                 sparse(num_rel, length(c_quad))];
+        b_rel = sparse(num_rel, 1);
+
+        Anew = [Anew; A_rel];
+        bnew = [bnew; b_rel];
+    end
     
     %now for the relations between entries
     

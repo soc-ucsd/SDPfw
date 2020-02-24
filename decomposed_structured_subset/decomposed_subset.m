@@ -1,4 +1,4 @@
-function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
+function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
 %DECOMPOSED_SUBSET Reformulate a decomposed SDP into structured subsets
 %   Each K.s clique is replaced by a cones in the list 'cones'
 % Input data
@@ -13,6 +13,10 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
 
 
 %% Input check
+ 
+    if nargin < 6
+        dual = 0;
+    end
 
     if size(A,1) ~= length(b) 
         A = A';
@@ -27,10 +31,16 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
         K.q = [];
     end
 
+    m = length(b);
+    
     %% Non PSD part
-    A_free_lin = A(:,1:K.f+K.l);
+    %A_free_lin = A(:,1:K.f+K.l);
+    A_free     = A(:, 1:K.f);
+    A_lin      = A(:, K.f + (1:K.l));
     A_quad     = A(:, K.f + K.l + (1:K.q)); 
-    c_free_lin = c(1:K.f+K.l, :);
+    %c_free_lin = c(1:K.f+K.l, :);
+    c_free     = c(1:K.f);
+    c_lin      = c(K.f + (1:K.l));
     c_quad     = c(K.f + K.l + (1:K.q), :);
     
     numPSD = length(K.s);
@@ -54,9 +64,13 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
     %define new matrices
     
     Count = K.f + K.l + sum(K.q);
-    
+    Count_free= 0;
     Count_lin = 0;
     Count_psd = 0;
+        
+    inew_free = [];
+    jnew_free = [];
+    vnew_free = []; 
     
     inew_lin = [];
     jnew_lin = [];
@@ -66,8 +80,10 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
     jnew_psd = [];
     vnew_psd = [];
     
-    cnew_lin  = [];
-    %cnew_quad = [];
+    A_rel_free = {};
+    
+    cnew_free = [];
+    cnew_lin  = [];    
     cnew_psd  = [];
     %offset in current x for where the semidefinite variables are
             
@@ -108,31 +124,79 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
         elseif strcmp('dd', cone_curr)
             %DD
             K_temp.s = Ksi;
-            [A_dd_curr, ~, c_dd_curr, K_dd_curr, info_curr] = ...
-                dd_convert(A_curr, b, c_curr, K_temp);
+            if dual
+                %DD star
+                [~, ~, ~, ~, info_dds] = ...
+                    dd_star_convert(A_curr, b, c_curr, K_temp, 1);
+                
+                A_dd_free = info_dds.A_dd_free ;
+                A_dd_lin  = info_dds.A_dd_lin;                
+                
+                Knew.f = Knew.f + Ksi*(Ksi+1)/2;
+                
+                %New free variables
+                [i_curr, j_curr, v_curr] = find(A_dd_free);
+
+                j_curr = j_curr + Count_free;
+                
+                inew_free = [inew_free; i_curr];
+                jnew_free= [jnew_free; j_curr];
+                vnew_free= [vnew_free; v_curr]; 
+
+                info_curr.ind = K.f + Count_free + reshape(tri_indexer(Ksi),[], 1);
+                
+                Count_free = Count_free + Ksi*(Ksi+1)/2;         
+                
+                info_curr.num_var = Ksi*(Ksi+1)/2;
+                
+                
+                [i_curr, j_curr, v_curr] = find(A_dd_lin);
+
+                j_curr = j_curr + Count_lin;
+
+                %New nonnegative variables
+                inew_lin = [inew_lin; i_curr];
+                jnew_lin = [jnew_lin; j_curr];
+                vnew_lin = [vnew_lin; v_curr]; 
+
+                Count_lin = Count_lin + Ksi^2;
+                Knew.l = Knew.l + Ksi^2;
+                
+                
+                %Additional relationships (dual inequalities)
+                A_rel_free = cat(1,A_rel_free, info_dds.A_rel_free);
+                
+                cnew_free  = [cnew_free; info_dds.c_dd_free];
+                cnew_lin   = [cnew_lin;  info_dds.c_dd_lin];
+        
+                
+            else
+                [A_dd_curr, ~, c_dd_curr, K_dd_curr, info_curr] = ...
+                    dd_convert(A_curr, b, c_curr, K_temp);
+
+                %info_curr.ind = info_curr.ind{1} + Count;
+                info_curr.rays = info_curr.rays{1};
+                info_curr.num_var = K_dd_curr.l;            
+
+                %Anew_lin = [Anew_lin A_dd_curr];
+
+
+                [i_curr, j_curr, v_curr] = find(A_dd_curr);
+
+                j_curr = j_curr + Count_lin;
+
+                %figure out how to preallocate this
+                inew_lin = [inew_lin; i_curr];
+                jnew_lin = [jnew_lin; j_curr];
+                vnew_lin = [vnew_lin; v_curr]; 
+
+                Count_lin = Count_lin + Ksi^2;
+                Knew.l = Knew.l + Ksi^2;
+
+                cnew_lin = [cnew_lin; c_dd_curr];                 
+            end
             
-            %info_curr.ind = info_curr.ind{1} + Count;
-            info_curr.rays = info_curr.rays{1};
-            info_curr.num_var = K_dd_curr.l;            
-            
-            %Anew_lin = [Anew_lin A_dd_curr];
-            
-            
-            [i_curr, j_curr, v_curr] = find(A_dd_curr);
-            
-            j_curr = j_curr + Count_lin;
-            
-            %figure out how to preallocate this
-            inew_lin = [inew_lin; i_curr];
-            jnew_lin = [jnew_lin; j_curr];
-            vnew_lin = [vnew_lin; v_curr]; 
-            
-            Count_lin = Count_lin + Ksi^2;
-            Knew.l = Knew.l + Ksi^2;
-            
-            cnew_lin = [cnew_lin; c_dd_curr];
-            
-            is_dd = 1;            
+            is_dd = 1;       
         elseif isnumeric(cone_curr)  && (cone_curr > 0)           
             %SDD
             opts.bfw  = 1;
@@ -194,25 +258,48 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones)
     end
 
     %output results
-    %Anew = [A_free_lin Anew_lin A_quad Anew_quad Anew_psd];
+    %Anew = [A_free_lin Anew_lin A_quad Anew_quad Anew_psd];   
     
-    Anew_lin = sparse(inew_lin, jnew_lin, vnew_lin, length(b) ,Count_lin);
-    Anew_psd = sparse(inew_psd, jnew_psd, vnew_psd, length(b), Count_psd);
     
-    Anew = [A_free_lin Anew_lin A_quad Anew_psd];
+    Anew_free= sparse(inew_free, jnew_free, vnew_free, m, Count_free);
+    Anew_lin = sparse(inew_lin,  jnew_lin,  vnew_lin, m, Count_lin);
+    Anew_psd = sparse(inew_psd,  jnew_psd,  vnew_psd, m, Count_psd);
     
-    cnew = [c_free_lin; cnew_lin; c_quad; cnew_psd];
-    bnew = b;
+    Anew = [A_free Anew_free A_lin Anew_lin A_quad Anew_psd];
+    
+    cnew = [c_free; cnew_free; c_lin; cnew_lin; c_quad; cnew_psd];
+    
     
     Knew.q(Knew.q == 0) = [];
     
-    %info = [];
     
-    info.dd = info_dd;
-    info.count_dd = K.f+K.l;
+        %relations between data
+    if dual
+        A_rel_free_diag = cell_blkdiag(A_rel_free);
+        num_rel =  size(A_rel_free_diag, 1);
+    
+        A_rel_lin_diag =  -speye(num_rel);
+
+        A_rel = [sparse(num_rel, K.f), A_rel_free_diag, sparse(num_rel, K.l), A_rel_lin_diag, sparse(num_rel, K.l + sum(K.q) + Count_psd)];
+        
+        Anew = [Anew; A_rel];
+        bnew = [b; sparse(num_rel, 1)] ;
+    else
+        bnew = b;
+        num_rel = 0;
+    end
+    
+    
+    %info = [];
+    info.dual = dual;
+    info.dd = info_dd;    
+    info.num_rel = num_rel;
+    info.count_free = Count_free;
     info.non_dd = info_non_dd;
-    info.count_non_dd = Count_lin + sum(K.q);
+    info.prev_cone = K;
+    info.count_non_dd = Knew.f + Knew.l + sum(Knew.q);
     info.prev_var = length(c);
+    info.dual = dual;
     
 end
 

@@ -1,4 +1,5 @@
-load('sos_quartic_200.mat', 'model');
+load('sos_quartic_200.mat', 'model_split');
+model = model_split;
 modelD = struct;
 model.c =  model.C;
 model = rmfield(model, 'c');
@@ -6,6 +7,9 @@ model = rmfield(model, 'c');
  [modelD.A, modelD.b, modelD.C, modelD.K, info] = ...
      dd_star_convert(model.A,model.b,model.C, model.K);
 
+ [modelS.A, modelS.b, modelS.C, modelS.K, infoS] = ...
+    decomposed_subset(model.A,model.b,model.C, model.K, 'dd', 1);
+ 
 % As = model.A(:, 3:end);
 % N = model.K.s;
 % Nd = N *(N+1)/2;
@@ -48,10 +52,13 @@ model = rmfield(model, 'c');
 
 
 %  
- pars.fid = 0;
-[xd, yd, info_dds] = sedumi(modelD.A, modelD.b, modelD.C, modelD.K, pars);
+pars.fid = 0;
+% [xd, yd, info_D] = sedumi(modelD.A, modelD.b, modelD.C, modelD.K, pars);
+[xs, ys, info_solve] = sedumi(modelS.A, modelS.b, modelS.C, modelS.K, pars);
+x = decomposed_recover(xs, infoS);
 
-[Mi, L] = tri_indexer(model.K.s(1));
-xs = xd(3:16);
-x_ret = xs(Mi);
-reshape(x_ret, 4, 4)
+
+% [Mi, L] = tri_indexer(model.K.s(1));
+% xs = xd(3:16);
+% x_ret = xs(Mi);
+% reshape(x_ret, 4, 4)
