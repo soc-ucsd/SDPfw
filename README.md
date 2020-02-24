@@ -1,5 +1,7 @@
-# Block factor-width-two cone program
-Reformulation of SDPs using block factor-width two matrices
+# Block factor-width-two and Decomposed cone programs
+Reformulation of SDPs using structured subsets of the PSD cone. Includes block factor-width-two and (scaled) diagonally dominant matrices.
+
+## Block factor-width-two
 
 The function factorwidth.m approximates an SDP in the standard primal vectorized form using block factor-width-two matrices
 
@@ -14,7 +16,17 @@ where the conic constraint `x \in K` is cartesian products of the following cone
 * Second-order cone
 * Positive semidefinite cone
 
-Only the PSD cones are approximated.
+Only the PSD cones are approximated.    
+
+## Decomposed Structured Subsets
+
+The function decomposed_subset.m approximates an SDP in the standard primal vectorized form using general structured subsets. 
+
+The arguments to decomposed_subset includes a parameter 'cone' for the approximating subset of the PSD cone. Allowable values are 'dd', 'sdd', 'psd', or an integer k (block factor-width 2 with block size k). 'cone' may also be a cell indicating which approximating cone should be used for each PSD cone (in K.s). 
+
+decomposed_recover.m returns the optimum matrix solution X^* given the approximated problem from decomposed_subset.m
+
+basis_change.m performs the Change of Basis algorithm given a model and an initial feasible point. model.basis is the Cholesky basis used for transformation
 
 ## Related publications
 Details can be found in the following papers:
