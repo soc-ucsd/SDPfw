@@ -5,8 +5,6 @@ if OPTIMIZE
     N = 200;
     th = linspace(0,2*pi, N);
 
-
-
     %PSD matrix  X(4, 4)
 
 

@@ -85,7 +85,7 @@ for j = 1:length(model_list)
     [cost, x_feas, info, time] = run_model(model_feas, 'psd');
     
     [model_feas_change, x_fake{j}] = basis_change(x_feas, model_curr);
-    Basis_Matrix{1, j} = model_feas_change;
+    Basis_Matrix{1, j} = model_feas_change; 
     X_Matrix{1, j} = x_feas;
     %Basis_Matrix{1, i} = model_feas_change;
 end

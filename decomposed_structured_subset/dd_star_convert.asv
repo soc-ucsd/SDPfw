@@ -49,24 +49,20 @@ function [Anew, bnew, cnew, Knew, info] = dd_star_convert(A,b,c,K)
     Knew.s = [];
     %A_dd = [];
     %c_dd = [];
-    %A_dd_free = [];
-    i_dd_free = [];
-    j_dd_free = [];
-    v_dd_free = [];
+    A_dd_free = [];
     c_dd_free = [];
-    A_dd_lin  = sparse(length(b), sum(K.s.^2));
-    c_dd_lin  = sparse(sum(K.s.^2), 1);
+    A_dd_lin  = [];
+    c_dd_lin  = [];
     
     A_rel_free = cell(length(K.s), 1);
     A_rel_lin  = cell(length(K.s), 1);
     
     %%PSD part
     Count = K.f+K.l+K.q;
-    Count_dd_free = 0;
-%    Count_dd_lin  = K.f + K.l;
-    Count_dd_lin  = 0;
+    Count_dd_free = K.f;
+    Count_dd_lin  = K.f + K.l;
     
-    %info.rays = cell(length(K.s), 1);
+    info.rays = cell(length(K.s), 1);
     info.ind  = cell(length(K.s), 1);
     for PSDind = 1:length(K.s)   % multiple PSD cone
         Ksi = K.s(PSDind);
@@ -77,35 +73,24 @@ function [Anew, bnew, cnew, Knew, info] = dd_star_convert(A,b,c,K)
         
         %[At_psd_dd, c_dd_free_new] = svecData_mod(Apsd', cpsd, Ksi);
         %rays_svec, ~] = svecData_mod(rays', cpsd, Ksi);
-        At_psd_dd = tri_matrix(Apsd, 1);
-        c_dd_free_new = tri_matrix(cpsd', 1);
+        At_psd_dd = triu_matrix(Apsd, 1);
+        c_dd_free_new = triu_matrix(cpsd', 1);
         
         %extreme rays for DD cone
         rays = dd_extreme_rays(Ksi);
-        %rays(:, Ksi+3:end) = 0;
-        %raysT  = tri_matrix(rays', 1);
-        raysT  = tri_matrix(rays', 1);
+        rays = rays(:, 1:Ksi);
+        raysT  = triu_matrix(rays', 1);
         %raysT = zeros(size(raysT));
         
         num_svec = length(c_dd_free);
         
         %cost, and standard affine constraints <Ai, X> = bi
-        %A_dd_free = [A_dd_free At_psd_dd];
-        [i_curr, j_curr, v_curr] = find(At_psd_dd);
-
-        j_curr = j_curr + Count_dd_free;
-        Count_dd_free = Count_dd_free + Ksi*(Ksi+1)/2;
-        %figure out how to preallocate this
-        i_dd_free = [i_dd_free; i_curr];
-        j_dd_free = [j_dd_free; j_curr];
-        v_dd_free = [v_dd_free; v_curr];
-        
-        
+        A_dd_free = [A_dd_free At_psd_dd];
         c_dd_free = [c_dd_free; c_dd_free_new'];
         
         %A_dd_lin  = [A_dd_lin; rays_svec'];
-        %c_dd_lin  = [c_dd_lin; sparse(num_dd, 1)];                                
-        %A_dd_lin  = [A_dd_lin sparse(length(b), num_dd)];
+        c_dd_lin  = [c_dd_lin; sparse(num_dd, 1)];                                
+        A_dd_lin  = [A_dd_lin sparse(length(b), num_dd)];
         %now relate the new variables together, rays*free = lin
         
         A_rel_free{PSDind} = raysT;
@@ -119,16 +104,13 @@ function [Anew, bnew, cnew, Knew, info] = dd_star_convert(A,b,c,K)
         %info.ind{PSDind} = Count_dd + (1:Ksi^2);
         %info.rays{PSDind} = rays;
         
-        %Count_dd_free = Count_dd_free + num_svec;
-        %Count_dd_lin  = Count_dd_lin + num_svec + num_dd;
+        Count_dd_free = Count_dd_free + num_svec;
+        Count_dd_lin  = Count_dd_lin + num_svec + num_dd;
         
         %Count_dd = Count_dd + Ksi^2;
         Count = Count + num_dd;
-        info.ind{PSDind} = reshape(tri_indexer(Ksi), [], 1);
     end
     
-    
-    A_dd_free = sparse(i_dd_free, j_dd_free, v_dd_free);
     Anew = [A_free A_dd_free A_lin  A_dd_lin A_quad];
     cnew = [c_free; c_dd_free; c_lin; c_dd_lin; c_quad];
 
