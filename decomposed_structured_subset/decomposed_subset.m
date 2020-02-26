@@ -65,25 +65,45 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
     
     Count = K.f + K.l + sum(K.q);
     Count_free= 0;
+    Count_linf= 0;
     Count_lin = 0;
     Count_psd = 0;
+    Count_psdf= 0;
+    Count_prev= 0;
         
-    inew_free = [];
-    jnew_free = [];
-    vnew_free = []; 
+    inew_linf = [];
+    jnew_linf = [];
+    vnew_linf = []; 
     
     inew_lin = [];
     jnew_lin = [];
     vnew_lin = [];    
     
+    
+    iprev_psd = [];
+    jprev_psd = [];
+    vprev_psd = [];
+    Kprev_s = [];
+    
+    inew_psdf = [];
+    jnew_psdf = [];
+    vnew_psdf = [];
+    
+    
     inew_psd = [];
     jnew_psd = [];
     vnew_psd = [];
     
-    A_rel_free = {};
+    %A_rel_free = {};
+    A_rel_linf = {};
+    A_rel_lin  = {};
+    A_rel_psdf = {};
+    A_rel_psd  = {};
     
-    cnew_free = [];
-    cnew_lin  = [];    
+    cnew_linf = [];
+    cnew_lin  = [];        
+    cprev_psd = [];
+    cnew_psdf = [];
     cnew_psd  = [];
     %offset in current x for where the semidefinite variables are
             
@@ -94,6 +114,11 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
         K_temp = struct;        
         
         cone_curr = cones{i};
+        
+        if strcmp(cone_curr, 'sdd')
+            cone_curr = 1;
+        end
+        
         info_curr = struct;
         
         Ksi = K.s(i);
@@ -137,16 +162,18 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
                 %New free variables
                 [i_curr, j_curr, v_curr] = find(A_dd_free);
 
-                j_curr = j_curr + Count_free;
+                j_curr = j_curr + Count_linf;
                 
-                inew_free = [inew_free; i_curr];
-                jnew_free= [jnew_free; j_curr];
-                vnew_free= [vnew_free; v_curr]; 
+                inew_linf = [inew_linf; i_curr];
+                jnew_linf= [jnew_linf; j_curr];
+                vnew_linf= [vnew_linf; v_curr]; 
 
-                info_curr.ind = K.f + Count_free + reshape(tri_indexer(Ksi),[], 1);
                 
-                Count_free = Count_free + Ksi*(Ksi+1)/2;         
+                %Indexing?
+                info_curr.ind_dual = K.f + Count_linf + reshape(tri_indexer(Ksi),[], 1);
                 
+                Count_linf = Count_linf + Ksi*(Ksi+1)/2;         
+                %Count_free = Count_free + Ksi*(Ksi+1)/2;
                 info_curr.num_var = Ksi*(Ksi+1)/2;
                 
                 
@@ -164,9 +191,9 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
                 
                 
                 %Additional relationships (dual inequalities)
-                A_rel_free = cat(1,A_rel_free, info_dds.A_rel_free);
-                
-                cnew_free  = [cnew_free; info_dds.c_dd_free];
+                A_rel_linf = cat(1,A_rel_linf, info_dds.A_rel_free);
+                A_rel_lin = cat(1,A_rel_lin, info_dds.A_rel_lin);
+                cnew_linf = [cnew_linf; info_dds.c_dd_free];
                 cnew_lin   = [cnew_lin;  info_dds.c_dd_lin];
         
                 
@@ -203,30 +230,85 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
             %opts.socp = 1;   % second-order cones constraints
             opts.socp = 0;   % No SOCP constraints, they are bugged
             opts.block = cone_curr;
+            opts.keep_split = 1;
+            opts.dual = 1;
+            
+            if dual
+                %Factor Width star
+                K_temp.s = Ksi;
+                [~, ~, ~, ~, info_fw] = ...
+                    factorwidth(A_curr, b, c_curr, K_temp, opts);                            
+                
+                A_fw_free = info_fw.A_fw_free ;
+                A_fw_psd  = info_fw.A_fw_psd;                
+                
+                Knew.f = Knew.f + Ksi*(Ksi+1)/2;
+                
+                %New free variables
+                [i_curr, j_curr, v_curr] = find(A_fw_free);
 
-            
-            K_temp.s = Ksi;
-            %TODO: add indexing/recovery for sdd_info
-            [A_curr, ~, c_curr, K_curr, info_curr] = ...
-                factorwidth(A_curr, b, c_curr, K_temp, opts);            
+                j_curr = j_curr + Count_psdf;
+                
+                inew_psdf = [inew_psdf; i_curr];
+                jnew_psdf= [jnew_psdf; j_curr];
+                vnew_psdf= [vnew_psdf; v_curr]; 
 
-            [i_curr, j_curr, v_curr] = find(A_curr);
-            
-            j_curr = j_curr + Count_psd;
-            
-            %figure out how to preallocate this
-            inew_psd = [inew_psd; i_curr];
-            jnew_psd = [jnew_psd; j_curr];
-            vnew_psd = [vnew_psd; v_curr]; 
-            
-            Count_psd = Count_psd + sum(K_curr.s.^2);
+                
+                %redo this
+                info_curr.ind_dual = K.f + Count_psdf + reshape(tri_indexer(Ksi),[], 1);
+                
+                Count_psdf = Count_psdf + Ksi*(Ksi+1)/2;
+                %Count_free = Count_free + Ksi*(Ksi+1)/2;         
+                
+                info_curr.num_var = Ksi*(Ksi+1)/2;
+                
+                num_s_new = length(info_fw.c_fw_psd);
+                
+                [i_curr, j_curr, v_curr] = find(A_fw_psd);
 
-            %Anew_psd = [Anew_psd K_curr];
-            cnew_psd = [cnew_psd; c_curr];
-            
-            
-            Knew.s = [Knew.s; K_curr.s];
-            info_curr.num_var = length(c_curr);
+                j_curr = j_curr + Count_psd;
+
+                %New nonnegative variables
+                inew_psd = [inew_psd; i_curr];
+                jnew_psd = [jnew_psd; j_curr];
+                vnew_psd = [vnew_psd; v_curr]; 
+
+                Count_psd = Count_psd + num_s_new;
+                Knew.s = [Knew.s;  info_fw.new_cone.s];
+                
+                
+                %Additional relationships (dual inequalities)
+                A_rel_psdf = cat(1,A_rel_psdf, info_fw.A_rel_free);
+                A_rel_psd  = cat(1,A_rel_psd,  info_fw.A_rel_psd);
+                
+                cnew_psdf  = [cnew_psdf; info_fw.c_fw_free];
+                cnew_psd   = [cnew_psd;  info_fw.c_fw_psd];
+        
+                
+            else
+                K_temp.s = Ksi;
+                %TODO: add indexing/recovery for sdd_info
+                [A_curr, ~, c_curr, K_curr, info_curr] = ...
+                    factorwidth(A_curr, b, c_curr, K_temp, opts);            
+
+                [i_curr, j_curr, v_curr] = find(A_curr);
+
+                j_curr = j_curr + Count_psd;
+
+                %figure out how to preallocate this
+                inew_psd = [inew_psd; i_curr];
+                jnew_psd = [jnew_psd; j_curr];
+                vnew_psd = [vnew_psd; v_curr]; 
+
+                Count_psd = Count_psd + sum(K_curr.s.^2);
+
+                
+                cnew_psd = [cnew_psd; c_curr];
+
+
+                Knew.s = [Knew.s; K_curr.s];
+                info_curr.num_var = length(c_curr);
+            end
             is_dd = 0;
         else
             %PSD, self dual
@@ -234,18 +316,18 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
             
             [i_curr, j_curr, v_curr] = find(A_curr);
             
-            j_curr = j_curr + Count_psd;
+            j_curr = j_curr + Count_prev;
             
             %figure out how to preallocate this
-            inew_psd = [inew_psd; i_curr];
-            jnew_psd = [jnew_psd; j_curr];
-            vnew_psd = [vnew_psd; v_curr]; 
+            iprev_psd = [iprev_psd; i_curr];
+            jprev_psd = [jprev_psd; j_curr];
+            vprev_psd = [vprev_psd; v_curr]; 
             
-            cnew_psd = [cnew_psd; c_curr];
+            cprev_psd = [cprev_psd; c_curr];
             info_curr.num_var = length(c_curr);
             is_dd = 0;
-            Count_psd = Count_psd + Ksi^2;
-            Knew.s = [Knew.s; Ksi];
+            Count_prev = Count_prev+ Ksi^2;
+            Kprev_s = [Kprev_s; Ksi];
         end
         info_curr.ind_orig = Count + (1:Ksi^2);
         
@@ -258,16 +340,19 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
     end
 
     %output results
-    %Anew = [A_free_lin Anew_lin A_quad Anew_quad Anew_psd];   
     
+    Knew.s = [Kprev_s; Knew.s];
+    %Anew_free = sparse(inew_free, jnew_free, vnew_free, m, Count_free);
+    Anew_free_lin = sparse(inew_linf, jnew_linf, vnew_linf, m, Count_linf);
+    Anew_free_psd = sparse(inew_psdf, jnew_psdf, vnew_psdf, m, Count_psdf);
     
-    Anew_free= sparse(inew_free, jnew_free, vnew_free, m, Count_free);
-    Anew_lin = sparse(inew_lin,  jnew_lin,  vnew_lin, m, Count_lin);
-    Anew_psd = sparse(inew_psd,  jnew_psd,  vnew_psd, m, Count_psd);
+    Anew_lin  = sparse(inew_lin,  jnew_lin,  vnew_lin, m, Count_lin);
+    Aprev_psd = sparse(iprev_psd,  jprev_psd,  vprev_psd, m, sum(Kprev_s.^2));
+    Anew_psd  = sparse(inew_psd,  jnew_psd,  vnew_psd, m, Count_psd);
     
-    Anew = [A_free Anew_free A_lin Anew_lin A_quad Anew_psd];
+    Anew = [A_free Anew_free_lin Anew_free_psd A_lin Anew_lin A_quad Aprev_psd Anew_psd];
     
-    cnew = [c_free; cnew_free; c_lin; cnew_lin; c_quad; cnew_psd];
+    cnew = [c_free; cnew_linf; cnew_psdf; c_lin; cnew_lin; c_quad; cprev_psd; cnew_psd];
     
     
     Knew.q(Knew.q == 0) = [];
@@ -275,14 +360,40 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
     
         %relations between data
     if dual
-        A_rel_free_diag = cell_blkdiag(A_rel_free);
-        num_rel =  size(A_rel_free_diag, 1);
-    
-        A_rel_lin_diag =  -speye(num_rel);
-
-        A_rel = [sparse(num_rel, K.f), A_rel_free_diag, sparse(num_rel, K.l), A_rel_lin_diag, sparse(num_rel, K.l + sum(K.q) + Count_psd)];
         
-        Anew = [Anew; A_rel];
+        for k = 1:length(info_non_dd)
+            if isfield(info_non_dd{k}, 'ind_dual')
+                info_non_dd{k}.ind_dual = info_non_dd{k}.ind_dual + Count_linf;
+            end
+        end
+        
+        %A_rel_free_diag = cell_blkdiag(A_rel_free);
+        A_rel_free_lin_diag = cell_blkdiag(A_rel_linf);        
+        A_rel_lin_diag  = cell_blkdiag(A_rel_lin);
+        num_rel_lin =  size(A_rel_free_lin_diag, 1);
+        
+        
+        A_rel_free_psd_diag = cell_blkdiag(A_rel_psdf);        
+        A_rel_psd_diag  = cell_blkdiag(A_rel_psd);
+        num_rel_psd =  size(A_rel_free_psd_diag, 1);
+    
+        %A_rel_lin_diag =  -speye(num_rel);
+        
+        A_rel_lin_only = [sparse(num_rel_lin, K.f), A_rel_free_lin_diag, sparse(num_rel_lin, length(cnew_psdf) + K.l), ...
+            A_rel_lin_diag, sparse(num_rel_lin, sum(K.q) + sum(Knew.s.^2))];
+            
+        A_rel_psd_only = [sparse(num_rel_psd, K.f), sparse(num_rel_psd, length(cnew_linf)),A_rel_free_psd_diag, ...
+            sparse(num_rel_psd, Knew.l + sum(K.q)), sparse(num_rel_psd, sum(Kprev_s.^2)),  A_rel_psd_diag];
+            
+            
+        Anew = [Anew; A_rel_lin_only; A_rel_psd_only];    
+        
+        %This will not work with mixes of  psd and FW*. Handle this 
+        %A_rel = [sparse(num_rel, K.f), A_rel_free_diag, sparse(num_rel, K.l), ...
+        %    A_rel_lin_diag, sparse(num_rel, sum(K.q) + sum(Kprev_s.^2)), A_rel_psd_diag];
+        
+        %Anew = [Anew; A_rel];
+        num_rel = num_rel_lin + num_rel_psd;
         bnew = [b; sparse(num_rel, 1)] ;
     else
         bnew = b;

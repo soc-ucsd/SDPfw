@@ -64,7 +64,7 @@ function [Anew, bnew, cnew, Knew, info] = dd_star_convert(A,b,c,K, keep_split)
     A_rel_lin  = cell(length(K.s), 1);
     
     %%PSD part
-    Count = K.f+K.l+K.q;
+    Count = K.f+K.l+sum(K.q);
     %Count_dd
     Count_dd_free = 0;
 %    Count_dd_lin  = K.f + K.l;
@@ -133,7 +133,7 @@ function [Anew, bnew, cnew, Knew, info] = dd_star_convert(A,b,c,K, keep_split)
         Count = Count + num_dd;        
     end
     
-    A_dd_free = sparse(i_dd_free, j_dd_free, v_dd_free);
+    A_dd_free = sparse(i_dd_free, j_dd_free, v_dd_free, length(b), sum(K.s .*(K.s + 1)/2));
     
     if keep_split
         Anew = [];
@@ -142,6 +142,7 @@ function [Anew, bnew, cnew, Knew, info] = dd_star_convert(A,b,c,K, keep_split)
         info.A_dd_free = A_dd_free;
         info.A_dd_lin  = A_dd_lin;
         info.A_rel_free  = A_rel_free;
+        info.A_rel_lin = A_rel_lin;
         info.c_dd_free = c_dd_free;
         info.c_dd_lin  = c_dd_lin;
     else        

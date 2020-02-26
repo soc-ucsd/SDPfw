@@ -24,7 +24,7 @@ for i = 1:length(info.dd)
     
     if dual
         %DD*
-        x_out(info_curr.ind_orig) =  x(info_curr.ind);
+        x_out(info_curr.ind_orig) =  x(info_curr.ind_dual);
     else
         %DD
         range_curr = count_dd + (1:info_curr.num_var);
@@ -49,7 +49,10 @@ for i = 1:length(info.non_dd)
     
     info_curr = info.non_dd{i};
     range_curr = count_non_dd + (1:info_curr.num_var);
-    if isfield(info_curr, 'Ech')
+    if isfield(info_curr, 'ind_dual')
+        %FW*
+        x_out(info_curr.ind_orig) =  x(info_curr.ind_dual);
+    elseif isfield(info_curr, 'Ech')
         %factor width
         
         x_reconstructed = accumarray(info_curr.Ech, x(range_curr));
