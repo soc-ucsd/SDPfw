@@ -18,7 +18,7 @@ opt.dual = 1;
 %     factorwidth(model.A,model.b,model.C, model.K, opt);
  
 [modelS.A, modelS.b, modelS.C, modelS.K, infoS] = ...
-    decomposed_subset(model.A,model.b,model.C, model.K, 'sdd', 1);
+    decomposed_subset(model.A,model.b,model.C, model.K, {'psd', 'psd'}, 1);
 
 
 %[xf, yf, info_solve] = sedumi(modelF.A, modelF.b, modelF.C, modelF.K);

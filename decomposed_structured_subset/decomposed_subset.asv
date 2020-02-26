@@ -65,45 +65,35 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
     
     Count = K.f + K.l + sum(K.q);
     Count_free= 0;
-    Count_linf= 0;
     Count_lin = 0;
     Count_psd = 0;
-    Count_psdf= 0;
-    Count_prev= 0;
         
-    inew_linf = [];
-    jnew_linf = [];
-    vnew_linf = []; 
+    inew_free = [];
+    jnew_free = [];
+    vnew_free = []; 
     
     inew_lin = [];
     jnew_lin = [];
     vnew_lin = [];    
-    
     
     iprev_psd = [];
     jprev_psd = [];
     vprev_psd = [];
     Kprev_s = [];
     
-    inew_psdf = [];
-    jnew_psdf = [];
-    vnew_psdf = [];
-    
-    
     inew_psd = [];
     jnew_psd = [];
     vnew_psd = [];
     
     %A_rel_free = {};
-    A_rel_linf = {};
+    A_rel_linf = {}
     A_rel_lin  = {};
     A_rel_psdf = {};
     A_rel_psd  = {};
     
-    cnew_linf = [];
-    cnew_lin  = [];        
+    cnew_free = [];
+    cnew_lin  = [];    
     cprev_psd = [];
-    cnew_psdf = [];
     cnew_psd  = [];
     %offset in current x for where the semidefinite variables are
             
@@ -162,7 +152,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
                 %New free variables
                 [i_curr, j_curr, v_curr] = find(A_dd_free);
 
-                j_curr = j_curr + Count_linf;
+                j_curr = j_curr + Count_free;
                 
                 inew_linf = [inew_linf; i_curr];
                 jnew_linf= [jnew_linf; j_curr];
@@ -172,8 +162,8 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
                 %Indexing?
                 info_curr.ind = K.f + Count_free + reshape(tri_indexer(Ksi),[], 1);
                 
-                Count_linf = Count_linf + Ksi*(Ksi+1)/2;         
-                Count_free = Count_free + Ksi*(Ksi+1)/2;
+                Count_free = Count_free + Ksi*(Ksi+1)/2;         
+                
                 info_curr.num_var = Ksi*(Ksi+1)/2;
                 
                 
@@ -247,7 +237,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
                 %New free variables
                 [i_curr, j_curr, v_curr] = find(A_fw_free);
 
-                j_curr = j_curr + Count_psdf;
+                j_curr = j_curr + Count_free;
                 
                 inew_psdf = [inew_psdf; i_curr];
                 jnew_psdf= [jnew_psdf; j_curr];
@@ -257,7 +247,6 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
                 %redo this
                 info_curr.ind = K.f + Count_free + reshape(tri_indexer(Ksi),[], 1);
                 
-                Count_psdf = Count_psdf + Ksi*(Ksi+1)/2;
                 Count_free = Count_free + Ksi*(Ksi+1)/2;         
                 
                 info_curr.num_var = Ksi*(Ksi+1)/2;
@@ -274,11 +263,11 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
                 vnew_psd = [vnew_psd; v_curr]; 
 
                 Count_psd = Count_psd + num_s_new;
-                Knew.s = [Knew.s;  info_fw.new_cone.s];
+                Knew.s = [Knew.s,  info_fw.new_cone.s];
                 
                 
                 %Additional relationships (dual inequalities)
-                A_rel_psdf = cat(1,A_rel_psdf, info_fw.A_rel_free);
+                A_rel_psdf = cat(1,A_rel_free, info_fw.A_rel_free);
                 A_rel_psd  = cat(1,A_rel_psd,  info_fw.A_rel_psd);
                 
                 cnew_psdf  = [cnew_psdf; info_fw.c_fw_free];
@@ -316,7 +305,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
             
             [i_curr, j_curr, v_curr] = find(A_curr);
             
-            j_curr = j_curr + Count_prev;
+            j_curr = j_curr + Count_psd;
             
             %figure out how to preallocate this
             iprev_psd = [iprev_psd; i_curr];
@@ -326,7 +315,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
             cprev_psd = [cprev_psd; c_curr];
             info_curr.num_var = length(c_curr);
             is_dd = 0;
-            Count_prev = Count_prev+ Ksi^2;
+            Count_psd = Count_psd + Ksi^2;
             Kprev_s = [Kprev_s; Ksi];
         end
         info_curr.ind_orig = Count + (1:Ksi^2);
@@ -343,8 +332,8 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
     
     Knew.s = [Kprev_s; Knew.s];
     %Anew_free = sparse(inew_free, jnew_free, vnew_free, m, Count_free);
-    Anew_free_lin = sparse(inew_linf, jnew_linf, vnew_linf, m, Count_linf);
-    Anew_free_psd = sparse(inew_psdf, jnew_psdf, vnew_psdf, m, Count_psdf);
+    Anew_free_lin = sparse(inew_linf, jnew_linf, vnew_lin);
+    Anew_free_psd = sparse(inew_psdf, jnew_psdf, vnew_psd);
     
     Anew_lin  = sparse(inew_lin,  jnew_lin,  vnew_lin, m, Count_lin);
     Aprev_psd = sparse(iprev_psd,  jprev_psd,  vprev_psd, m, sum(Kprev_s.^2));
@@ -372,21 +361,14 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
     
         %A_rel_lin_diag =  -speye(num_rel);
         
-        A_rel_lin_only = [sparse(num_rel_lin, K.f), A_rel_free_lin_diag, sparse(num_rel_lin, length(cnew_psdf) + K.l), ...
-            A_rel_lin_diag, sparse(num_rel_lin, sum(K.q) + sum(Knew.s.^2))];
-            
-        A_rel_psd_only = [sparse(num_rel_psd, K.f), sparse(num_rel_psd, length(cnew_linf)),A_rel_free_psd_diag, ...
-            sparse(num_rel_psd, Knew.l + sum(K.q)), sparse(num_rel_psd, sum(Kprev_s.^2)),  A_rel_psd_diag];
-            
-            
-        Anew = [Anew; A_rel_lin_only; A_rel_psd_only];    
+        A_rel_lin_only = [sparse(num_rel_lin, K.f), A_rel_free_lin_diag, sparse(num_rel_lin, length(cnew_psdf)),
+            sparse(num_rel_
         
         %This will not work with mixes of  psd and FW*. Handle this 
         %A_rel = [sparse(num_rel, K.f), A_rel_free_diag, sparse(num_rel, K.l), ...
         %    A_rel_lin_diag, sparse(num_rel, sum(K.q) + sum(Kprev_s.^2)), A_rel_psd_diag];
         
         %Anew = [Anew; A_rel];
-        num_rel = num_rel_lin + num_rel_psd;
         bnew = [b; sparse(num_rel, 1)] ;
     else
         bnew = b;
