@@ -1,0 +1,18 @@
+function [sdp_opt, cone_valid] = check_sdp_opt(x_opt, y_opt, A, c, K, cones, dual)
+%CHECK_SDP_OPT Does the decomposed structured subset solve the SDP?
+%   Calls recover_opt_dual and check_opt_dual if needed
+
+if dual
+    z_opt = x_opt;
+else
+    if size(A, 1) == length(c)
+        A = A';
+    end
+
+    z_opt = c - A'*y_opt;
+end 
+
+[sdp_opt,cone_valid] = check_opt_dual(z_opt,K, cones);
+
+end
+

@@ -17,8 +17,10 @@ opt.dual = 1;
 % [modelF.A, modelF.b, modelF.C, modelF.K, infoF] = ...
 %     factorwidth(model.A,model.b,model.C, model.K, opt);
  
+cones =  {'sdd','dd'};
+
 [modelS.A, modelS.b, modelS.C, modelS.K, infoS] = ...
-    decomposed_subset(model.A,model.b,model.C, model.K, {'dd','psd'}, 0);
+    decomposed_subset(model.A,model.b,model.C, model.K,cones, 1);
 
 
 %[xf, yf, info_solve] = sedumi(modelF.A, modelF.b, modelF.C, modelF.K);
@@ -30,3 +32,6 @@ x = decomposed_recover(xs, infoS);
 
 X1 = reshape(x(2 + (1:9)), 3, 3);
 X2 = reshape(x( 2 + 9 + (1:4)), 2, 2);
+
+[sdp_opt, cone_valid] = check_opt_dual(x, model.K, cones);
+%z = recover_opt_dual

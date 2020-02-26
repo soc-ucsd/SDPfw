@@ -70,7 +70,7 @@ function [Anew, bnew, cnew, Knew, info] = factorwidth(A,b,c,K,opts)
     Ech  = 1:K.f+K.l+K.q;      % Indexing to extract local submatrices & split cone
     Ech  = Ech(:);
 
-    
+%Parameters for Dual Factor Width optimization    
 A_rel_free = {};
 Count = K.f+K.l+K.q;  
 
