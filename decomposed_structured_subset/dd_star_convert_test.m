@@ -18,7 +18,7 @@ opt.dual = 1;
 %     factorwidth(model.A,model.b,model.C, model.K, opt);
  
 [modelS.A, modelS.b, modelS.C, modelS.K, infoS] = ...
-    decomposed_subset(model.A,model.b,model.C, model.K, 'sdd', 1);
+    decomposed_subset(model.A,model.b,model.C, model.K, {'dd','psd'}, 0);
 
 
 %[xf, yf, info_solve] = sedumi(modelF.A, modelF.b, modelF.C, modelF.K);
@@ -26,10 +26,7 @@ opt.dual = 1;
 % pars.fid = 0;
 % % [xd, yd, info_D] = sedumi(modelD.A, modelD.b, modelD.C, modelD.K, pars);
 [xs, ys, info_solve] = sedumi(modelS.A, modelS.b, modelS.C, modelS.K);
-% x = decomposed_recover(xs, infoS);
+x = decomposed_recover(xs, infoS);
 
-
-% [Mi, L] = tri_indexer(model.K.s(1));
-% xs = xd(3:16);
-% x_ret = xs(Mi);
-% reshape(x_ret, 4, 4)
+X1 = reshape(x(2 + (1:9)), 3, 3);
+X2 = reshape(x( 2 + 9 + (1:4)), 2, 2);

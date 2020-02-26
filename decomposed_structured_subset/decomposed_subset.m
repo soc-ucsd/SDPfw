@@ -170,10 +170,10 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
 
                 
                 %Indexing?
-                info_curr.ind = K.f + Count_free + reshape(tri_indexer(Ksi),[], 1);
+                info_curr.ind_dual = K.f + Count_linf + reshape(tri_indexer(Ksi),[], 1);
                 
                 Count_linf = Count_linf + Ksi*(Ksi+1)/2;         
-                Count_free = Count_free + Ksi*(Ksi+1)/2;
+                %Count_free = Count_free + Ksi*(Ksi+1)/2;
                 info_curr.num_var = Ksi*(Ksi+1)/2;
                 
                 
@@ -255,10 +255,10 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
 
                 
                 %redo this
-                info_curr.ind = K.f + Count_free + reshape(tri_indexer(Ksi),[], 1);
+                info_curr.ind_dual = K.f + Count_psdf + reshape(tri_indexer(Ksi),[], 1);
                 
                 Count_psdf = Count_psdf + Ksi*(Ksi+1)/2;
-                Count_free = Count_free + Ksi*(Ksi+1)/2;         
+                %Count_free = Count_free + Ksi*(Ksi+1)/2;         
                 
                 info_curr.num_var = Ksi*(Ksi+1)/2;
                 
@@ -360,6 +360,13 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
     
         %relations between data
     if dual
+        
+        for k = 1:length(info_non_dd)
+            if isfield(info_non_dd{k}, 'ind_dual')
+                info_non_dd{k}.ind_dual = info_non_dd{k}.ind_dual + Count_linf;
+            end
+        end
+        
         %A_rel_free_diag = cell_blkdiag(A_rel_free);
         A_rel_free_lin_diag = cell_blkdiag(A_rel_linf);        
         A_rel_lin_diag  = cell_blkdiag(A_rel_lin);
