@@ -7,11 +7,11 @@ CONVERT = 0;
 %fname = 'sea_star_H2_tiny.mat';
 %fname = 'sea_star_Hinf0_tiny.mat';
 %fname = 'sea_star_H2_small.mat';
-%fname = 'sea_star_Hinf0_medium.mat';
+fname = 'sea_star_Hinf0_medium.mat';
 %fname = 'sea_star_Hinf0_large.mat';
 %fname = 'sea_star_Hinf0_verylarge.mat';
 %fname = 'sea_star_Hinf0_giant.mat';
-fname = 'sea_star_Hinf0_wide_small.mat';
+%fname = 'sea_star_Hinf0_wide_small.mat';
 [filepath,name,ext] = fileparts(fname);
 
 

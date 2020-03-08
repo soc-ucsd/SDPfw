@@ -6,13 +6,7 @@ function  [Hout, package, time_solve, time_convert] = run_model_star(model, cone
         dual = 0;
     end    
     
-    if nargin < 4
-        use_mosek = 1;
-    end
-    
-    if nargin < 5
-        QUIET = 1;
-    end
+    if nargin <
     
     tic
     

@@ -231,13 +231,11 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
             %opts.socp = 1;   % second-order cones constraints
             opts.socp = 0;   % No SOCP constraints, they are bugged
             opts.block = cone_curr;
-            
-            
+            opts.keep_split = 1;
+            opts.dual = 1;
             
             if dual
                 %Factor Width star
-                opts.keep_split = 1;
-                opts.dual = 1;
                 K_temp.s = Ksi;
                 [~, ~, ~, ~, info_fw] = ...
                     factorwidth(A_curr, b, c_curr, K_temp, opts);                            
@@ -292,7 +290,6 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
                 K_temp.s = Ksi;
                 %TODO: add indexing/recovery for sdd_info
                 opts.keep_split = 0;
-                opts.dual = 0;
                 [A_curr, ~, c_curr, K_curr, info_curr] = ...
                     factorwidth(A_curr, b, c_curr, K_temp, opts);            
 
