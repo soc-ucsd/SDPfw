@@ -127,26 +127,27 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
         
         A_curr = A(:, Count + (1:Ksi^2));
         c_curr = c(Count + (1:Ksi^2), :);
-        if Ksi == 1
-            %nonnegative entry, self dual
-            %Anew_lin = [Anew_lin A_curr];
-            [i_curr, j_curr, v_curr] = find(A_curr);
-            
-            j_curr = j_curr + Count_lin;
-            
-            %figure out how to preallocate this
-            inew_lin = [inew_lin; i_curr];
-            jnew_lin = [jnew_lin; j_curr];
-            vnew_lin = [vnew_lin; v_curr];                        
-            
-            cnew_lin = [cnew_lin; c_curr];
-            
-            info_curr.num_var = 1;
-            is_dd = 0;
-            
-            Knew.l = Knew.l + 1;
-            Count_lin = Count_lin + 1;
-        elseif strcmp('dd', cone_curr)
+%         if Ksi == 1
+%             %nonnegative entry, self dual
+%             %Anew_lin = [Anew_lin A_curr];
+%             [i_curr, j_curr, v_curr] = find(A_curr);
+%             
+%             j_curr = j_curr + Count_lin;
+%             
+%             %figure out how to preallocate this
+%             inew_lin = [inew_lin; i_curr];
+%             jnew_lin = [jnew_lin; j_curr];
+%             vnew_lin = [vnew_lin; v_curr];                        
+%             
+%             cnew_lin = [cnew_lin; c_curr];
+%             
+%             info_curr.num_var = 1;
+%             is_dd = 0;
+%             
+%             Knew.l = Knew.l + 1;
+%             Count_lin = Count_lin + 1;
+        %elseif strcmp('dd', cone_curr)
+        if strcmp('dd', cone_curr)
             %DD
             K_temp.s = Ksi;
             if dual
@@ -230,11 +231,13 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
             %opts.socp = 1;   % second-order cones constraints
             opts.socp = 0;   % No SOCP constraints, they are bugged
             opts.block = cone_curr;
-            opts.keep_split = 1;
-            opts.dual = 1;
+            
+            
             
             if dual
                 %Factor Width star
+                opts.keep_split = 1;
+                opts.dual = 1;
                 K_temp.s = Ksi;
                 [~, ~, ~, ~, info_fw] = ...
                     factorwidth(A_curr, b, c_curr, K_temp, opts);                            
@@ -288,6 +291,8 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
             else
                 K_temp.s = Ksi;
                 %TODO: add indexing/recovery for sdd_info
+                opts.keep_split = 0;
+                opts.dual = 0;
                 [A_curr, ~, c_curr, K_curr, info_curr] = ...
                     factorwidth(A_curr, b, c_curr, K_temp, opts);            
 
@@ -354,7 +359,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
     
     cnew = [c_free; cnew_linf; cnew_psdf; c_lin; cnew_lin; c_quad; cprev_psd; cnew_psd];
     
-    
+     
     Knew.q(Knew.q == 0) = [];
     
     
@@ -385,7 +390,7 @@ function [Anew, bnew, cnew, Knew, info] = decomposed_subset(A,b,c,K,cones, dual)
         A_rel_psd_only = [sparse(num_rel_psd, K.f), sparse(num_rel_psd, length(cnew_linf)),A_rel_free_psd_diag, ...
             sparse(num_rel_psd, Knew.l + sum(K.q)), sparse(num_rel_psd, sum(Kprev_s.^2)),  A_rel_psd_diag];
             
-            
+        %cnew = [c_free; cnew_linf; cnew_psdf; c_lin; cnew_lin; c_quad; cprev_psd; cnew_psd];    
         Anew = [Anew; A_rel_lin_only; A_rel_psd_only];    
         
         %This will not work with mixes of  psd and FW*. Handle this 
