@@ -27,9 +27,11 @@ uncons_time = np.genfromtxt('./LR_output_uncons_v2_time.csv', delimiter = ',')
 cons_cost = np.genfromtxt('../LR120_output_box_1_2_cost.csv', delimiter = ',')
 cons_time = np.genfromtxt('../LR120_output_box_1_2_time.csv', delimiter = ',')
 
-
+uncons_cost[np.isnan(uncons_cost)] = np.inf
 
 uncons_mask = np.zeros_like(uncons_time)
+#cost_gap = abs(uncons_cost-uncons_cost[-1, -1])
+#cost_gap_mask = np.isnan(cost_gap) | (cost_gap >= 1e-3)
 uncons_mask[abs(uncons_cost-uncons_cost[-1, -1]) >= 1e-3] = True
 uncons_mask[np.isnan(uncons_cost)] = True
 
@@ -107,14 +109,14 @@ with sns.axes_style("white"):
     
     plt.subplot(1, 2, 2)
     sns.heatmap(cons_time.T, mask=cons_mask.T )
-    #plt.yticks(np.arange(cons_cost.shape[1])+0.5, thresh, size=tick_size)
-    plt.yticks([])
+    plt.yticks(np.arange(cons_cost.shape[1])+0.5, thresh, size=tick_size)
+#    plt.yticks([])
     plt.xticks(np.arange(cons_cost.shape[0])+0.5, cone, size=tick_size)
-    #plt.ylabel('PSD threshold', size = label_size)
+    plt.ylabel('PSD threshold', size = label_size)
     plt.xlabel('Cone Complexity', size = label_size)
     plt.title('Constrained $f^*=4939.1$', size=title_size)
     
     
 #    fig.suptitle('Time (seconds) to find Lower Bounds' , size=sup_size)
     #sns.heatmap(uniform_data, mask=mask)
-    plt.tight_layout()
+    plt.tight_layout(w_pad = 25)
