@@ -1,8 +1,9 @@
-function out = draw_feasibility(model, cone, th)
+function out = draw_feasibility(model, cone, th, DUAL)
     N = length(th);
     out.a  = zeros(N, 1);
     out.b  = zeros(N, 1);
     out.x  = cell(N, 1);
+    out.y  = cell(N, 1);
     
     if ~isfield(model, 'A')
         A = model.At';
@@ -17,7 +18,7 @@ function out = draw_feasibility(model, cone, th)
     end
     
     [model_new.A,model_new.b,model_new.C,model_new.K, model_new.info] = ...
-        decomposed_subset(A, model.b, C, model.K, cone);
+        decomposed_subset(A, model.b, C, model.K, cone, DUAL);
     model_new.pars = model.pars;
  
     %yalmip poses this as a dual optimization problem for some reason
@@ -41,6 +42,7 @@ function out = draw_feasibility(model, cone, th)
         out.b(i) = x(2);
         %x = decomposed_recover(x, model_new.info); 
         out.x{i} = decomposed_recover(x, model_new.info);
+        out.y{i} = y(1:length(model.b));
     end
     
     %out.conv = convhull(out.a, out.b);

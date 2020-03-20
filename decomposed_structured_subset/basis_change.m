@@ -1,4 +1,4 @@
-function [model_out, x_fake]= basis_change(x, model)
+function [model_out, x_fake]= basis_change(x, y, model, dual)
     %Cholesky basis change, based on original paper by Georgina and Amirali
     %
     %Input:
@@ -6,6 +6,10 @@ function [model_out, x_fake]= basis_change(x, model)
     %   model:  sedumi format model (struct with fields At, b, c, K)
     %Output:
     %   model_out: new model under basis change
+    
+    if nargin < 3
+        dual = 0;
+    end
     
     K = model.K;
     
@@ -16,15 +20,26 @@ function [model_out, x_fake]= basis_change(x, model)
     model_out = model;
     x_fake = zeros(size(x));
     
+    if dual
+        z = model.c - model.At*y;
+    end
+    
     for i = 1:length(K.s)
         Ksi = K.s(i);
         ind = Count + (1:Ksi^2);
         
         %Find new basis
-        X = reshape(x(ind), Ksi, Ksi);        
         x_fake(ind) = reshape(speye(Ksi), [], 1);
+        if dual
+            Z = reshape(z(ind), Ksi, Ksi);
+            Lz = chol(Z + 1e-8*eye(Ksi), 'lower');
+            L = inv(Lz);
+        else
+            X = reshape(x(ind), Ksi, Ksi);        
+            L = chol(X, 'lower');
+        end
         
-        L = chol(X, 'lower');
+        
         basis{i} = L;
         
         %perform basis change
@@ -33,6 +48,7 @@ function [model_out, x_fake]= basis_change(x, model)
         model_out.c(ind) = reshape(C_new, [], 1);
         
         At_curr = model.At(ind, :);
+        At_curr0 = At_curr;
         for j = 1:size(model.At, 2)
             At_j = At_curr(:, j);
             At_j_mat = reshape(At_j, Ksi, Ksi);

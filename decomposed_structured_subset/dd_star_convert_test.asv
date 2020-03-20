@@ -17,18 +17,21 @@ opt.dual = 1;
 % [modelF.A, modelF.b, modelF.C, modelF.K, infoF] = ...
 %     factorwidth(model.A,model.b,model.C, model.K, opt);
  
-[modelS.A, modelS.b, modelS.C, modelS.K, infoS] = ...
-    decomposed_subset(model.A,model.b,model.C, model.K, {'sdd','dd'}, 0);
+cones =  {'sdd','dd'};
 
+[modelP.A, modelP.b, modelP.C, modelP.K, infoS] = ...
+    decomposed_subset(model.A,model.b,model.C, model.K,cones, 0);
 
-%[xf, yf, info_solve] = sedumi(modelF.A, modelF.b, modelF.C, modelF.K);
-%  
-% pars.fid = 0;
-% % [xd, yd, info_D] = sedumi(modelD.A, modelD.b, modelD.C, modelD.K, pars);
-[xs, ys, info_solve] = sedumi(modelS.A, modelS.b, modelS.C, modelS.K);
-x = decomposed_recover(xs, infoS);
+[xP_d, yP_d, info_solveP] = sedumi(modelP.A, modelP.b, modelP.C, modelP.K);
 
-X1 = reshape(x(2 + (1:9)), 3, 3);
-X2 = reshape(x( 2 + 9 + (1:4)), 2, 2);
+[modelD.A, modelD.b, modelD.C, modelD.K, infoS] = ...
+    decomposed_subset(model.A,model.b,model.C, model.K,cones, 1);
 
-z = recover_opt
+[xD_d, yD_d, info_solveD] = sedumi(modelD.A, modelD.b, modelD.C, modelD.K);
+xD = decomposed_recover(xD_d, infoS);
+
+XD1 = reshape(xD(2 + (1:9)), 3, 3);
+XD2 = reshape(xD( 2 + 9 + (1:4)), 2, 2);
+
+[sdp_opt, cone_valid] = check_sdp_opt(xD ,yD_d, model.A, model.C, model., cones);
+%z = recover_opt_dual
