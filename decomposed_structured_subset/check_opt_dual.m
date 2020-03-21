@@ -24,7 +24,7 @@ function [sdp_optimal,cone_valid] = check_opt_dual(z_opt,K, cones)
         end
     end
     
-    cone_valid = zeros(numPSD, 1);
+    cone_valid = false(numPSD, 1);
     
     Count = K.f + K.l + sum(K.q);
     for PSDind = 1:numPSD
@@ -32,7 +32,7 @@ function [sdp_optimal,cone_valid] = check_opt_dual(z_opt,K, cones)
         curr_range = Count + (1:Ksi^2);
         
         if strcmp('psd', cones{PSDind})
-            cone_valid(PSDind) = 1;
+            cone_valid(PSDind) = true;
         else
             Z_curr = reshape(z_opt(curr_range), Ksi, Ksi);
             d = eig(Z_curr);

@@ -3,9 +3,9 @@
 %load('sea_star_Hinf0_medium.mat')
 
 %fname = 'sea_star_H2_tiny';
-fname = 'sea_star_Hinf0_tiny';
+%fname = 'sea_star_Hinf0_tiny';
 %fname = 'sea_star_H2_small';
-%fname = 'sea_star_Hinf0_medium';
+fname = 'sea_star_Hinf0_medium';
 %fname = 'sea_star_Hinf0_large';
 %fname = 'sea_star_Hinf0_verylarge';
 %fname = 'sea_star_Hinf0_giant';
@@ -150,21 +150,25 @@ end
 if PRIMAL
     cost_primal = cellfun(@(x) x.Hout, CONE);
     time_primal= cellfun(@(x) x.time_solve + x.time_convert, CONE);
+    sdp_opt_primal = cellfun(@(x) x.sdp_opt, CONE);
     RESULTS.cost_primal = cost_primal;
     RESULTS.time_primal = time_primal;
+    RESULTS.sdp_opt_primal = sdp_opt_primal;
     %csvwrite(strcat(fname, '//cost_primal.csv'), cost);
     %csvwrite(strcat(fname, '//time_primal.csv'), cost);
-    save(outname, '-append', 'cost_primal', 'time_primal')
+    save(outname, '-append', 'cost_primal', 'time_primal', 'sdp_opt_primal')
 end
 
 if DUAL
     cost_dual = cellfun(@(x) x.Hout, CONE_dual);
     time_dual = cellfun(@(x) x.time_solve + x.time_convert, CONE_dual);
+    sdp_opt_dual = cellfun(@(x) x.sdp_opt, CONE_dual);
     RESULTS.cost_dual = cost_dual;
     RESULTS.time_dual = time_dual;
+    RESULTS.sdp_opt_dual = sdp_opt_dual;
     %csvwrite(strcat(fname, '//cost_dual.csv'), cost_dual);
     %csvwrite(strcat(fname, '//time_dual.csv'), time_dual);
-    save(outname, '-append', 'cost_dual', 'time_dual')
+    save(outname, '-append', 'cost_dual', 'time_dual', 'sdp_opt_dual')
 end
 
 if RUN_PSD

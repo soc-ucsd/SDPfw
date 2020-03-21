@@ -3,9 +3,9 @@
 %load('sea_star_Hinf0_medium.mat')
 
 %fname = 'sea_star_H2_tiny';
-fname = 'sea_star_Hinf0_tiny';
+%fname = 'sea_star_Hinf0_tiny';
 %fname = 'sea_star_H2_small';
-%fname = 'sea_star_Hinf0_medium';
+fname = 'sea_star_Hinf0_medium';
 %fname = 'sea_star_Hinf0_large';
 %fname = 'sea_star_Hinf0_verylarge';
 %fname = 'sea_star_Hinf0_giant';
@@ -127,37 +127,16 @@ end
 if DUAL
     for i = 1:Ncones
         for j = 1:Nthresh
-        end
-    end
-end
-for i = 1:Ncones
-    for j = 1:Nthresh
-
-            %upper bound
-            [CONE{i,j}.Hout, RES{i,j}, CONE{i,j}.time_solve, CONE{i,j}.time_convert, CONE{i,j}.sdp_opt]...
-                = run_model_star(model, CONE{i,j}.cone, 0, use_mosek, QUIET);              
-
-            fprintf('Cone: %s \t Thresh:  %d \t Hinf upper: %0.3f \t \t Time Solve: %0.1f \t Time Convert: %0.1f \t  Optimal: %d\n', ...
-                num2str(cones{i}), thresh (j), CONE{i,j}.Hout, CONE{i,j}.time_solve, CONE{i,j}.time_convert, CONE{i,j}.sdp_opt)
-
-        
-        if DUAL
             %lower bound?
             [CONE_dual{i,j}.Hout, RES{i,j}, CONE_dual{i,j}.time_solve, CONE_dual{i,j}.time_convert, CONE_dual{i,j}.sdp_opt]...
                 = run_model_star(model, CONE_dual{i,j}.cone, 1, use_mosek, QUIET);
 
             fprintf('Cone: %s \t Thresh:  %d \t Hinf lower: %0.3f \t \t Time Solve: %0.1f \t Time Convert: %0.1f \t Optimal: %d\n', ...
-                num2str(cones{i}), thresh (j), CONE_dual{i,j}.Hout, CONE_dual{i,j}.time_solve, CONE_dual{i,j}.time_convert, CONE_dual{i,j}.sdp_opt)
+            num2str(cones{i}), thresh (j), CONE_dual{i,j}.Hout, CONE_dual{i,j}.time_solve, CONE_dual{i,j}.time_convert, CONE_dual{i,j}.sdp_opt)
+            save(outname,  '-append', 'CONE_dual');
         end
-        save(outname,  '-append',  'CONE', 'CONE_dual');
-        %save(outname, 'CONE', 'CONE0', 'cones', 'thresh')
-        
     end
 end
-
-
-
-
 
 RESULTS = struct;
 if PRIMAL || DUAL
@@ -173,16 +152,19 @@ if PRIMAL
     time_primal= cellfun(@(x) x.time_solve + x.time_convert, CONE);
     RESULTS.cost_primal = cost_primal;
     RESULTS.time_primal = time_primal;
+    RESULTS.sdp_opt_primal = sdp_opt_primal;
     %csvwrite(strcat(fname, '//cost_primal.csv'), cost);
     %csvwrite(strcat(fname, '//time_primal.csv'), cost);
-    save(outname, '-append', 'cost_primal', 'time_dual')
+    save(outname, '-append', 'cost_primal', 'time_primal')
 end
 
 if DUAL
     cost_dual = cellfun(@(x) x.Hout, CONE_dual);
     time_dual = cellfun(@(x) x.time_solve + x.time_convert, CONE_dual);
+    sdp_opt_dual = cellfun(@(x) x.sdp_opt, CONE_dual);
     RESULTS.cost_dual = cost_dual;
     RESULTS.time_dual = time_dual;
+    RESULTS.sdp_opt_dual = sdp_opt_dual;
     %csvwrite(strcat(fname, '//cost_dual.csv'), cost_dual);
     %csvwrite(strcat(fname, '//time_dual.csv'), time_dual);
     save(outname, '-append', 'cost_dual', 'time_dual')
@@ -203,7 +185,7 @@ if RUN_PSD
 end
 
 %write the results to file
-rjson = jsonencode(RESULTS, true);
+rjson = jsonencode(RESULTS, 'ConvertInfAndNaN', false);
 fid = fopen(strcat(fname, '//sea_star_results.json'), 'w');
 fwrite(fid, rjson, 'char');
 fclose(fid);
