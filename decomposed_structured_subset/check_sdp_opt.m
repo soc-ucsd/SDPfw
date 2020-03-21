@@ -1,4 +1,4 @@
-function [sdp_opt, cone_valid] = check_sdp_opt(x_opt, y_opt, A, c, K, cones, dual)
+function [sdp_opt, cone_valid] = check_sdp_opt(x_opt, y_opt, A, b, c, K, cones, dual)
 %CHECK_SDP_OPT Does the decomposed structured subset solve the SDP?
 %   Calls check_opt_dual after forming the dual optimal solution from KKT
 %Input:
@@ -21,9 +21,9 @@ else
     %recover the dual solution
     if size(A, 1) == length(c)
         A = A';
-    end
+    end    
 
-    z_opt = c - A'*y_opt;
+    z_opt = c - A'*y_opt(1:length(b));
 end 
 
 [sdp_opt,cone_valid] = check_opt_dual(z_opt,K, cones);
