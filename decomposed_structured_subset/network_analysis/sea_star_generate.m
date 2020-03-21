@@ -6,18 +6,28 @@
 %% Stability Test: Generating data
 rng(62, 'twister')
 
-star_size = 8;
+star_size = 4;
 Flag  = 3; %3 for Hinf
 
+SYNTHESIZE = 1;
 VISUALIZE = 1;
 BIG_REAL = 0;
-if star_size == 8
+if star_size == 9
+    %wide_small
+    head = 70;      %size of central 'head'
+    knuckle = 10;    %size of each knuckle
+    t = 4;          %#links between head and first knuckle
+    t_k = 4;        %#links between subsequent knuckles
+    N_arm = 12;          %#arms
+    k = 2;          %#knuckles per arm
+    size_str = 'wide_med';
+elseif star_size == 8
     %wide_small
     head = 18;      %size of central 'head'
     knuckle = 5;    %size of each knuckle
     t = 2;          %#links between head and first knuckle
     t_k = 2;        %#links between subsequent knuckles
-    N = 7;          %#arms
+    N_arm = 7;          %#arms
     k = 1;          %#knuckles per arm
     size_str = 'wide_small';
 elseif star_size == 7
@@ -26,8 +36,8 @@ elseif star_size == 7
     knuckle = 9;    %size of each knuckle
     t = 3;          %#links between head and first knuckle
     t_k = 3;        %#links between subsequent knuckles
-    N = 12;          %#arms
-    k = 3;          %#knuckles per arm
+    N_arm = 12;         %#arms
+    k = 2;          %#knuckles per arm
     size_str = 'wide';
 elseif star_size == 6
     %Giant
@@ -35,7 +45,7 @@ elseif star_size == 6
     knuckle = 10;    %size of each knuckle
     t = 3;          %#links between head and first knuckle
     t_k = 3;        %#links between subsequent knuckles
-    N = 6;          %#arms
+    N_arm = 6;          %#arms
     k = 6;          %#knuckles per arm
     size_str = 'giant';
 elseif star_size == 5
@@ -44,7 +54,7 @@ elseif star_size == 5
     knuckle = 10;    %size of each knuckle
     t = 4;          %#links between head and first knuckle
     t_k = 2;        %#links between subsequent knuckles
-    N = 6;          %#arms
+    N_arm = 6;          %#arms
     k = 6;          %#knuckles per arm
     size_str = 'huge';
 elseif star_size == 4
@@ -53,7 +63,7 @@ elseif star_size == 4
     knuckle = 10;    %size of each knuckle
     t = 2;          %#links between head and first knuckle
     t_k = 2;        %#links between subsequent knuckles
-    N = 6;          %#arms
+    N_arm = 6;          %#arms
     k = 5;          %#knuckles per arm
     size_str = 'verylarge';
 elseif star_size == 3
@@ -62,7 +72,7 @@ elseif star_size == 3
     knuckle = 8;    %size of each knuckle
     t = 2;          %#links between head and first knuckle
     t_k = 2;        %#links between subsequent knuckles
-    N = 5;          %#arms
+    N_arm = 5;          %#arms
     k = 4;          %#knuckles per arm
     size_str = 'large';
 elseif star_size == 2
@@ -71,7 +81,7 @@ elseif star_size == 2
     knuckle = 6;    %size of each knuckle
     t = 2;          %#links between head and first knuckle
     t_k = 2;        %#links between subsequent knuckles
-    N = 6;          %#arms
+    N_arm = 6;          %#arms
     k = 3;          %#knuckles per arm
     size_str = 'medium';
 elseif star_size == 1
@@ -80,7 +90,7 @@ elseif star_size == 1
     knuckle = 4;    %size of each knuckle
     t = 2;          %#links between head and first knuckle
     t_k = 2;        %#links between subsequent knuckles
-    N = 3;          %#arms
+    N_arm = 3;          %#arms
     k = 2;          %#knuckles per arm
     size_str = 'small';    
 elseif star_size == 0
@@ -89,7 +99,7 @@ elseif star_size == 0
     knuckle = 3;    %size of each knuckle
     t = 1;          %#links between head and first knuckle
     t_k = 1;        %#links between subsequent knuckles
-    N = 2;          %#arms
+    N_arm = 2;          %#arms
     k = 1;          %#knuckles per arm
     size_str = 'tiny';
 else
@@ -98,14 +108,13 @@ else
     knuckle = 1;    %size of each knuckle
     t = 1;          %#links between head and first knuckle
     t_k = 1;        %#links between subsequent knuckles
-    N = 2;          %#arms
+    N_arm = 2;          %#arms
     k = 1;          %#knuckles per arm
     size_str = 'micro';
 end
 
 
-N_state = head + knuckle*N*k;
-
+N_state = head + knuckle*k*N_arm;
 Gw = sparse(N_state, N_state);
 
 %head is dense
@@ -114,12 +123,11 @@ weight_knuck = 4;
 weight_knuck_k = 4;
 weight_knuck_h = 2;
 
-
 Gw(1:head, 1:head) = weight_head;
 
 i_incr = head;
 t_incr = 0;
-for i = 1:N
+for i = 1:N_arm
     %head to knuckle
     k_ind = i_incr + (1:knuckle);
     t_ind = t_incr + (1:t);
@@ -128,35 +136,24 @@ for i = 1:N
     Gw(t_ind, k_ind) = weight_knuck_h;
     i_incr = i_incr + knuckle;
     t_incr = t_incr + t;
-    
+
     %knuckle to knuckle
     for j = 1:(k-1)
         i_prev = i_incr + ((1-t_k):0);
         i_next = i_incr + (1:t_k);
-        
+
         i_k = i_incr + (1:knuckle);
         Gw(i_k, i_k) = weight_knuck;
         Gw(i_prev, i_next) = weight_knuck_k;
         Gw(i_next, i_prev) = weight_knuck_k;
-        
+
         i_incr = i_incr + knuckle;
     end
 end
 
-if VISUALIZE
-     figure(1)
-    subplot(1,2,2)
-    spy(Gw)
-    title('Sea Star Interactions', 'fontsize', 18, 'interpreter', 'latex')
-    subplot(1,2,1)
-     plot(graph(Gw, 'omitselfloops'), 'layout', 'force', ...
-         'Iterations', 6000, 'UseGravity', 'on', 'WeightEffect', 'inverse')
-     axis square
-     title('Sea Star Visualization', 'fontsize', 18, 'interpreter', 'latex')
-     box off
-end
 
 
+if SYNTHESIZE
 G = (Gw > 0);
 Mc    = maximalCliques(G);
 %generate system
@@ -218,15 +215,39 @@ else
     %title_str = '$\begin{pmatrix}A^T P + P A^T & P^T B & C^T \\ B^T P& -\gamma I & 0 \\ C & 0 & -\gamma I \end{pmatrix}\leq -\epsilon I$';
     title_str = 'Bounded Real Lemma';
 end
-% by SeDuMi
+
+dir_str = strcat('sea_star_',flag_str,'_',size_str);
 opts      = sdpsettings('verbose',1,'solver','sedumi');
-[model,~,~,~] = export(Constraint,Cost,opts);
+[model_dense,~,~,~] = export(Constraint,Cost,opts);
+
+if ~exist(dir_str, 'dir')
+    mkdir(dir_str);
+end
+
+%MAKE PLOTS
+if VISUALIZE
+    close all;
+
+    %figure(1)
+    figure('units','normalized','outerposition',[0 0 0.5 0.5])
+    subplot(1,2,2)
+    spy(Gw)
+    title('Sea Star Interactions', 'fontsize', 18, 'interpreter', 'latex')
+    subplot(1,2,1)
+    plot(graph(Gw, 'omitselfloops'), 'layout', 'force', ...
+        'Iterations', 6000, 'UseGravity', 'on', 'WeightEffect', 'inverse')
+    axis square
+    axis off
+    title('Sea Star Visualization', 'fontsize', 18, 'interpreter', 'latex')
+    box off
+    export_fig(strcat(dir_str, '\\network_plot'), '-pdf', '-png');
+    %export_fig strcat(dir_str, '\\network_plot.pdf')
+end
 
 % A = model.A;
 % b = model.b;
-% c = model.C;
+% c = model.c;
 % K.f = model.K.f;K.l = model.K.l;K.q = model.K.q;K.s = model.K.s;
-
 
 %yalmip outputs SDP
 parCoLO0.domain    = 1;  % dConvCliqueTree  ---> equalities 
@@ -241,28 +262,29 @@ parCoLO.range     = 1;   % rConvMatDecomp   ---> equalities
 parCoLO.EQorLMI   = 2; % CoLOtoEQform     ---> LMI standard form
 parCoLO.SDPsolver = []; % CoLOtoEQform     ---> LMI standard form       
     
-
 parCoLO.quiet     = 1; % Some peace and quiet       
-J.f = length(model.b);
+J.f = length(model_dense.b);
 
-[~,~,~,cliqueDomain,cliqueRange,LOP] = sparseCoLO(model.A',model.b,model.C,model.K,J,parCoLO); 
-[~,~,~,cliqueDomain,cliqueRange,LOP_dual] = sparseCoLO(model.A',model.b,model.C,model.K,J,parCoLO0); 
+[~,~,~,cliqueDomain,cliqueRange,LOP] = sparseCoLO(model_dense.A',model_dense.b,model_dense.C,model_dense.K,J,parCoLO); 
+%[~,~,~,cliqueDomain,cliqueRange,LOP_dual] = sparseCoLO(model.A',model.b,model.c,model.K,J,parCoLO0); 
 
+model = struct;
+model.A = -LOP.A';
+model.b = -LOP.c;
+model.c = -LOP.b;
+model.K = LOP.J;
 
-model_upper = struct;
-model_upper.A = -LOP.A';
-model_upper.b = -LOP.c;
-model_upper.c = -LOP.b;
-model_upper.K = LOP.J;
+fname = strcat(strcat(dir_str, '\\sea_star.mat'));
 
-model_lower = LOP_dual;
+save(fname, 'model', 'Sys', 'G', 'n', 'm', 'd', 'Gw')
+end
 
 if VISUALIZE
-    figure(2)
+    figure('units','normalized','outerposition',[0 0 0.5 0.5])
     clf
-    SP = spones(spones(model.C) + sparse(sum(spones(model.A),2)));  % vector of 1s and 0s
-    mask1 = reshape(SP(1:model.K.s(1)^2), model.K.s(1), model.K.s(1));
-    mask2 = reshape(SP(model.K.s(1)^2 + (1:model.K.s(2)^2)), model.K.s(2), model.K.s(2));
+    SP = spones(spones(model_dense.C) + sparse(sum(spones(model_dense.A),2)));  % vector of 1s and 0s
+    mask1 = reshape(SP(1:model_dense.K.s(1)^2), model_dense.K.s(1), model_dense.K.s(1));
+    mask2 = reshape(SP(model_dense.K.s(1)^2 + (1:model_dense.K.s(2)^2)), model_dense.K.s(2), model_dense.K.s(2));
 
     subplot(1,2,1)
     spy(mask1)
@@ -270,10 +292,9 @@ if VISUALIZE
     subplot(1,2,2)
     spy(mask2)
     title(title_str, 'interpreter', 'latex', 'Fontsize', 18)
+    export_fig(strcat(dir_str, '\\lmi'), '-pdf', '-png');
 
-    figure(3)
-    clf
-
+ 
     %plot(sort(LOP.J.s), '.', 'Markersize', 10)
 %     plot(xlim, [11,11], 'k--')
 % %     plot(xlim, [60,60], 'k-.')
@@ -282,51 +303,44 @@ if VISUALIZE
 %     %plot(xlim, [75,75], 'k-')
 %     plot(xlim, [41,41], 'k-.')
 %     plot(xlim, [63,63], 'k-')
-    %[N_h,edges] = histcounts(model_upper.K.s, 'BinMethod','integers');
-    subplot(2,1,1)
-        hold on
-    [N_h,edges] = histcounts(model_lower.K.s, 'BinMethod','integers');
+    %[N_h,edges] = histcounts(model.K.s, 'BinMethod','integers');
+%     subplot(2,1,1)
+%         hold on
+%     [N_h,edges] = histcounts(model_lower.K.s, 'BinMethod','integers');
+%     edges = edges+0.5;
+%      yl = [0, max(N_h)];
+%      plot([11,11], yl,'k--')
+%      plot([60,60],  yl, 'k-.')
+%      plot([100,100], yl, 'k-')
+% 
+%     stem(edges([N_h 0] ~= 0), N_h(N_h ~= 0), '.', 'MarkerSize', 30)
+%     title(strcat('Sea Star Lower Bound Clique Sizes $(p=', num2str(length(model_lower.K.s)),')$'), 'fontsize', 18, 'Interpreter', 'latex')
+%      legend({'Size 11', 'Size 60', 'Size 100','Cliques'},...
+%         'location', 'northeast', 'fontsize', 12)
+%     %legend({'Cliques'}, 'location', 'northeast', 'fontsize', 12)
+%     %hold off
+%     xlabel('Size of Clique')
+%     ylabel('Number of Cliques')
+%     
+%    subplot(2,1,2)
+     figure('units','normalized','outerposition',[0 0 0.5 0.4])
+    clf
+ 
+    hold on
+    [N_h,edges] = histcounts(model.K.s, 'BinMethod','integers');
     edges = edges+0.5;
-     yl = [0, max(N_h)];
+    yl = [0, max(N_h)];
      plot([11,11], yl,'k--')
      plot([60,60],  yl, 'k-.')
      plot([100,100], yl, 'k-')
-
-    stem(edges([N_h 0] ~= 0), N_h(N_h ~= 0), '.', 'MarkerSize', 30)
-    title(strcat('Sea Star Lower Bound Clique Sizes $(p=', num2str(length(model_lower.K.s)),')$'), 'fontsize', 18, 'Interpreter', 'latex')
-
+   stem(edges([N_h 0] ~= 0), N_h(N_h ~= 0), '.', 'MarkerSize', 30)
 
      legend({'Size 11', 'Size 60', 'Size 100','Cliques'},...
         'location', 'northeast', 'fontsize', 12)
-    %legend({'Cliques'}, 'location', 'northeast', 'fontsize', 12)
-    %hold off
     xlabel('Size of Clique')
     ylabel('Number of Cliques')
-    
-    subplot(2,1,2)
-        hold on
-    [N_h,edges] = histcounts(model_upper.K.s, 'BinMethod','integers');
-    edges = edges+0.5;
-     yl = [0, max(N_h)];
-     plot([11,11], yl,'k--')
-     plot([60,60],  yl, 'k-.')
-     plot([100,100], yl, 'k-')
-
-    stem(edges([N_h 0] ~= 0), N_h(N_h ~= 0), '.', 'MarkerSize', 30)
-    title(strcat('Sea Star Upper Bound Clique Sizes $(p=', num2str(length(model_upper.K.s)),')$'),'fontsize', 18, 'Interpreter', 'latex')
-
-
-     legend({'Size 11', 'Size 60', 'Size 100','Cliques'},...
-        'location', 'northeast', 'fontsize', 12)
-    %legend({'Cliques'}, 'location', 'northeast', 'fontsize', 12)
-    %hold off
-    xlabel('Size of Clique')
-    ylabel('Number of Cliques')
+    export_fig(strcat(dir_str, '\\clique_size'), '-pdf', '-png');
     
     %xlabel('Clique  #', 'fontsize', 12)
     %ylabel('Size of Clique', 'fontsize', 12) 
 end
-
-fname = strcat('sea_star_',flag_str,'_',size_str,'.mat');
-
-save(fname, 'model', 'model_upper', 'model_lower', 'Sys', 'G', 'n', 'm', 'd')

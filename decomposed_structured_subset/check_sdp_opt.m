@@ -23,7 +23,7 @@ else
         A = A';
     end    
 
-    z_opt = c - A'*y_opt(length(b));
+    z_opt = c - A'*y_opt(1:length(b));
 end 
 
 [sdp_opt,cone_valid] = check_opt_dual(z_opt,K, cones);

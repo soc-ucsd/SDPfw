@@ -1,4 +1,4 @@
-function  [Hout, package, time_solve, time_convert] = run_model_star(model, cone, dual, use_mosek, QUIET)    
+function  [Hout, package, time_solve, time_convert, sdp_opt] = run_model_star(model, cone, dual, use_mosek, QUIET)    
     
 
     %H2 and Hinf norm both require square roots
@@ -20,7 +20,7 @@ function  [Hout, package, time_solve, time_convert] = run_model_star(model, cone
     %[y,x,infoSeDuMi] = sedumi(-model.A',-model.c,-model.b,model.J);
         
     %[A, b, c, K, ~] = decomposed_subset(-model.A',-model.c,-model.b,model.J, cone);
-    [A, b, c, K, ~] = decomposed_subset(model.A',model.b,model.c,model.K, cone, dual);
+    [A, b, c, K, info] = decomposed_subset(model.A',model.b,model.c,model.K, cone, dual);
     %pars.fid = 0;
     %pars.fid = 1;    
     %[x, ~, info] = sedumi(A, b, c, K, pars);
@@ -57,6 +57,8 @@ function  [Hout, package, time_solve, time_convert] = run_model_star(model, cone
         end
 
         package = res;
+        [x,y] = convert_mosek2sedumi_var(res.sol.itr,prob.bardim);
+        
     else
         time_convert = toc;
         tic
@@ -69,6 +71,16 @@ function  [Hout, package, time_solve, time_convert] = run_model_star(model, cone
         package.y = y;
         package.info = info;
     end
+    
+    %check for SDP optimality
+    
+    if isnan(cost)
+        sdp_opt = 0;
+    else
+        x_rec = decomposed_recover(x, info);
+        [sdp_opt, cone_valid] = check_sdp_opt(x_rec, y, model.A, model.b, model.c, model.K, cone, dual);
+    end
+    
     Hout = sqrt(cost);
     %Hout = cost; 
     %Hinf = 
