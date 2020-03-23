@@ -75,7 +75,7 @@ function  [Hout, package, time_solve, time_convert, sdp_opt] = run_model_star(mo
     %check for SDP optimality
     
     if isnan(cost)
-        sdp_opt = 0;
+        sdp_opt = false;
     else
         x_rec = decomposed_recover(x, info);
         [sdp_opt, cone_valid] = check_sdp_opt(x_rec, y, model.A, model.b, model.c, model.K, cone, dual);

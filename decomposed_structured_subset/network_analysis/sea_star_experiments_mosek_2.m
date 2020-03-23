@@ -5,12 +5,12 @@
 %fname = 'sea_star_H2_tiny';
 %fname = 'sea_star_Hinf0_tiny';
 %fname = 'sea_star_H2_small';
-fname = 'sea_star_Hinf0_medium';
+%fname = 'sea_star_Hinf0_medium';
 %fname = 'sea_star_Hinf0_large';
-%fname = 'sea_star_Hinf0_verylarge';
+%name = 'sea_star_Hinf0_verylarge';
 %fname = 'sea_star_Hinf0_giant';
 %fname = 'sea_star_Hinf0_wide_small';
-
+fname = 'sea_star_Hinf0_wide_med';
 
 %outname = strcat(filepath,'output_ifac_',name,ext);
 outname = strcat(fname, '//output_ifac.mat');
@@ -18,7 +18,7 @@ load(strcat(fname, '//sea_star.mat'), 'model');
 
 
 %running options
-RUN_PSD = 1;
+RUN_PSD = 0;
 PRIMAL = 1;
 DUAL = 1;
 DRAW = 0;
@@ -35,16 +35,16 @@ if DRAW
      plot([100,100], yl, 'k-')
 
     stem(edges([N_h 0] ~= 0), N_h(N_h ~= 0), '.', 'MarkerSize', 30)
-    title(strcat('Sea Star LMI Clique Sizes $(p=', num2str(length(model.K.s)),')$'),'fontsize', 18, 'Interpreter', 'latex')
+    title(strcat('Sea Star LMI Clique Sizes $(p=', num2str(length(model.K.s)),')$'),'fontsize', 14, 'Interpreter', 'latex')
 
 
      legend({'Size 11', 'Size 60', 'Size 100','Cliques'},...
-        'location', 'northeast', 'fontsize', 12)
+        'location', 'northeast')
     %legend({'Cliques'}, 'location', 'northeast', 'fontsize', 12)
     %hold off
     xlabel('Size of Clique')
     ylabel('Number of Cliques')
-    keyboard
+    %keyboard
 end
 
 %medium
@@ -53,13 +53,13 @@ end
 
 
 
-thresh = [0,11];
-cones = {'dd', 2, 4, 6};
+%thresh = [0,11];
+%cones = {'dd', 2, 4, 6};
 %thresh = [0];
 %cones =  {'dd'};
 %large
 
-%thresh = [0, 11, 60, 100];
+thresh = [0, 11, 60, 100];
 %thresh = [100];
 %thresh = [0, 5, 11];
 %thresh = [0, 11, 40];
@@ -67,6 +67,7 @@ cones = {'dd', 2, 4, 6};
 
 %cones = {'dd', 1, 5, 7, 15, 30, 50};
 %cones = {'dd', 1, 3, 5, 8, 15, 30, 55, 70};
+cones = {'dd', 1, 3, 5, 8, 15, 30, 55};
 %cones = {1, 3, 5, 8, 15, 30, 55, 70};
 %cones = {73};
 %cones = {'dd'};
@@ -85,35 +86,45 @@ Ncones = length(cones);
 Nthresh = length(thresh);
 
 use_mosek = 1;
-QUIET = 1;
+QUIET = 0;
 
 output = NaN*ones(Ncones, Nthresh);
 
 Ks = model.K.s;
 
 CONE = cell(Ncones, Nthresh);
-RES  = cell(Ncones, Nthresh);
-CONE_dual = cell(Ncones, Nthresh);
-%RES_dual = cell(Ncones, Nthresh);
 
-for i = 1:Ncones
-    for j = 1:Nthresh
-        CONE{i,j} = struct;
-        CONE{i,j}.cone = cone_list(Ks, thresh(j), cones{i});
-    end
-end
 
-CONE_dual = CONE; 
+
 
 cone = cell(length(Ks), 1);
+if exist(outname, 'file')    
+    %save(outname,'-append', 'cones', 'thresh');
+    load(outname)
+else
+    save(outname,'cones', 'thresh');
+    for i = 1:Ncones
+        for j = 1:Nthresh
+            cl = cone_list(Ks, thresh(j), cones{i});
+            CONE{i,j} = struct;
+            CONE{i,j}.cone = cl;
+        end
+    end
 
-save(outname, 'cones', 'thresh');
+end
+
+%RES  = cell(Ncones, Nthresh);
+%CONE_dual = cell(Ncones, Nthresh);
+%RES_dual = cell(Ncones, Nthresh);
+CONE_dual = CONE;
+
 if PRIMAL
 for i = 1:Ncones
+%for i = 8:Ncones
     for j = 1:Nthresh
 
         %upper bound
-        [CONE{i,j}.Hout, RES{i,j}, CONE{i,j}.time_solve, CONE{i,j}.time_convert, CONE{i,j}.sdp_opt]...
+        [CONE{i,j}.Hout,~, CONE{i,j}.time_solve, CONE{i,j}.time_convert, CONE{i,j}.sdp_opt]...
             = run_model_star(model, CONE{i,j}.cone, 0, use_mosek, QUIET);              
 
         fprintf('Cone: %s \t Thresh:  %d \t Hinf upper: %0.3f \t \t Time Solve: %0.1f \t Time Convert: %0.1f \t  Optimal: %d\n', ...
@@ -128,7 +139,7 @@ if DUAL
     for i = 1:Ncones
         for j = 1:Nthresh
             %lower bound?
-            [CONE_dual{i,j}.Hout, RES{i,j}, CONE_dual{i,j}.time_solve, CONE_dual{i,j}.time_convert, CONE_dual{i,j}.sdp_opt]...
+            [CONE_dual{i,j}.Hout, ~, CONE_dual{i,j}.time_solve, CONE_dual{i,j}.time_convert, CONE_dual{i,j}.sdp_opt]...
                 = run_model_star(model, CONE_dual{i,j}.cone, 1, use_mosek, QUIET);
 
             fprintf('Cone: %s \t Thresh:  %d \t Hinf lower: %0.3f \t \t Time Solve: %0.1f \t Time Convert: %0.1f \t Optimal: %d\n', ...
