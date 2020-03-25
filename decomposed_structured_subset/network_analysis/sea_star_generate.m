@@ -6,11 +6,11 @@
 %% Stability Test: Generating data
 rng(62, 'twister')
 
-star_size = 4;
+star_size = 9;
 Flag  = 3; %3 for Hinf
 
 SYNTHESIZE = 1;
-VISUALIZE = 1;
+VISUALIZE = 0;
 BIG_REAL = 0;
 if star_size == 9
     %wide_small
@@ -20,7 +20,7 @@ if star_size == 9
     t_k = 4;        %#links between subsequent knuckles
     N_arm = 12;          %#arms
     k = 2;          %#knuckles per arm
-    size_str = 'wide_med';
+    size_str = 'wide_med2';
 elseif star_size == 8
     %wide_small
     head = 18;      %size of central 'head'
@@ -276,7 +276,7 @@ model.K = LOP.J;
 
 fname = strcat(strcat(dir_str, '\\sea_star.mat'));
 
-save(fname, 'model', 'Sys', 'G', 'n', 'm', 'd', 'Gw')
+save(fname, 'model', 'Sys', 'G', 'n', 'm', 'd', 'Gw', 'model_dense')
 end
 
 if VISUALIZE

@@ -62,7 +62,7 @@ psd = '$\mathbb{S}_+$'
 ##cons_cone = (dd, sdd, 2, 3, 5,	6,	10,	15,	20,	psd)
 #cons_thresh = (0, 5, 12, 45, 100)
 
-cone_inner = ['$B_{%d}$' % i for i in (2, 3, 5,	6,10,	15,	20, 30, 40)]
+cone_inner = ['$B_{%d}$' % i for i in (2, 3, 5,	6,10,15,	20, 30, 40)]
 
 cone = [dd, sdd] + cone_inner + [psd]
 thresh = (0, 5, 12, 45, 100)
@@ -88,33 +88,59 @@ thresh = (0, 5, 12, 45, 100)
 #cons_note[ind_cons_max] = True
 #cons_note[ind_cons_min] = True
 
-tick_size = 18
+tick_size = 16
 #sup_size = 22
-title_size = 28
-label_size = 18
+title_size = 22
+label_size = 16
 cbar_size = 18
+annot_size = 16
 
 #%%
 with sns.axes_style("white"):
+#    fig = plt.figure(3)
+#    fig.clf()
+#    plt.subplot(1, 2, 1)
+#    sns.heatmap(uncons_time.T, mask=uncons_mask.T)
+#    plt.yticks(np.arange(uncons_cost.shape[1])+0.5, thresh, size=tick_size)
+#    plt.xticks(np.arange(uncons_cost.shape[0])+0.5, cone, size=tick_size)
+#    plt.ylabel('PSD threshold', size = label_size)
+#    plt.xlabel('Cone Complexity', size = label_size)
+#    plt.title('Unconstrained $f^*=-110.2$', size=title_size)
+#
+#    
+#    plt.subplot(1, 2, 2)
+#    sns.heatmap(cons_time.T, mask=cons_mask.T )
+#    plt.yticks(np.arange(cons_cost.shape[1])+0.5, thresh, size=tick_size)
+#    plt.xticks(np.arange(cons_cost.shape[0])+0.5, cone, size=tick_size)
+#    plt.ylabel('PSD threshold', size = label_size)
+#    plt.xlabel('Cone Complexity', size = label_size)
+#    plt.title('Constrained $f^*=4939.1$', size=title_size)
+#    
+#    
+##    fig.suptitle('Time (seconds) to find Lower Bounds' , size=sup_size)
+#    #sns.heatmap(uniform_data, mask=mask)
+#    plt.tight_layout(w_pad = 25)
+    
     fig = plt.figure(3)
     fig.clf()
-    plt.subplot(1, 2, 1)
-    sns.heatmap(uncons_time.T, mask=uncons_mask.T)
+    #plt.subplot(1, 2, 1)
+    sns.heatmap(uncons_time.T/60, mask=uncons_mask.T, annot=True, fmt="0.2f",annot_kws={"size":annot_size})
     plt.yticks(np.arange(uncons_cost.shape[1])+0.5, thresh, size=tick_size)
     plt.xticks(np.arange(uncons_cost.shape[0])+0.5, cone, size=tick_size)
     plt.ylabel('PSD threshold', size = label_size)
     plt.xlabel('Cone Complexity', size = label_size)
-    plt.title('Unconstrained $f^*=-110.2$', size=title_size)
+    plt.title('Unconstrained $f^*=-110.2$ time (min.)', size=title_size)
 
     
-    plt.subplot(1, 2, 2)
-    sns.heatmap(cons_time.T, mask=cons_mask.T )
+    #plt.subplot(1, 2, 2)
+    fig = plt.figure(4)
+    fig.clf()
+    sns.heatmap(cons_time.T/60, mask=cons_mask.T, annot=True, fmt="0.2f",annot_kws={"size":annot_size})
     plt.yticks(np.arange(cons_cost.shape[1])+0.5, thresh, size=tick_size)
-#    plt.yticks([])
     plt.xticks(np.arange(cons_cost.shape[0])+0.5, cone, size=tick_size)
     plt.ylabel('PSD threshold', size = label_size)
     plt.xlabel('Cone Complexity', size = label_size)
-    plt.title('Constrained $f^*=4939.1$', size=title_size)
+    plt.title('Constrained $f^*=4939.1$ time (min.)', size=title_size)
     
     
 #    fig.suptitle('Time (seconds) to find Lower Bounds' , size=sup_size)
