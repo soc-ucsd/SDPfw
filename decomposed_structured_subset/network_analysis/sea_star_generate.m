@@ -10,7 +10,7 @@ star_size = 9;
 Flag  = 3; %3 for Hinf
 
 SYNTHESIZE = 1;
-VISUALIZE = 0;
+VISUALIZE = 1;
 BIG_REAL = 0;
 if star_size == 9
     %wide_small
@@ -20,7 +20,7 @@ if star_size == 9
     t_k = 4;        %#links between subsequent knuckles
     N_arm = 12;          %#arms
     k = 2;          %#knuckles per arm
-    size_str = 'wide_med2';
+    size_str = 'wide_med';
 elseif star_size == 8
     %wide_small
     head = 18;      %size of central 'head'
@@ -294,7 +294,22 @@ if VISUALIZE
     title(title_str, 'interpreter', 'latex', 'Fontsize', 18)
     export_fig(strcat(dir_str, '\\lmi'), '-pdf', '-png');
 
- 
+
+    figure('units','normalized','outerposition',[0 0 0.5 0.5])
+    subplot(1,3,1)
+    plot(graph(Gw, 'omitselfloops'), 'layout', 'force', ...
+        'Iterations', 10000, 'UseGravity', 'on', 'WeightEffect', 'inverse')
+    axis square
+    axis off
+    title('Sea Star Visualization', 'fontsize', 18, 'interpreter', 'latex')
+    box off
+    subplot(1,3,2)
+    spy(mask1)
+    title('$P \geq \epsilon I$', 'interpreter', 'latex', 'Fontsize', 18)
+    subplot(1,3,3)
+    spy(mask2)
+    title(title_str, 'interpreter', 'latex', 'Fontsize', 18)
+    export_fig(strcat(dir_str, '\\vis_lmi'), '-pdf', '-png');
     %plot(sort(LOP.J.s), '.', 'Markersize', 10)
 %     plot(xlim, [11,11], 'k--')
 % %     plot(xlim, [60,60], 'k-.')
