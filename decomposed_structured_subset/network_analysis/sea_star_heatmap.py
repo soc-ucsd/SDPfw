@@ -9,6 +9,8 @@ import numpy as np; np.random.seed(0)
 import seaborn as sns; sns.set()
 import matplotlib.pyplot as plt
 import json
+from matplotlib import rc
+rc('text', usetex=True)
 
 #fname = "sea_star_Hinf0_medium"
 fname = "sea_star_Hinf0_wide_med"
@@ -87,3 +89,4 @@ with sns.axes_style("white"):
     plt.title('Lower bound time (min.)', size=title_size)
 
     plt.tight_layout()
+    plt.show()

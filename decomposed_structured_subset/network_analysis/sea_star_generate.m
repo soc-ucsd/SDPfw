@@ -10,17 +10,18 @@ star_size = 9;
 Flag  = 3; %3 for Hinf
 
 SYNTHESIZE = 1;
-VISUALIZE = 1;
+VISUALIZE = 0;
 BIG_REAL = 0;
 if star_size == 9
     %wide_small
-    head = 70;      %size of central 'head'
+    head = 35;      %size of central 'head'
+%     head = 15;      %size of central 'head'
     knuckle = 10;    %size of each knuckle
     t = 4;          %#links between head and first knuckle
     t_k = 4;        %#links between subsequent knuckles
     N_arm = 12;          %#arms
     k = 2;          %#knuckles per arm
-    size_str = 'wide_med';
+    size_str = strcat('wide_med_', num2str(head));
 elseif star_size == 8
     %wide_small
     head = 18;      %size of central 'head'

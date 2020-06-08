@@ -8,6 +8,8 @@ function [model, model_split] = blockArrowSplit(m,nBlk,BlkSize,ArrowHead)
 % r        : rank of optimal X
 % num_c    : number of cost functions desired
 
+%Author: Jared Miller, Jan 2020
+
 nCones = 1;
 num_c = 1;
 % cone
