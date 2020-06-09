@@ -1,14 +1,21 @@
-head_size = [0, 1, (1:14)*5];
-
+% head_size = [0, 1, (1:14)*5];
+% head_size = 25;
+% Hout_list = zeros(length(head_size), 1);
+% time_list = zeros(length(head_size), 1);
+% 
+% head_size_old = head_size;
+% time_list_old = time_list;
+% head_size = 10*(4:7);
+head_size = [45];
 Hout_list = zeros(length(head_size), 1);
 time_list = zeros(length(head_size), 1);
 
-outname = 'reference_results.mat';
+outname = 'reference_results_6.mat';
 
 QUIET = 0;
 
-for k = 1:length(head_size)
-% for k = 1:1
+% for k = 1:length(head_size)
+for k = 1:1
     curr_head = head_size(k);
     
     curr_name = strcat('sea_star_Hinf0_wide_med_', num2str(curr_head), '\\sea_star.mat');
@@ -25,8 +32,8 @@ for k = 1:length(head_size)
     
     save(outname, 'Hout_list', 'time_list', 'k', 'head_size')
     
-    [k, Hout, time_solve];
+    [k, Hout, time_solve]
     
-    keyboard
+%     keyboard
     
 end

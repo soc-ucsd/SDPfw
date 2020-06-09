@@ -1,9 +1,4 @@
-function [Hout, time_solve, sdp_opt] = sea_star_reference(model, QUIET, use_mosek)
-    A = model.A;
-    b = model.b; 
-    c = model.c;
-    K = model.K;
-    
+function [Hout, time_solve, sdp_opt] = sea_star_reference(model, QUIET, use_mosek)    
     if nargin < 2
         QUIET = 1;
     end
@@ -17,7 +12,7 @@ function [Hout, time_solve, sdp_opt] = sea_star_reference(model, QUIET, use_mose
         %prob = convert_sedumi2mosek(A', b, c, K);
         %prob0 = convert_sedumi2mosek(-model.A',-model.c,-model.b,model.J);
         %[r0, res0] = mosekopt('minimize', prob0);       
-        prob = sedumi2mosek(A', b, c, K);
+        prob = sedumi2mosek(model.A', model.b, model.c, model.K);
         tic;    
         
         % Set log level (integer parameter)
@@ -38,19 +33,19 @@ function [Hout, time_solve, sdp_opt] = sea_star_reference(model, QUIET, use_mose
             cost = NaN;
         end
 
-        package = res;
+%         package = res;
         [x,y] = convert_mosek2sedumi_var(res.sol.itr,prob.bardim);
         
     else
         tic
         pars.fid = 1;
         %pars.fid = 0;
-        [x, y, info] = sedumi(A, b, c, K, pars);
+        [x, y, info] = sedumi(model.A, model.b, model.c, model.K, pars);
         time_solve = toc;
         cost = c'*x;
-        package.x = x;
-        package.y = y;
-        package.info = info;
+%         package.x = x;
+%         package.y = y;
+%         package.info = info;
     end
     
     %check for SDP optimality
@@ -60,7 +55,7 @@ function [Hout, time_solve, sdp_opt] = sea_star_reference(model, QUIET, use_mose
     else
 %         x_rec = decomposed_recover(x, info);
 %         [sdp_opt, cone_valid] = check_sdp_opt(x_rec, y, model.A, model.b, model.c, model.K, cone, dual);
-        sdp_opt = true
+        sdp_opt = true;
     end
     
     Hout = sqrt(cost);

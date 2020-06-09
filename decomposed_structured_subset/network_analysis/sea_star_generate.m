@@ -14,7 +14,7 @@ VISUALIZE = 0;
 BIG_REAL = 0;
 if star_size == 9
     %wide_small
-    head = 35;      %size of central 'head'
+    head = 45;      %size of central 'head'
 %     head = 15;      %size of central 'head'
     knuckle = 10;    %size of each knuckle
     t = 4;          %#links between head and first knuckle

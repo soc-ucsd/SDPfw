@@ -10,4 +10,4 @@ cones = cone_list(model.K.s, 0, 2);
 
  prob = convert_sedumi2mosek(model_new.A, model_new.b, model_new.C, model_new.K);
  
-% [r, res] = mosekopt('minimize', prob)
+[r, res] = mosekopt('minimize', prob)

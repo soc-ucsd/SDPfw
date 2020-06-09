@@ -13,6 +13,22 @@ end
 if ~isfield(K, 's')
     K.s = [];
 end
+
+% m = length(b);  % Number of constraints
+
+% Make sure that sizes of A, b and c are consistent
+% %from convert_sedumi2mosek by Melody Zhu
+% if size(A, 2) ~= m
+%     A = A';
+% end
+% if size(b, 2) ~= 1
+%     b = b';
+% end
+% if size(c, 2) ~= 1
+%     c = c';
+% end
+
+%
 prob.a = A0(1:(K.f+K.l+sum(K.q)),:)';
 prob.c = C0(1:(K.f+K.l+sum(K.q)));
 
@@ -85,7 +101,8 @@ for j = 1:length(K0.s)
 end
 
 if ~isempty(K.q) && K.q(1)>0    
-    prob.cones.type   = [repmat(0,1,length(K.q))];
+    %prob.cones.type   = [repmat(0,1,length(K.q))];
+    prob.cones.type = zeros(length(K.q), 1);
     top = 1 + K.f + K.l;
     prob.cones.sub = [];
     prob.cones.subptr = [];
