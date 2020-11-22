@@ -1,5 +1,5 @@
 function [Mi, L] = tri_indexer(num_var)
-    %create a moment matrix with indices in Mi and L variables
+    %create an order-1 moment matrix with indices in Mi and L variables
     m_size = num_var;
     L = m_size*(m_size+1)/2;
 

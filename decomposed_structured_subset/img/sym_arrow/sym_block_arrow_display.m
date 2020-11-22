@@ -17,6 +17,8 @@ visualize = 1;
 % visualize = 1;
 % 
 
+FS = 16;
+
 nBlk = 8;
 orbits = {[1,2,3,4], 5, 6, [7,8]};
 splits = [1, 0, 1, 0 ];
@@ -76,7 +78,7 @@ for k = 1:m
     
     rectangle('Position', [nBlk*BlkSize, nBlk*BlkSize, ArrowHead, ArrowHead], 'FaceColor', 'k')
     set(gca, 'YDir','reverse')
-    title('Permutation Orbits', 'FontSize', 22, 'interpreter', 'latex')
+    title('Permutation Orbits', 'FontSize', FS,  'interpreter', 'latex')
     axis off
 %    plot elements of *-algebra
     %figure(1)    
@@ -95,14 +97,14 @@ for k = 1:m
         M_display(M_display == 0) = NaN;
         imagesc(M_display)
         axis square
-        title('Group-Invariant Matrix $X$', 'FontSize', 22, 'interpreter', 'latex')
+        title('Group-Invariant Matrix $X$', 'FontSize', FS,  'interpreter', 'latex')
         axis off
         
         subplot(2,2,3)
         U_display = U;
         imagesc(U_display)
         axis square
-        title('Block-Diagonalizer $P$', 'FontSize', 22, 'interpreter', 'latex')
+        title('Block-Diagonalizer $P$', 'FontSize', FS,  'interpreter', 'latex')
         axis off
         
         subplot(2,2,4)
@@ -111,7 +113,7 @@ for k = 1:m
         M_display(M_display == 0) = NaN;
         imagesc(M_display)
         axis square
-        title('Block Diagonalization $X_k$', 'FontSize', 22,'interpreter', 'latex')
+        title('Block Diagonalization $X_k$', 'FontSize', FS, 'interpreter', 'latex')
         axis off
         pause(0.5);
         fname = strcat('sym_block_arrow-', num2str(k));
