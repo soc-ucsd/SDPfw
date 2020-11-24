@@ -17,15 +17,15 @@ fname = "sea_star_Hinf0_wide_med"
 
 with open(fname + '/sea_star_results.json') as f:
     data = json.load(f)
-    
-    
-cost_primal = np.array(data["cost_primal"])    
+
+
+cost_primal = np.array(data["cost_primal"])
 cost_primal[np.isnan(cost_primal)] = np.Infinity
-time_primal = np.array(data["time_primal"])    
-time_dual = np.array(data["time_dual"])    
+time_primal = np.array(data["time_primal"])
+time_dual = np.array(data["time_dual"])
 
 cost_dual = np.array(data["cost_dual"])
-    
+
 RUN_PSD = 0
 
 cones = ["$\mathcal{D}\mathcal{D}$"] + ["$B_{%d}$"%i for i in [1,3,5,8,15, 30, 55]] + ["$\mathbb{S}_+$"]
@@ -34,18 +34,18 @@ if RUN_PSD:
     #cones = data["cones"]+["psd"]
     cost_primal  = np.append(cost_primal, np.ones([1, cost_primal.shape[1]])*data["cost_psd"], axis = 0)
     time_primal  = np.append(time_primal, np.ones([1, cost_primal.shape[1]])*data["time_psd"], axis = 0)
-    
-    
+
+
     cost_dual  = np.append(cost_dual, np.ones([1, cost_dual.shape[1]])*data["cost_psd"], axis = 0)
     time_dual  = np.append(time_dual, np.ones([1, cost_primal.shape[1]])*data["time_psd"], axis = 0)
-    
-    
-    
+
+
+
     primal_mask = np.zeros_like(cost_primal )
     primal_mask[(cost_primal - data["cost_psd"] >= 1e-4)] = True
     cost_psd = data["cost_psd"]
 else:
-    #cones = data["cones"]    
+    #cones = data["cones"]
     primal_mask = ~np.array(data["sdp_opt_primal"])
     cost_psd = cost_primal[-1, -1]
 
@@ -53,9 +53,10 @@ else:
 tick_size = 18
 #sup_size = 22
 title_size = 22
-label_size = 16
+label_size = 18
 cbar_size = 18
-annot_size = 16
+#annot_size = 16
+annot_size = 18
 with sns.axes_style("white"):
     fig = plt.figure(3)
     fig.clf()
@@ -78,7 +79,7 @@ with sns.axes_style("white"):
     plt.title('Lower bound $\gamma$', size=title_size)
 
     plt.tight_layout()
-    
+
     fig3 = plt.figure(5)
     fig3.clf()
     sns.heatmap(time_dual.T/60, annot=True, fmt="0.2f", annot_kws={"size":annot_size})
