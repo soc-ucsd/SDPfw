@@ -2,7 +2,6 @@
 %      test factorwitdth.m using sedumi
 % =========================================================================
 
-
 clear; close all;
 
 % load SDP data

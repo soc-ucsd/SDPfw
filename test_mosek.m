@@ -1,7 +1,7 @@
 %%  test the usage of factorwitdth.m using Mosek
 
 clear;close all
-Partition = [2,100];%[2,5,10,20,50,100];         % partition of blocks
+Partition = [2:2:10];         % partition of blocks
 
 file = 'SedumiDataEx10';
 load(['SeDuMiData\', file '.mat']);
@@ -34,8 +34,16 @@ for k = 1:length(Partition)
     end
 end
 
+
 figure
+subplot(1,2,1)
 plot(Partition, Time,'*','markersize',10);hold on; plot(Partition, Time,'b','linewidth',1.2);
 xlabel('Number of partition','interpreter','latex')
 ylabel('Solver time consumption (s)','interpreter','latex')
+
+subplot(1,2,2)
+plot(Partition, Cost,'*','markersize',10);hold on; plot(Partition, Cost,'b','linewidth',1.2);
+xlabel('Number of partition','interpreter','latex')
+ylabel('Cost value','interpreter','latex')
+
 
