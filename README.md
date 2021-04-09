@@ -36,9 +36,9 @@ Input data
 
 The output data _Anew, bnew, cnew, Knew_ are new SDP data in sedumi form, which can be passed to SeDuMi directly, i.e.,
 
-	>> [Anew, bnew, cnew, Knew, infofw] = factorwidth(A,b,c,K,opts);
-	>> [xn,yn,info] = sedumi(Anew,bnew,cnew,Knew);
-	>> 
+	>> [Anew, bnew, cnew, Knew, infofw] = factorwidth(A,b,c,K,opts);   % reformulate an SDP using factor-width approximation
+	>> [xn,yn,info] = sedumi(Anew,bnew,cnew,Knew);                     % solve the new SDP using sedumi
+	
 See _test_sedumi.m_ and _test_mosek.m_ for examples.
 
 
