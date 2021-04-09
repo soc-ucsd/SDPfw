@@ -34,7 +34,12 @@ Input data
 * _opts.dual_    1 or 0, whether this should be dual or primal block
                     factorwidth two cone
 
-The output data _Anew, bnew, cnew, Knew_ are new SDP data in sedumi form, which can be passed to SeDuMi directly. See _test_sedumi.m_ and _test_mosek.m_ for examples.
+The output data _Anew, bnew, cnew, Knew_ are new SDP data in sedumi form, which can be passed to SeDuMi directly, i.e.,
+
+	>> [Anew, bnew, cnew, Knew, infofw] = factorwidth(A,b,c,K,opts);
+	>> [xn,yn,info] = sedumi(Anew,bnew,cnew,Knew);
+	>> 
+See _test_sedumi.m_ and _test_mosek.m_ for examples.
 
 
 ## Decomposed Structured Subsets
