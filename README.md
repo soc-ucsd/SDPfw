@@ -1,7 +1,10 @@
 # Block factor-width-two and Decomposed cone programs
-Reformulation of SDPs using structured subsets of the PSD cone. Includes block factor-width-two and (scaled) diagonally dominant matrices.
+This repository contains a set of MATLAB scripts that reformulate standard SDPs using structured subsets of the positive semidefinite (PSD) cone. We consider two general classes of structured subsets of the PSD cone
 
-## Block factor-width-two
+* Block factor-width two matrices (including diagonally dominant and scaled-diagonally dominant matrices); see our paper [Block Factor-width-two Matrices and Their Applications to Semidefinite and Sum-of-squares Optimization](https://arxiv.org/abs/1909.11076)
+* Decomposed structured subsets (a combination of chordal decomposition and factor-width decomposition); see our paper [Decomposed Structured Subsets for Semidefinite and Sum-of-Squares Optimization](https://arxiv.org/abs/1911.12859)
+
+## Block factor-width-two program
 
 The function factorwidth.m approximates an SDP in the standard primal vectorized form using block factor-width-two matrices
 
