@@ -1,5 +1,5 @@
 % =========================================================================
-%      test factorwitdth.m using sedumi
+%      test factorwidth.m using sedumi
 % =========================================================================
 
 clear; close all;
@@ -9,7 +9,7 @@ file = 'SedumiDataEx10';
 load(['SeDuMiData\', file '.mat']);
 
 % Set partitions
-Partition = [2:2:10];                  % partition of blocks
+Partition = [2:2:10];                 % partition of blocks
 Tcon = zeros(length(Partition),1);    % time for conversion
 Time = zeros(length(Partition),1);    % time for sedumi
 Cost = zeros(length(Partition),1);    % cost value

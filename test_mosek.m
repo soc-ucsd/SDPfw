@@ -1,4 +1,4 @@
-%%  test the usage of factorwitdth.m using Mosek
+%%  test the usage of factorwidth.m using Mosek
 
 clear;close all
 Partition = [2:2:10];         % partition of blocks
