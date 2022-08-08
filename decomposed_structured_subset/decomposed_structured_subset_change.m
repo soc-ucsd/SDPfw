@@ -1,6 +1,9 @@
 %testing to make sure that the decomposed structured subset scheme works
 rng(500, 'twister')
 % 
+SOLVE = 0;
+PLOT = 1;
+
 m = 80;
 nBlk = 15;
 BlkSize = 10;
@@ -10,6 +13,7 @@ ArrowHead = 10;
 % nBlk = 5;
 % BlkSize = 10;
 % ArrowHead = 5;
+if SOLVE
 
 [model, model_split] = blockArrowSplit(m,nBlk,BlkSize,ArrowHead);
 
@@ -117,21 +121,26 @@ end
 save('block_arrow_change.mat', 'cone', 'cliqueDomain', ...
     'Cost_Matrix', 'Info_Matrix', 'Basis_Matrix', 'X_Matrix', 'cost0', 'x0', 'model_list')
 
-
+end
+if PLOT
 figure(1)
+clf
 C = linspecer(5);
 hold on
-plot(1:iter_max, Cost_Matrix(:, 1), 'color', C(1, :), 'linewidth', 2)
-plot(1:iter_max, Cost_Matrix(:, 2), 'color', C(2, :), 'linewidth', 2)
-plot(1:iter_max, Cost_Matrix(:, 3), 'color', C(3, :), 'linewidth', 2)
+plot(1:iter_max, Cost_Matrix(:, 1), 's-', 'color', C(1, :), 'linewidth', 2)
+plot(1:iter_max, Cost_Matrix(:, 2), 's-','color', C(2, :), 'linewidth', 2)
+plot(1:iter_max, Cost_Matrix(:, 3), 's-', 'color', C(3, :), 'linewidth', 2)
+
+xlabel('Iteration', 'FontSize', 14)
+ylabel('Objective', 'FontSize', 14)
 
 plot([1, iter_max], [cost0, cost0], 'k--', 'linewidth', 2)
 hold off
 legend_list = {'$B_5$', '$B_5(E_F, ?)$', '$B_5(E, ?)$', '$S_+$'};
-legend(legend_list, 'Interpreter', 'latex')
-title('Change of Basis')
+legend(legend_list, 'Interpreter', 'latex', 'FontSize', 14)
+title('Decomposed Change of Basis Comparision', 'FontSize', 18)
 
-
+end
 function  [cost, x, info, time] = run_model(model, cone)
     tic
     [A, b, c, K, info_new] = decomposed_subset(model.At,model.b,model.c,model.K, cone);

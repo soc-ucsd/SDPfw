@@ -1,14 +1,16 @@
-function [model_out, x_fake]= basis_change(x, y, model, dual)
+function [model_out, x_fake]= basis_change(x, model, y, dual)
     %Cholesky basis change, based on original paper by Georgina and Amirali
     %
     %Input:
     %   x:      analyitic center of new basis
     %   model:  sedumi format model (struct with fields At, b, c, K)
+    %   y:      If using dual variables for outer approximation
     %Output:
     %   model_out: new model under basis change
     
     if nargin < 3
         dual = 0;
+        y = 0;
     end
     
     K = model.K;

@@ -1,5 +1,6 @@
-%load('block_arrow_change.mat')
+% load('block_arrow_change.mat')
 
+iter_max = size(Cost_Matrix, 1);
 figure(1)
 clf
 C = linspecer(5);
@@ -12,7 +13,7 @@ plot(xlim, [cost0, cost0]/1e4, 'k--', 'linewidth', 2)
 hold off
 legend_list = {'$B_5$', '$B_5(E_F, ?)$', '$B_5(E, ?)$', '$S_+$'};
 legend(legend_list, 'Interpreter', 'latex', 'fontsize', 18)
-title('Decomposed Change of Basis Comparision', 'fontsize', 18)
+title('Decomposed Change of Basis Comparison', 'fontsize', 18)
 
 xlabel('Iteration')
-ylabel('Cost')
+ylabel('Objective')

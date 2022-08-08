@@ -146,3 +146,5 @@ with sns.axes_style("white"):
 #    fig.suptitle('Time (seconds) to find Lower Bounds' , size=sup_size)
     #sns.heatmap(uniform_data, mask=mask)
     plt.tight_layout(w_pad = 25)
+
+plt.show()

@@ -24,3 +24,5 @@ $RECYCLE.BIN/
 factorwidth.asv
 
 decomposed_structured_subset\*.asv
+decomposed_structured_subset/block_arrow_change.mat
+decomposed_structured_subset/basis_change_experiment_costs.mat
